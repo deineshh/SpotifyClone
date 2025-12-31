@@ -1,0 +1,34 @@
+<Solution>
+  <Folder Name="/docker/" />
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Apps/">
+    <Project Path="src/Apps/SpotifyClone.Api/SpotifyClone.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Shared/" />
+  <Folder Name="/src/Shared/BuildingBlocks/">
+    <Project Path="src/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Application/SpotifyClone.Shared.BuildingBlocks.Application.csproj" />
+    <Project Path="src/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Domain/SpotifyClone.Shared.BuildingBlocks.Domain.csproj" />
+    <Project Path="src/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Infrastructure/SpotifyClone.Shared.BuildingBlocks.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/Kernel/">
+    <Project Path="src/Shared/Kernel/SpotifyClone.Shared.Kernel/SpotifyClone.Shared.Kernel.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/Apps/" />
+  <Folder Name="/tests/Modules/" />
+  <Folder Name="/tests/Shared/" />
+  <Folder Name="/tests/Shared/BuildingBlocks/">
+    <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Application.Tests/SpotifyClone.Shared.BuildingBlocks.Application.Tests.csproj" />
+    <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Domain.Tests/SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Shared/Kernel/">
+    <Project Path="tests/Shared/Kernel/SpotifyClone.Shared.Kernel.Tests/SpotifyClone.Shared.Kernel.Tests.csproj" />
+  </Folder>
+</Solution>
