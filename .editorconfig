@@ -5,6 +5,9 @@
 
 #### Static code analysis rule customizations
 
+# S2094: Classes should not be empty
+dotnet_diagnostic.S2094.severity = suggestion
+
 # CA1707: Identifiers should not contain underscores
 dotnet_diagnostic.CA1707.severity = suggestion
 
