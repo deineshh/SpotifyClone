@@ -22,6 +22,9 @@ D - Delegate
           - DomainExceptionBase.cs (AC)
         - Repositories/
           - IRepository.cs (I)
+        - Exceptions/
+          - DomainException.cs (AC)
+          - IdNullDomainException.cs (C)
       - SpotifyClone.Shared.BuildingBlocks.Application.csproj
         - Abstractions/
           - Commands/
