@@ -20,7 +20,7 @@ public sealed class StronglyTypedIdTests
     }
 
     [Fact]
-    public void EqualValues_Should_BeEqual()
+    public void StronglyTypedIdsWithEqualValues_Should_BeEqual()
     {
         // Arrange
         var guid = Guid.NewGuid();
@@ -35,7 +35,7 @@ public sealed class StronglyTypedIdTests
     }
 
     [Fact]
-    public void NotEqualValues_Should_NotBeEqual()
+    public void StronglyTypedIdsWithNotEqualValues_Should_NotBeEqual()
     {
         // Arrange
         var guid1 = Guid.NewGuid();
@@ -51,7 +51,7 @@ public sealed class StronglyTypedIdTests
     }
 
     [Fact]
-    public void EqualValues_Should_HaveSameHashCode()
+    public void StronglyTypedIdsWithEqualValues_Should_HaveSameHashCode()
     {
         // Arrange
         var guid = Guid.NewGuid();
@@ -65,7 +65,7 @@ public sealed class StronglyTypedIdTests
     }
 
     [Fact]
-    public void NotEqualValues_Should_HaveDifferentHashCodes()
+    public void StronglyTypedIdsWithNotEqualValues_Should_HaveDifferentHashCodes()
     {
         // Arrange
         var guid1 = Guid.NewGuid();

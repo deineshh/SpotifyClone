@@ -5,6 +5,9 @@
 
 #### Static code analysis rule customizations
 
+# CA1806: Do not ignore method results
+dotnet_diagnostic.CA1806.severity = suggestion
+
 # S2094: Classes should not be empty
 dotnet_diagnostic.S2094.severity = suggestion
 

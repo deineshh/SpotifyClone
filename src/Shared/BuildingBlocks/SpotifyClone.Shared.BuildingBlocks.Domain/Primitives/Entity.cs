@@ -6,9 +6,6 @@ public abstract class Entity<TId>
 {
     public TId Id { get; private init; }
 
-    protected Entity()
-        => Id = default!;
-
     protected Entity(TId id)
         => Id = id ?? throw new IdNullDomainException();
 
@@ -19,7 +16,7 @@ public abstract class Entity<TId>
         => !(left == right);
 
     public bool Equals(Entity<TId>? other)
-        => other is not null && ReferenceEquals(this, other) && Id!.Equals(other.Id);
+        => other is not null && Id!.Equals(other.Id);
 
     public override bool Equals(object? obj)
         => obj is not null
