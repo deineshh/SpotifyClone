@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using FluentAssertions;
+﻿using FluentAssertions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Tests.Primitives.StronglyTypedIds;
 

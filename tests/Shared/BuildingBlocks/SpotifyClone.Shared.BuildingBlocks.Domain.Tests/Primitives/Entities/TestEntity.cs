@@ -4,7 +4,7 @@ using SpotifyClone.Shared.BuildingBlocks.Domain.Tests.Primitives.StronglyTypedId
 namespace SpotifyClone.Shared.BuildingBlocks.Domain.Tests.Primitives.Entities;
 
 internal sealed class TestEntity(TestId id, string name)
-    : Entity<TestId>(id)
+    : Entity<TestId, Guid>(id)
 {
     public string Name { get; set; } = name;
 }
