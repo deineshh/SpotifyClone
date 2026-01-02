@@ -5,6 +5,9 @@
 
 #### Static code analysis rule customizations
 
+# S125: Sections of code should not be commented out
+dotnet_diagnostic.S125.severity = suggestion
+
 # CA1307: Specify StringComparison for clarity
 dotnet_diagnostic.CA1307.severity = suggestion
 
