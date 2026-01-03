@@ -20,7 +20,21 @@ public sealed class DomainEventArchitectureTests
         isAbstractClass.Should().BeTrue();
     }
 
-    // This method will be moved to a different test module once we have some REAL code that implements domain events.
+    [Fact]
+    public void DomainEvent_Should_ImplementINotificationInterface()
+    {
+        // Arrange
+        Type domainEventType = typeof(DomainEvent);
+        var iNotificationType = Type.GetType("MediatR.INotification, MediatR");
+
+        // Act
+        bool implementsINotification = iNotificationType != null && iNotificationType.IsAssignableFrom(domainEventType);
+        
+        // Assert
+        implementsINotification.Should().BeTrue();
+    }
+
+    // This method will be moved to different test modules once we have some REAL code that implements DomainEvent.
     [Fact]
     public void DomainEvents_Should_BeSealed()
     {
@@ -39,7 +53,7 @@ public sealed class DomainEventArchitectureTests
         result.IsSuccessful.Should().BeTrue();
     }
 
-    // This method will be moved to a different test module once we have some REAL code that implements domain events.
+    // This method will be moved to different test modules once we have some REAL code that implements DomainEvent.
     [Fact]
     public void DomainEvents_Should_HaveDomainEventPostfix()
     {

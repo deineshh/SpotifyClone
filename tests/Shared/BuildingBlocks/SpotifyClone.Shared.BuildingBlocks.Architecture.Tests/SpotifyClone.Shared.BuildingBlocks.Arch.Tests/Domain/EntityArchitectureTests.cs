@@ -20,6 +20,7 @@ public sealed class EntityArchitectureTests
         isAbstractClass.Should().BeTrue();
     }
 
+    // This method will be moved to different test modules once we have some REAL code that implements Entity.
     [Fact]
     public void Entities_Should_BeSealed()
     {

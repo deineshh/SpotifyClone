@@ -34,6 +34,7 @@ public sealed class DomainExceptionArchitectureTests
         inheritsFromException.Should().BeTrue();
     }
 
+    // This method will be moved to different test modules once we have some REAL code that implements DomainException.
     [Fact]
     public void DomainExceptions_Should_BeSealed()
     {
@@ -52,6 +53,7 @@ public sealed class DomainExceptionArchitectureTests
         result.IsSuccessful.Should().BeTrue();
     }
 
+    // This method will be moved to different test modules once we have some REAL code that implements DomainException.
     [Fact]
     public void DomainExceptions_Should_HaveDomainExceptionPostfix()
     {

@@ -20,6 +20,7 @@ public sealed class ValueObjectArchitectureTests
         isAbstractClass.Should().BeTrue();
     }
 
+    // This method will be moved to different test modules once we have some REAL code that implements ValueObject.
     [Fact]
     public void ValueObjects_Should_BeSealed()
     {
