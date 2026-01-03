@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <Folder Include="NewFolder\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
 </Project>

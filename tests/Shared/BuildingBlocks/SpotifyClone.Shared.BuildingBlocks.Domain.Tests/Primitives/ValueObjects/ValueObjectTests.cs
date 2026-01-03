@@ -5,6 +5,19 @@ namespace SpotifyClone.Shared.BuildingBlocks.Domain.Tests.Primitives.ValueObject
 public sealed class ValueObjectTests
 {
     [Fact]
+    public void Constructor_Should_AssignData()
+    {
+        // Arrange
+        int expectedValue = 99;
+
+        // Act
+        var valueObject = new TestValueObject(expectedValue);
+
+        // Assert
+        valueObject.Value.Should().Be(expectedValue);
+    }
+
+    [Fact]
     public void ValueObjectsWithEqualProperties_Should_BeEqual()
     {
         // Arrange
