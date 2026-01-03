@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
-using SpotifyClone.Shared.BuildingBlocks.Arch.Tests.Domain.Exceptions;
 
-namespace SpotifyClone.Shared.BuildingBlocks.Domain.Tests.Primitives.Exceptions;
+namespace SpotifyClone.Shared.BuildingBlocks.Domain.Tests.Primitives.DomainExceptions;
 
 public sealed class DomainExceptionTests
 {

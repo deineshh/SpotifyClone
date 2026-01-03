@@ -14,17 +14,14 @@ D - Delegate
     - BuildingBlocks/
       - SpotifyClone.Shared.BuildingBlocks.Domain.csproj
         - Primitives/
+          - DomainException.cs (AC)
+          - ValueObject.cs (AR)
           - StronglyTypedId.cs (AR)
+          - DomainEvent.cs (AR)
           - Entity.cs (AC)
           - AggregateRoot.cs (AC)
-          - ValueObject.cs (AR)
-          - DomainEvent.cs (AR)
-          - DomainException.cs (AC)
         - Repositories/
           - IRepository.cs (I)
-        - Exceptions/
-          - DomainException.cs (AC)
-          - IdNullDomainException.cs (C)
       - SpotifyClone.Shared.BuildingBlocks.Application.csproj
         - Abstractions/
           - Commands/
@@ -1081,6 +1078,16 @@ D - Delegate
         - Application/
         - Infrastructure/
       - SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj
+        - Primitives/
+          - DomainExceptions/
+          - ValueObjects/
+          - StronglyTypedIds/
+          - DomainEvents/
+          - Entities/
+          - AggregateRoots/
+        - Repositories/
+          - IRepositories/
+            - 
       - SpotifyClone.Shared.BuildingBlocks.Application.Tests.csproj
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj
     - Kernel/
