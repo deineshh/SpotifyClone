@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using FluentAssertions;
-using NetArchTest.Rules;
+﻿using FluentAssertions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Arch.Tests.Application;
