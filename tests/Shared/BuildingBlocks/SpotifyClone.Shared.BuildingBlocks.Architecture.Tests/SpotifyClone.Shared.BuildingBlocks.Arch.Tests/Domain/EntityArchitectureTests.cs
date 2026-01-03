@@ -31,6 +31,8 @@ public sealed class EntityArchitectureTests
         TestResult result = Types.InAssembly(domainAssembly)
             .That()
             .Inherit(typeof(Entity<,>))
+            .And()
+            .AreNotAbstract()
             .Should()
             .BeSealed()
             .GetResult();
