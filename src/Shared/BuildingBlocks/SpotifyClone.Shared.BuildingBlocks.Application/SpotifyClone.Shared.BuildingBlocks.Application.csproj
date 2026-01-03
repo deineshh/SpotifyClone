@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <Folder Include="Abstractions\" />
+    <Folder Include="Abstractions\Commands\" />
+    <Folder Include="Abstractions\Services\" />
+    <Folder Include="Abstractions\Queries\" />
+    <Folder Include="Models\" />
+    <Folder Include="Behaviors\" />
+    <Folder Include="Results\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MediatR" />
