@@ -20,8 +20,6 @@ D - Delegate
           - DomainEvent.cs (AR)
           - Entity.cs (AC)
           - AggregateRoot.cs (AC)
-        - Repositories/
-          - IRepository.cs (I)
       - SpotifyClone.Shared.BuildingBlocks.Application.csproj
         - Abstractions/
           - Commands/
@@ -52,8 +50,6 @@ D - Delegate
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.csproj
         - Persistence/
           - EfCoreUnitOfWorkBase.cs (AC)
-          - Repositories/
-            - EfCoreRepositoryBase.cs (AC)
           - Converters/
             - StronglyTypedIdEfCoreConverter.cs (AC)
           - Exceptions/
@@ -1080,14 +1076,30 @@ D - Delegate
       - SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj
         - Primitives/
           - DomainExceptions/
+            - NullTestDomainException.cs (C)
+            - EmptyTestDomainException.cs (C)
+            - WhitespaceTestDomainException.cs (C)
+            - DomainExceptionTests.cs (C)
           - ValueObjects/
+            - TestValueObject.cs (R)
+            - OtherTestValueObject.cs (R)
+            - ValueObjectTests.cs (C)
           - StronglyTypedIds/
+            - TestId.cs (R)
+            - OtherTestId.cs (R)
+            - StronglyTypedIdTests.cs (C)
           - DomainEvents/
+            - TestDomainEvent.cs (R)
+            - OtherTestDomainEvent.cs (R)
+            - DomainEventTests.cs (C)
           - Entities/
+            - TestEntity.cs (C)
+            - OtherTestEntity.cs (C)
+            - EntityTests.cs (C)
           - AggregateRoots/
-        - Repositories/
-          - IRepositories/
-            - 
+            - TestAggregate.cs (C)
+            - OtherTestAggregate.cs (C)
+            - AggregateRootTests.cs (C)
       - SpotifyClone.Shared.BuildingBlocks.Application.Tests.csproj
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj
     - Kernel/
