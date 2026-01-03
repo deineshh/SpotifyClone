@@ -88,6 +88,6 @@ public sealed class EntityTests
         Action act = () => new TestEntity(null!, "Entity with Null Id");
 
         // Assert
-        act.Should().Throw<IdNullDomainException>();
+        act.Should().Throw<ArgumentNullException>();
     }
 }

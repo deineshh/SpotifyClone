@@ -19,7 +19,7 @@ D - Delegate
           - AggregateRoot.cs (AC)
           - ValueObject.cs (AR)
           - DomainEvent.cs (AR)
-          - DomainExceptionBase.cs (AC)
+          - DomainException.cs (AC)
         - Repositories/
           - IRepository.cs (I)
         - Exceptions/
@@ -1068,6 +1068,18 @@ D - Delegate
 - tests/
   - Shared/
     - BuildingBlocks/
+      - SpotifyClone.Shared.BuildingBlocks.Arch.Tests.csproj
+        - DependencyTests.cs (C)
+        - Domain/
+          - DomainExceptionArchitectureTests.cs (C)
+          - ValueObjectArchitectureTests.cs (C)
+          - StronglyTypedIdArchitectureTests.cs (C)
+          - DomainEventArchitectureTests.cs (C)
+          - EntityArchitectureTests.cs (C)
+          - AggregateRootArchitectureTests.cs (C)
+          - IRepositoryArchitectureTests.cs (C)
+        - Application/
+        - Infrastructure/
       - SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj
       - SpotifyClone.Shared.BuildingBlocks.Application.Tests.csproj
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj

@@ -11,7 +11,7 @@ public abstract class Entity<TId, TIdValue>
         => Id = default!;
 
     protected Entity(TId id)
-        => Id = id ?? throw new IdNullDomainException();
+        => Id = id ?? throw new ArgumentNullException(nameof(id));
 
     public static bool operator ==(Entity<TId, TIdValue>? left, Entity<TId, TIdValue>? right)
         => left is not null && left.Equals(right);

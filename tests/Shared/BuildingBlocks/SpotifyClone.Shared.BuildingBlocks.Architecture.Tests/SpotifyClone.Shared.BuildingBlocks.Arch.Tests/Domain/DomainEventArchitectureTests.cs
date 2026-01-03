@@ -20,6 +20,7 @@ public sealed class DomainEventArchitectureTests
         isAbstractClass.Should().BeTrue();
     }
 
+    // This method will be moved to a different test module once we have some REAL code that implements domain events.
     [Fact]
     public void DomainEvents_Should_BeSealed()
     {
@@ -38,6 +39,7 @@ public sealed class DomainEventArchitectureTests
         result.IsSuccessful.Should().BeTrue();
     }
 
+    // This method will be moved to a different test module once we have some REAL code that implements domain events.
     [Fact]
     public void DomainEvents_Should_HaveDomainEventPostfix()
     {
