@@ -4,10 +4,5 @@ public abstract class DomainException : Exception
 {
     protected DomainException(string message)
         : base(message)
-    {
-        if (string.IsNullOrWhiteSpace(message))
-        {
-            throw new ArgumentException("Domain exception message is required.");
-        }
-    }
+        => ArgumentException.ThrowIfNullOrWhiteSpace(message);
 }

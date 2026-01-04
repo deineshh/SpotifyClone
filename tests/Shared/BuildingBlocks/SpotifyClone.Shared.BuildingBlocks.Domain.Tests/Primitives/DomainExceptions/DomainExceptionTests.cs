@@ -11,7 +11,7 @@ public sealed class DomainExceptionTests
         Action actNull = () => new NullTestDomainException();
 
         // Assert
-        actNull.Should().Throw<ArgumentException>().WithMessage("Domain exception message is required.");
+        actNull.Should().Throw<ArgumentException>();
     }
 
     [Fact]
@@ -21,7 +21,7 @@ public sealed class DomainExceptionTests
         Action actEmpty = () => new EmptyTestDomainException();
 
         // Assert
-        actEmpty.Should().Throw<ArgumentException>().WithMessage("Domain exception message is required.");
+        actEmpty.Should().Throw<ArgumentException>();
     }
 
     [Fact]
@@ -31,6 +31,6 @@ public sealed class DomainExceptionTests
         Action actWhitespace = () => new WhitespaceTestDomainException();
 
         // Assert
-        actWhitespace.Should().Throw<ArgumentException>().WithMessage("Domain exception message is required.");
+        actWhitespace.Should().Throw<ArgumentException>();
     }
 }
