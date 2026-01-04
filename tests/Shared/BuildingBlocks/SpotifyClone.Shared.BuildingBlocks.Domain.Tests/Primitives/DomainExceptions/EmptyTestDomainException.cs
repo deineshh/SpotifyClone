@@ -2,7 +2,7 @@
 
 namespace SpotifyClone.Shared.BuildingBlocks.Domain.Tests.Primitives.DomainExceptions;
 
-internal sealed class EmptyTestDomainException : DomainException
+internal sealed class EmptyTestDomainException : DomainExceptionBase
 {
     public EmptyTestDomainException() : base(string.Empty)
     {

@@ -2,7 +2,7 @@
 
 namespace SpotifyClone.Shared.BuildingBlocks.Domain.Tests.Primitives.DomainExceptions;
 
-internal sealed class WhitespaceTestDomainException : DomainException
+internal sealed class WhitespaceTestDomainException : DomainExceptionBase
 {
     public WhitespaceTestDomainException() : base("  ")
     {

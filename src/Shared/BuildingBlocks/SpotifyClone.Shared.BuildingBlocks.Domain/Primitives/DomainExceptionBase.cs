@@ -1,8 +1,8 @@
 ﻿namespace SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
-public abstract class DomainException : Exception
+public abstract class DomainExceptionBase : Exception
 {
-    protected DomainException(string message)
+    protected DomainExceptionBase(string message)
         : base(message)
         => ArgumentException.ThrowIfNullOrWhiteSpace(message);
 }

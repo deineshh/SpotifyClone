@@ -35,8 +35,13 @@ D - Delegate
           - EmailAttachment.cs (R)
           - EmailPriority.cs (E)
           - IEmailSender.cs (I)
+        - Exceptions/
+          - ApplicationExceptionBase.cs (AC)
+          - ConcurrencyConflictApplicationException.cs (C)
+          - OperationCanceledApplicationException.cs (C)
         - Behaviors/
           - ValidationPipelineBehavior.cs (C)
+          - ValidationFailuresExtensions.cs (SC)
           - ExceptionHandlingPipelineBeavior.cs (C)
           - TransactionPipelineBehavior.cs (C)
           - LoggingPipelineBehavior.cs (C)
@@ -1074,6 +1079,7 @@ D - Delegate
         - Application/
           - ErrorArchitectureTests.cs (C)
           - EmailContractsArchitectureTests.cs (C)
+          - ApplicationExceptionArchitectureTests.cs (C)
         - Infrastructure/
       - SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj
         - Primitives/

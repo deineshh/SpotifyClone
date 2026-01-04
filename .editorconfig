@@ -5,6 +5,12 @@
 
 #### Static code analysis rule customizations
 
+# CA1710: Identifiers should have correct suffix
+dotnet_diagnostic.CA1710.severity = suggestion
+
+# S3376: Attribute, EventArgs, and Exception type names should end with the type being extended
+dotnet_diagnostic.S3376.severity = suggestion
+
 # CA1515: Consider making public types internal
 dotnet_diagnostic.CA1515.severity = suggestion
 

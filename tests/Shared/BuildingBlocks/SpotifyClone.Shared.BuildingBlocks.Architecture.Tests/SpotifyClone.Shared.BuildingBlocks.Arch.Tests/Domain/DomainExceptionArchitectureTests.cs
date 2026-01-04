@@ -8,10 +8,10 @@ namespace SpotifyClone.Shared.BuildingBlocks.Arch.Tests.Domain;
 public sealed class DomainExceptionArchitectureTests
 {
     [Fact]
-    public void DomainException_Should_BeAbstractClass()
+    public void DomainExceptionBase_Should_BeAbstractClass()
     {
         // Arrange
-        Type domainExceptionType = typeof(DomainException);
+        Type domainExceptionType = typeof(DomainExceptionBase);
 
         // Act
         bool isAbstractClass = domainExceptionType.IsAbstract && domainExceptionType.IsClass;
@@ -21,10 +21,10 @@ public sealed class DomainExceptionArchitectureTests
     }
 
     [Fact]
-    public void DomainException_Should_InheritFrom_Exception()
+    public void DomainExceptionBase_Should_InheritFrom_Exception()
     {
         // Arrange
-        Type domainExceptionType = typeof(DomainException);
+        Type domainExceptionType = typeof(DomainExceptionBase);
         Type exceptionType = typeof(Exception);
 
         // Act
@@ -39,12 +39,12 @@ public sealed class DomainExceptionArchitectureTests
     public void DomainExceptions_Should_BeSealed()
     {
         // Arrange
-        Assembly domainAssembly = typeof(DomainException).Assembly;
+        Assembly domainAssembly = typeof(DomainExceptionBase).Assembly;
 
         // Act
         TestResult result = Types.InAssembly(domainAssembly)
             .That()
-            .Inherit(typeof(DomainException))
+            .Inherit(typeof(DomainExceptionBase))
             .Should()
             .BeSealed()
             .GetResult();
@@ -58,12 +58,12 @@ public sealed class DomainExceptionArchitectureTests
     public void DomainExceptions_Should_HaveDomainExceptionPostfix()
     {
         // Arrange
-        Assembly domainAssembly = typeof(DomainException).Assembly;
+        Assembly domainAssembly = typeof(DomainExceptionBase).Assembly;
 
         // Act
         TestResult result = Types.InAssembly(domainAssembly)
             .That()
-            .Inherit(typeof(DomainException))
+            .Inherit(typeof(DomainExceptionBase))
             .Should()
             .HaveNameEndingWith("DomainException")
             .GetResult();
