@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <Folder Include="Abstractions\Services\" />
-    <Folder Include="Abstractions\Queries\" />
     <Folder Include="Models\" />
     <Folder Include="Behaviors\" />
   </ItemGroup>

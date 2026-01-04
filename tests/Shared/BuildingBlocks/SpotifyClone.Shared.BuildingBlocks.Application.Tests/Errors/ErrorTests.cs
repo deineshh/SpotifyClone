@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 
-namespace SpotifyClone.Shared.BuildingBlocks.Application.Tests.Abstractions.Errors;
+namespace SpotifyClone.Shared.BuildingBlocks.Application.Tests.Errors;
 
 public sealed class ErrorTests
 {
