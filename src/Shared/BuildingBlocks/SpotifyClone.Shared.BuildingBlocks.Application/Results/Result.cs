@@ -32,6 +32,6 @@ public class Result
     public static Result Failure(params Error[] errors)
         => new Result(false, errors ?? new[] { CommonErrors.Unknown });
 
-    public static Result<TValue> Failure<TValue>(params Error[] errors)
-        => new Result<TValue>(default!, false, errors ?? new[] { CommonErrors.Unknown });
+    public static Result<TValue?> Failure<TValue>(params Error[] errors)
+        => new Result<TValue?>(default, false, errors ?? new[] { CommonErrors.Unknown });
 }

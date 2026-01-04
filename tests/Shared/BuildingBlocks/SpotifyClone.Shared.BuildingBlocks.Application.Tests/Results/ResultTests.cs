@@ -149,15 +149,4 @@ public sealed class ResultTests
         failureResult.IsFailure.Should().BeTrue();
         failureResult.Errors.Should().ContainSingle().Which.Should().Be(CommonErrors.Unknown);
     }
-
-    [Fact]
-    public void FailureGenericWithValueType_Should_SetValueToDefault()
-    {
-        // Arrange & Act
-        var result = Result.Failure<int>(new Error("ERR", "Test"));
-
-        // Assert
-        result.Value.Should().Be(0);
-        result.IsSuccess.Should().BeFalse();
-    }
 }

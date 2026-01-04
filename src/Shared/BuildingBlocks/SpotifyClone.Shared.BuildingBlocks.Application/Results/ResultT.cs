@@ -4,9 +4,9 @@ namespace SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 public class Result<TValue> : Result
 {
-    public TValue Value { get; }
+    public TValue? Value { get; }
 
-    protected internal Result(TValue value, bool isSuccess, params Error[] errors)
+    protected internal Result(TValue? value, bool isSuccess, params Error[] errors)
         : base(isSuccess, errors)
         => Value = value;
 

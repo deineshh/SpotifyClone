@@ -1,8 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <Folder Include="Behaviors\" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="MediatR" />
   </ItemGroup>
