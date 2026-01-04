@@ -44,7 +44,6 @@ D - Delegate
         - Results/
           - Result.cs (C)
           - ResultT.cs (C)
-          - ResultExtensions.cs (SC)
         - BuildingBlocksApplicationAssemblyReference.cs (SC)
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.csproj
         - Persistence/
