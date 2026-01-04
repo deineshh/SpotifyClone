@@ -5,7 +5,6 @@
     <Folder Include="Abstractions\Queries\" />
     <Folder Include="Models\" />
     <Folder Include="Behaviors\" />
-    <Folder Include="Results\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MediatR" />

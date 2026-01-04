@@ -56,25 +56,27 @@ public sealed class DependencyTests
         result.IsSuccessful.Should().BeTrue();
     }
 
-    [Fact]
-    public void ApplicationLayer_Should_HaveDependencyOnDomainLayer()
-    {
-        // Arrange
-        var applicationAssembly = Assembly.Load(ApplicationLayerName);
-        string[] expectedDependencies = new[]
-        {
-            DomainLayerName
-        };
+    // This test is commented out FOR NOW because the Application may not have direct dependencies on the Domain
 
-        // Act
-        TestResult result = Types.InAssembly(applicationAssembly)
-            .Should()
-            .HaveDependencyOnAll(expectedDependencies)
-            .GetResult();
+    //[Fact]
+    //public void ApplicationLayer_Should_HaveDependencyOnDomainLayer()
+    //{
+    //    // Arrange
+    //    var applicationAssembly = Assembly.Load(ApplicationLayerName);
+    //    string[] expectedDependencies = new[]
+    //    {
+    //        DomainLayerName
+    //    };
 
-        // Assert
-        result.IsSuccessful.Should().BeTrue();
-    }
+    //    // Act
+    //    TestResult result = Types.InAssembly(applicationAssembly)
+    //        .Should()
+    //        .HaveDependencyOnAll(expectedDependencies)
+    //        .GetResult();
+
+    //    // Assert
+    //    result.IsSuccessful.Should().BeTrue();
+    //}
 
     [Fact]
     public void ApplicationLayer_Should_NotHaveDependencyOnInfrastructureLayer()

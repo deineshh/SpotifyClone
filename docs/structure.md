@@ -41,10 +41,9 @@ D - Delegate
         - Errors/
           - Error.cs (R)
           - CommonErrors.cs (SC)
-          - InfrastructureErrors.cs (SC)
         - Results/
-          - Result.cs (SC)
-          - ResultT.cs (SC)
+          - Result.cs (C)
+          - ResultT.cs (C)
           - ResultExtensions.cs (SC)
         - BuildingBlocksApplicationAssemblyReference.cs (SC)
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.csproj

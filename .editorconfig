@@ -5,6 +5,9 @@
 
 #### Static code analysis rule customizations
 
+# CA1515: Consider making public types internal
+dotnet_diagnostic.CA1515.severity = suggestion
+
 # S125: Sections of code should not be commented out
 dotnet_diagnostic.S125.severity = suggestion
 
