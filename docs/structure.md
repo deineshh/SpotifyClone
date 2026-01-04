@@ -29,10 +29,12 @@ D - Delegate
             - IQuery.cs (I)
             - IQueryHandler.cs (I)
           - Services/
-            - IEmailService.cs (I)
           - IUnitOfWork.cs (I)
-        - Models/
+        - Email/
           - EmailMessage.cs (R)
+          - EmailAttachment.cs (R)
+          - EmailPriority.cs (E)
+          - IEmailSender.cs (I)
         - Behaviors/
           - ValidationPipelineBehavior.cs (C)
           - ExceptionHandlingPipelineBeavior.cs (C)
@@ -1070,6 +1072,8 @@ D - Delegate
           - AggregateRootArchitectureTests.cs (C)
           - IRepositoryArchitectureTests.cs (C)
         - Application/
+          - ErrorArchitectureTests.cs (C)
+          - EmailContractsArchitectureTests.cs (C)
         - Infrastructure/
       - SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj
         - Primitives/
@@ -1099,6 +1103,10 @@ D - Delegate
             - OtherTestAggregate.cs (C)
             - AggregateRootTests.cs (C)
       - SpotifyClone.Shared.BuildingBlocks.Application.Tests.csproj
+        - Errors/
+          - ErrorTests.cs (C)
+        - Results/
+          - ResultTests.cs (C)
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj
     - Kernel/
       - SpotifyClone.Shared.Kernel.Tests.csproj
