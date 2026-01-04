@@ -6,9 +6,17 @@ public static class CommonErrors
         "Unknown",
         "An unknown error occurred.");
 
-    public static readonly Error InvalidRequest = new(
+    public static readonly Error InvalidRequest = new Error(
         "InvalidRequest",
         "The request is invalid.");
+
+    public static readonly Error ConcurrencyConflict = new Error(
+        "ConcurrencyConflict",
+        "A concurrency conflict occurred.");
+
+    public static readonly Error Internal = new Error(
+        "Internal",
+        "An internal error occurred.");
 
     public static Error Empty(string codeTitle, string descriptionTitle) => new Error(
         $"{codeTitle}.Empty",
