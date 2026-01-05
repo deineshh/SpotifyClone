@@ -25,7 +25,6 @@ public sealed class ExceptionHandlingPipelineBehavior<TRequest, TResponse>(
         }
         catch (OperationCanceledApplicationException)
         {
-            // Respect cancellation — never convert to Result
             throw;
         }
         catch (ConcurrencyConflictApplicationException ex)
@@ -56,22 +55,20 @@ public sealed class ExceptionHandlingPipelineBehavior<TRequest, TResponse>(
         {
             return (TResponse)(object)Result.Failure(error);
         }
-        else if (responseType.IsGenericType &&
+
+        if (responseType.IsGenericType &&
             responseType.GetGenericTypeDefinition() == typeof(Result<>))
         {
             Type valueType = responseType.GetGenericArguments()[0];
 
             MethodInfo failureMethod = typeof(Result)
-                .GetMethod(nameof(Result.Failure), new[] { typeof(Error[]) })!
+                .GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .First(m => m.Name == "Failure" && m.IsGenericMethod)
                 .MakeGenericMethod(valueType);
 
-            return (TResponse)failureMethod.Invoke(
-                null,
-                new object[] { new[] { error } })!;
+            return (TResponse)failureMethod.Invoke(null, new object[] { new[] { error } })!;
         }
 
-        throw new InvalidOperationException(
-            $"Unsupported response type {responseType.Name}. " +
-            "Handlers must return Result or Result<T>.");
+        throw new InvalidOperationException($"Unsupported response type {responseType.Name}.");
     }
 }

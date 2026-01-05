@@ -5,6 +5,9 @@
 
 #### Static code analysis rule customizations
 
+# CA1861: Avoid constant arrays as arguments
+dotnet_diagnostic.CA1861.severity = suggestion
+
 # CA1710: Identifiers should have correct suffix
 dotnet_diagnostic.CA1710.severity = suggestion
 

@@ -40,10 +40,10 @@ D - Delegate
           - ConcurrencyConflictApplicationException.cs (C)
           - OperationCanceledApplicationException.cs (C)
         - Behaviors/
-          - LoggingPipelineBehavior.cs (C)
           - ExceptionHandlingPipelineBeavior.cs (C)
-          - ValidationPipelineBehavior.cs (C)
+          - RequestLoggingPipelineBehavior.cs (C)
           - ValidationFailuresExtensions.cs (SC)
+          - ValidationPipelineBehavior.cs (C)
           - TransactionalPipelineBehavior.cs (C)
         - Errors/
           - Error.cs (R)
