@@ -19,5 +19,6 @@ public interface IEmailSender
     Task SendAsync(
         EmailMessage message,
         IEnumerable<EmailAttachment>? attachments = null,
-        EmailPriority priority = EmailPriority.Normal);
+        EmailPriority priority = EmailPriority.Normal,
+        CancellationToken cancellationToken = default);
 }

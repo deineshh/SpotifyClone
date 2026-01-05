@@ -39,6 +39,7 @@ D - Delegate
           - ApplicationExceptionBase.cs (AC)
           - ConcurrencyConflictApplicationException.cs (C)
           - OperationCanceledApplicationException.cs (C)
+          - EmailSendFailedApplicationException.cs (C)
         - Behaviors/
           - ExceptionHandlingPipelineBeavior.cs (C)
           - RequestLoggingPipelineBehavior.cs (C)
@@ -50,18 +51,15 @@ D - Delegate
           - CommonErrors.cs (SC)
         - Results/
           - Result.cs (C)
-          - ResultT.cs (C)
         - BuildingBlocksApplicationAssemblyReference.cs (SC)
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.csproj
         - Persistence/
           - EfCoreUnitOfWorkBase.cs (AC)
           - Converters/
             - StronglyTypedIdEfCoreConverter.cs (AC)
-          - Exceptions/
         - Messaging/
           - SmtpOptions.cs (R)
-          - SmtpEmailService.cs (C)
-          - Exceptions/
+          - SmtpEmailSender.cs (C)
         - DependencyInjection/
           - BuildingBlocksModule.cs (SC)
     - Kernel/
@@ -1080,6 +1078,7 @@ D - Delegate
           - ErrorArchitectureTests.cs (C)
           - EmailContractsArchitectureTests.cs (C)
           - ApplicationExceptionArchitectureTests.cs (C)
+          - PipelineBehaviorArchitectureTests.cs (C)
         - Infrastructure/
       - SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj
         - Primitives/
@@ -1113,6 +1112,13 @@ D - Delegate
           - ErrorTests.cs (C)
         - Results/
           - ResultTests.cs (C)
+        - Behaviors/
+          - TestCommand.cs (R)
+          - TestApplicationException.cs (C)
+          - ExceptionHandlingPipelineBehaviorTests.cs (C)
+          - RequestLoggingPipelineBehaviorTests.cs (C)
+          - TransactionalPipelineBehaviorTests.cs (C)
+          - ValidationPipelineBehaviorTests.cs (C)
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj
     - Kernel/
       - SpotifyClone.Shared.Kernel.Tests.csproj

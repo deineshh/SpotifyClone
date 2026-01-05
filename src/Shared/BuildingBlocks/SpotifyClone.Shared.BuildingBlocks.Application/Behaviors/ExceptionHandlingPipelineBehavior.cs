@@ -36,6 +36,15 @@ public sealed class ExceptionHandlingPipelineBehavior<TRequest, TResponse>(
 
             return CreateFailure(CommonErrors.ConcurrencyConflict);
         }
+        catch (EmailSendFailedApplicationException ex)
+        {
+            _logger.LogError(
+                ex,
+                "Email send failure while handling {RequestName}",
+                typeof(TRequest).Name);
+
+            return CreateFailure(CommonErrors.EmailSendFailed);
+        }
         catch (ApplicationExceptionBase ex)
         {
             _logger.LogError(

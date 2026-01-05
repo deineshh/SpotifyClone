@@ -25,6 +25,7 @@
   <Folder Name="/tests/Modules/" />
   <Folder Name="/tests/Shared/" />
   <Folder Name="/tests/Shared/BuildingBlocks/">
+    <Project Path="SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests/SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj" Id="8956939e-5606-40eb-8a50-c7aa5bf68d51" />
     <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Application.Tests/SpotifyClone.Shared.BuildingBlocks.Application.Tests.csproj" />
     <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Architecture.Tests/SpotifyClone.Shared.BuildingBlocks.Arch.Tests/SpotifyClone.Shared.BuildingBlocks.Arch.Tests.csproj" Id="c8aef5b3-a649-4183-a39f-fb01a64a2b56" />
     <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Domain.Tests/SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj" />

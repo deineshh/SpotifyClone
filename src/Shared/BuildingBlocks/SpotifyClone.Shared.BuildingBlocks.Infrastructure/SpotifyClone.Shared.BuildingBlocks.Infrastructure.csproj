@@ -1,1 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Folder Include="DependencyInjection\" />
+    <Folder Include="Persistence\Converters\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpotifyClone.Shared.BuildingBlocks.Application\SpotifyClone.Shared.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\SpotifyClone.Shared.BuildingBlocks.Domain\SpotifyClone.Shared.BuildingBlocks.Domain.csproj" />
+  </ItemGroup>
+</Project>
