@@ -5,12 +5,12 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Application.Behaviors;
 
-public sealed class LoggingPipelineBehavior<TRequest, TResponse>(
-    ILogger<LoggingPipelineBehavior<TRequest, TResponse>> logger)
+public sealed class RequestLoggingPipelineBehavior<TRequest, TResponse>(
+    ILogger<RequestLoggingPipelineBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly ILogger<LoggingPipelineBehavior<TRequest, TResponse>> _logger = logger;
+    private readonly ILogger<RequestLoggingPipelineBehavior<TRequest, TResponse>> _logger = logger;
 
     public async Task<TResponse> Handle(
         TRequest request,

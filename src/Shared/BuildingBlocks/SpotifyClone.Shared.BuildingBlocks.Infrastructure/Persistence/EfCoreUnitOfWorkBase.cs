@@ -11,7 +11,6 @@ public abstract class EfCoreUnitOfWorkBase<TDbContext> : IUnitOfWork
     protected EfCoreUnitOfWorkBase(TDbContext dbContext)
         => DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
-    public virtual async Task<int> SaveChangesAsync(
-        CancellationToken cancellationToken = default)
+    public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => await DbContext.SaveChangesAsync(cancellationToken);
 }

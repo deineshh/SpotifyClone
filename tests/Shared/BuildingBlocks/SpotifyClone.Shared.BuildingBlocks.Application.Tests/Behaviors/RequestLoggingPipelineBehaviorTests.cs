@@ -10,11 +10,11 @@ namespace SpotifyClone.Shared.BuildingBlocks.Application.Tests.Behaviors;
 
 public sealed class RequestLoggingPipelineBehaviorTests
 {
-    private readonly Mock<ILogger<LoggingPipelineBehavior<TestCommand, Result>>> _loggerMock = new();
-    private readonly LoggingPipelineBehavior<TestCommand, Result> _behavior;
+    private readonly Mock<ILogger<RequestLoggingPipelineBehavior<TestCommand, Result>>> _loggerMock = new();
+    private readonly RequestLoggingPipelineBehavior<TestCommand, Result> _behavior;
 
     public RequestLoggingPipelineBehaviorTests()
-        => _behavior = new LoggingPipelineBehavior<TestCommand, Result>(_loggerMock.Object);
+        => _behavior = new RequestLoggingPipelineBehavior<TestCommand, Result>(_loggerMock.Object);
 
     [Fact]
     public async Task Handle_Should_CallNextHandler()
