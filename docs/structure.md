@@ -67,8 +67,8 @@ D - Delegate
         - ValueObjects/
           - UserId.cs (R)
           - TrackId.cs (R)
-          - ImageMetadata.cs (R)
           - ImageId.cs (R)
+          - ImageMetadata.cs (R)
   - Modules/
     - Accounts/
       - SpotifyClone.Accounts.Domain.csproj
@@ -1079,7 +1079,6 @@ D - Delegate
           - EmailContractsArchitectureTests.cs (C)
           - ApplicationExceptionArchitectureTests.cs (C)
           - PipelineBehaviorArchitectureTests.cs (C)
-        - Infrastructure/
       - SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj
         - Primitives/
           - DomainExceptions/
@@ -1120,6 +1119,8 @@ D - Delegate
           - TransactionalPipelineBehaviorTests.cs (C)
           - ValidationPipelineBehaviorTests.cs (C)
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj
+        - Messaging/
+          - SmtpEmailSenderTests.cs (C)
     - Kernel/
       - SpotifyClone.Shared.Kernel.Tests.csproj
   - Modules/

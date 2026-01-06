@@ -8,7 +8,7 @@ namespace SpotifyClone.Shared.BuildingBlocks.Arch.Tests.Domain;
 public sealed class DomainEventArchitectureTests
 {
     [Fact]
-    public void DomainEvents_Should_BeAbstractClass()
+    public void DomainEvent_Should_BeAbstractClass()
     {
         // Arrange
         Type domainEventType = typeof(DomainEvent);

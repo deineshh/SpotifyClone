@@ -31,6 +31,7 @@
     <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Domain.Tests/SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Shared/Kernel/">
+    <Project Path="SpotifyClone.Shared.Kernel.Arch.Tests/SpotifyClone.Shared.Kernel.Arch.Tests.csproj" Id="269e157b-7763-420a-8dd0-f57e0626d09b" />
     <Project Path="tests/Shared/Kernel/SpotifyClone.Shared.Kernel.Tests/SpotifyClone.Shared.Kernel.Tests.csproj" />
   </Folder>
 </Solution>

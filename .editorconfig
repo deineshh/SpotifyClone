@@ -5,6 +5,9 @@
 
 #### Static code analysis rule customizations
 
+# CA1308: Normalize strings to uppercase
+dotnet_diagnostic.CA1308.severity = suggestion
+
 # CA1861: Avoid constant arrays as arguments
 dotnet_diagnostic.CA1861.severity = suggestion
 
