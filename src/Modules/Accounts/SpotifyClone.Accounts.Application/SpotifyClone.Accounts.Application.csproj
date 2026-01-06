@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\BuildingBlocks\SpotifyClone.Shared.BuildingBlocks.Application\SpotifyClone.Shared.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\..\Shared\BuildingBlocks\SpotifyClone.Shared.BuildingBlocks.Domain\SpotifyClone.Shared.BuildingBlocks.Domain.csproj" />
+    <ProjectReference Include="..\..\..\Shared\Kernel\SpotifyClone.Shared.Kernel\SpotifyClone.Shared.Kernel.csproj" />
+    <ProjectReference Include="..\SpotifyClone.Accounts.Domain\SpotifyClone.Accounts.Domain.csproj" />
+  </ItemGroup>
+</Project>
