@@ -25,13 +25,13 @@
   <Folder Name="/tests/Modules/" />
   <Folder Name="/tests/Shared/" />
   <Folder Name="/tests/Shared/BuildingBlocks/">
-    <Project Path="SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests/SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj" Id="8956939e-5606-40eb-8a50-c7aa5bf68d51" />
+    <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests/SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj" />
     <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Application.Tests/SpotifyClone.Shared.BuildingBlocks.Application.Tests.csproj" />
-    <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Architecture.Tests/SpotifyClone.Shared.BuildingBlocks.Arch.Tests/SpotifyClone.Shared.BuildingBlocks.Arch.Tests.csproj" Id="c8aef5b3-a649-4183-a39f-fb01a64a2b56" />
+    <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Arch.Tests/SpotifyClone.Shared.BuildingBlocks.Arch.Tests.csproj" />
     <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Domain.Tests/SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Shared/Kernel/">
-    <Project Path="SpotifyClone.Shared.Kernel.Arch.Tests/SpotifyClone.Shared.Kernel.Arch.Tests.csproj" Id="269e157b-7763-420a-8dd0-f57e0626d09b" />
+    <Project Path="tests/Shared/Kernel/SpotifyClone.Shared.Kernel.Arch.Tests/SpotifyClone.Shared.Kernel.Arch.Tests.csproj" />
     <Project Path="tests/Shared/Kernel/SpotifyClone.Shared.Kernel.Tests/SpotifyClone.Shared.Kernel.Tests.csproj" />
   </Folder>
 </Solution>
