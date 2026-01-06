@@ -27,7 +27,7 @@
   <Folder Name="/tests/Shared/BuildingBlocks/">
     <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests/SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj" />
     <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Application.Tests/SpotifyClone.Shared.BuildingBlocks.Application.Tests.csproj" />
-    <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Architecture.Tests/SpotifyClone.Shared.BuildingBlocks.Arch.Tests/SpotifyClone.Shared.BuildingBlocks.Arch.Tests.csproj" />
+    <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Arch.Tests/SpotifyClone.Shared.BuildingBlocks.Arch.Tests.csproj" />
     <Project Path="tests/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Domain.Tests/SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Shared/Kernel/">
