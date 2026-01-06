@@ -14,14 +14,12 @@ D - Delegate
     - BuildingBlocks/
       - SpotifyClone.Shared.BuildingBlocks.Domain.csproj
         - Primitives/
+          - DomainException.cs (AC)
+          - ValueObject.cs (AR)
           - StronglyTypedId.cs (AR)
+          - DomainEvent.cs (AR)
           - Entity.cs (AC)
           - AggregateRoot.cs (AC)
-          - ValueObject.cs (AR)
-          - DomainEvent.cs (AR)
-          - DomainExceptionBase.cs (AC)
-        - Repositories/
-          - IRepository.cs (I)
       - SpotifyClone.Shared.BuildingBlocks.Application.csproj
         - Abstractions/
           - Commands/
@@ -31,36 +29,37 @@ D - Delegate
             - IQuery.cs (I)
             - IQueryHandler.cs (I)
           - Services/
-            - IEmailService.cs (I)
           - IUnitOfWork.cs (I)
-        - Models/
+        - Email/
           - EmailMessage.cs (R)
+          - EmailAttachment.cs (R)
+          - EmailPriority.cs (E)
+          - IEmailSender.cs (I)
+        - Exceptions/
+          - ApplicationExceptionBase.cs (AC)
+          - ConcurrencyConflictApplicationException.cs (C)
+          - OperationCanceledApplicationException.cs (C)
+          - EmailSendFailedApplicationException.cs (C)
         - Behaviors/
-          - ValidationPipelineBehavior.cs (C)
           - ExceptionHandlingPipelineBeavior.cs (C)
-          - TransactionPipelineBehavior.cs (C)
-          - LoggingPipelineBehavior.cs (C)
+          - RequestLoggingPipelineBehavior.cs (C)
+          - ValidationFailuresExtensions.cs (SC)
+          - ValidationPipelineBehavior.cs (C)
+          - TransactionalPipelineBehavior.cs (C)
         - Errors/
           - Error.cs (R)
           - CommonErrors.cs (SC)
-          - InfrastructureErrors.cs (SC)
         - Results/
-          - Result.cs (SC)
-          - ResultT.cs (SC)
-          - ResultExtensions.cs (SC)
+          - Result.cs (C)
         - BuildingBlocksApplicationAssemblyReference.cs (SC)
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.csproj
         - Persistence/
           - EfCoreUnitOfWorkBase.cs (AC)
-          - Repositories/
-            - EfCoreRepositoryBase.cs (AC)
           - Converters/
             - StronglyTypedIdEfCoreConverter.cs (AC)
-          - Exceptions/
         - Messaging/
           - SmtpOptions.cs (R)
-          - SmtpEmailService.cs (C)
-          - Exceptions/
+          - SmtpEmailSender.cs (C)
         - DependencyInjection/
           - BuildingBlocksModule.cs (SC)
     - Kernel/
@@ -68,8 +67,8 @@ D - Delegate
         - ValueObjects/
           - UserId.cs (R)
           - TrackId.cs (R)
-          - ImageMetadata.cs (R)
           - ImageId.cs (R)
+          - ImageMetadata.cs (R)
   - Modules/
     - Accounts/
       - SpotifyClone.Accounts.Domain.csproj
@@ -1065,9 +1064,63 @@ D - Delegate
 - tests/
   - Shared/
     - BuildingBlocks/
+      - SpotifyClone.Shared.BuildingBlocks.Arch.Tests.csproj
+        - DependencyTests.cs (C)
+        - Domain/
+          - DomainExceptionArchitectureTests.cs (C)
+          - ValueObjectArchitectureTests.cs (C)
+          - StronglyTypedIdArchitectureTests.cs (C)
+          - DomainEventArchitectureTests.cs (C)
+          - EntityArchitectureTests.cs (C)
+          - AggregateRootArchitectureTests.cs (C)
+          - IRepositoryArchitectureTests.cs (C)
+        - Application/
+          - ErrorArchitectureTests.cs (C)
+          - EmailContractsArchitectureTests.cs (C)
+          - ApplicationExceptionArchitectureTests.cs (C)
+          - PipelineBehaviorArchitectureTests.cs (C)
       - SpotifyClone.Shared.BuildingBlocks.Domain.Tests.csproj
+        - Primitives/
+          - DomainExceptions/
+            - NullTestDomainException.cs (C)
+            - EmptyTestDomainException.cs (C)
+            - WhitespaceTestDomainException.cs (C)
+            - DomainExceptionTests.cs (C)
+          - ValueObjects/
+            - TestValueObject.cs (R)
+            - OtherTestValueObject.cs (R)
+            - ValueObjectTests.cs (C)
+          - StronglyTypedIds/
+            - TestId.cs (R)
+            - OtherTestId.cs (R)
+            - StronglyTypedIdTests.cs (C)
+          - DomainEvents/
+            - TestDomainEvent.cs (R)
+            - OtherTestDomainEvent.cs (R)
+            - DomainEventTests.cs (C)
+          - Entities/
+            - TestEntity.cs (C)
+            - OtherTestEntity.cs (C)
+            - EntityTests.cs (C)
+          - AggregateRoots/
+            - TestAggregate.cs (C)
+            - OtherTestAggregate.cs (C)
+            - AggregateRootTests.cs (C)
       - SpotifyClone.Shared.BuildingBlocks.Application.Tests.csproj
+        - Errors/
+          - ErrorTests.cs (C)
+        - Results/
+          - ResultTests.cs (C)
+        - Behaviors/
+          - TestCommand.cs (R)
+          - TestApplicationException.cs (C)
+          - ExceptionHandlingPipelineBehaviorTests.cs (C)
+          - RequestLoggingPipelineBehaviorTests.cs (C)
+          - TransactionalPipelineBehaviorTests.cs (C)
+          - ValidationPipelineBehaviorTests.cs (C)
       - SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.csproj
+        - Messaging/
+          - SmtpEmailSenderTests.cs (C)
     - Kernel/
       - SpotifyClone.Shared.Kernel.Tests.csproj
   - Modules/
