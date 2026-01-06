@@ -10,8 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Shared\BuildingBlocks\SpotifyClone.Shared.BuildingBlocks.Domain\SpotifyClone.Shared.BuildingBlocks.Domain.csproj" />
-    <ProjectReference Include="..\src\Shared\Kernel\SpotifyClone.Shared.Kernel\SpotifyClone.Shared.Kernel.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Shared\BuildingBlocks\SpotifyClone.Shared.BuildingBlocks.Domain\SpotifyClone.Shared.BuildingBlocks.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Shared\Kernel\SpotifyClone.Shared.Kernel\SpotifyClone.Shared.Kernel.csproj" />
   </ItemGroup>
 
   <ItemGroup>
