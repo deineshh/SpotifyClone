@@ -12,7 +12,9 @@
   </Folder>
   <Folder Name="/src/Modules/" />
   <Folder Name="/src/Modules/Accounts/">
+    <Project Path="src/Modules/Accounts/SpotifyClone.Accounts.Application/SpotifyClone.Accounts.Application.csproj" Id="0dd2b0d3-597b-4a81-889f-70378dec72ee" />
     <Project Path="src/Modules/Accounts/SpotifyClone.Accounts.Domain/SpotifyClone.Accounts.Domain.csproj" Id="44b6d0a5-3ac9-4943-9116-4c5242fc68b1" />
+    <Project Path="src/Modules/Accounts/SpotifyClone.Accounts.Infrastructure/SpotifyClone.Accounts.Infrastructure.csproj" Id="546dd04c-4395-4792-bb5b-103c8a27c107" />
   </Folder>
   <Folder Name="/src/Shared/" />
   <Folder Name="/src/Shared/BuildingBlocks/">

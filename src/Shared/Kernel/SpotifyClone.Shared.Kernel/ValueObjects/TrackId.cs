@@ -2,4 +2,16 @@
 
 namespace SpotifyClone.Shared.Kernel.ValueObjects;
 
-public sealed record TrackId(Guid Value) : StronglyTypedId<Guid>(Value);
+public sealed record TrackId : StronglyTypedId<Guid>
+{
+    private TrackId(Guid value)
+        : base(value)
+    {
+    }
+
+    public static TrackId New()
+        => new(Guid.NewGuid());
+
+    public static TrackId From(Guid value)
+        => new(value);
+}

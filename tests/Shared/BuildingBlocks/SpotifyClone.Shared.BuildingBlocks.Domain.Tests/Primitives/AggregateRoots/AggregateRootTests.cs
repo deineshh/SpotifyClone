@@ -11,7 +11,7 @@ public sealed class AggregateRootTests
     public void AggregatesWithSameId_Should_BeEqual()
     {
         // Arrange
-        var id = new TestId(Guid.NewGuid());
+        var id = TestId.New();
         var aggregate1 = new TestAggregate(id);
         var aggregate2 = new TestAggregate(id);
 
@@ -26,8 +26,8 @@ public sealed class AggregateRootTests
     public void AggregatesWithDifferentIds_Should_NotBeEqual()
     {
         // Arrange
-        var aggregate1 = new TestAggregate(new TestId(Guid.NewGuid()));
-        var aggregate2 = new TestAggregate(new TestId(Guid.NewGuid()));
+        var aggregate1 = new TestAggregate(TestId.New());
+        var aggregate2 = new TestAggregate(TestId.New());
 
         // Act
         bool areEqual = aggregate1 == aggregate2;
@@ -40,7 +40,7 @@ public sealed class AggregateRootTests
     public void AggregatesWithSameId_Should_HaveSameHashCode()
     {
         // Arrange
-        var id = new TestId(Guid.NewGuid());
+        var id = TestId.New();
         var aggregate1 = new TestAggregate(id);
         var aggregate2 = new TestAggregate(id);
 
@@ -56,8 +56,8 @@ public sealed class AggregateRootTests
     public void AggregatesWithDifferentIds_Should_HaveDifferentHashCodes()
     {
         // Arrange
-        var aggregate1 = new TestAggregate(new TestId(Guid.NewGuid()));
-        var aggregate2 = new TestAggregate(new TestId(Guid.NewGuid()));
+        var aggregate1 = new TestAggregate(TestId.New());
+        var aggregate2 = new TestAggregate(TestId.New());
 
         // Act
         int hashCode1 = aggregate1.GetHashCode();
@@ -71,9 +71,9 @@ public sealed class AggregateRootTests
     public void AggregatesOfDifferentTypesWithSameId_Should_NotBeEqual()
     {
         // Arrange
-        var id = new TestId(Guid.NewGuid());
+        var id = TestId.New();
         var aggregate1 = new TestAggregate(id);
-        var aggregate2 = new OtherTestAggregate(new OtherTestId(id.Value));
+        var aggregate2 = new OtherTestAggregate(OtherTestId.From(id.Value));
 
         // Act
         bool areEqual = aggregate1.Equals(aggregate2);
@@ -96,7 +96,7 @@ public sealed class AggregateRootTests
     public void DomainEvents_Should_BeReadOnly()
     {
         // Arrange
-        var aggregate = new TestAggregate(new TestId(Guid.NewGuid()));
+        var aggregate = new TestAggregate(TestId.New());
 
         // Act
         IReadOnlyCollection<DomainEvent> events = aggregate.DomainEvents;
@@ -109,7 +109,7 @@ public sealed class AggregateRootTests
     public void RaiseDomainEvent_Should_AddEventToDomainEvents()
     {
         // Arrange
-        var aggregate = new TestAggregate(new TestId(Guid.NewGuid()));
+        var aggregate = new TestAggregate(TestId.New());
         var domainEvent = new TestDomainEvent(42);
         var otherDomainEvent = new OtherTestDomainEvent(84);
 
@@ -129,7 +129,7 @@ public sealed class AggregateRootTests
     public void ClearDomainEvents_Should_RemoveAllEvents()
     {
         // Arrange
-        var aggregate = new TestAggregate(new TestId(Guid.NewGuid()));
+        var aggregate = new TestAggregate(TestId.New());
         aggregate.TriggerEvent(new TestDomainEvent(1));
         aggregate.TriggerEvent(new OtherTestDomainEvent(2));
 

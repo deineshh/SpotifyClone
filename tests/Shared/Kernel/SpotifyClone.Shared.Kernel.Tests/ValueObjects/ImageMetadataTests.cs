@@ -1,4 +1,6 @@
-﻿using SpotifyClone.Shared.Kernel.ValueObjects;
+﻿using FluentAssertions;
+using SpotifyClone.Shared.Kernel.Exceptions;
+using SpotifyClone.Shared.Kernel.ValueObjects;
 
 namespace SpotifyClone.Shared.Kernel.Tests.ValueObjects;
 
@@ -10,70 +12,145 @@ public sealed class ImageMetadataTests
         // Arrange
         int width = 800;
         int height = 600;
-        string fileType = "png";
+        int maxWidth = 1920;
+        int maxHeight = 1080;
+        ImageFileType fileType = ImageFileType.Jpg;
 
         // Act
-        var imageMetadata = new ImageMetadata(width, height, fileType);
+        var imageMetadata = new ImageMetadata(width, height, maxWidth, maxHeight, fileType);
 
         // Assert
-        Assert.Equal(width, imageMetadata.Width);
-        Assert.Equal(height, imageMetadata.Height);
-        Assert.Equal("png", imageMetadata.FileType);
+        imageMetadata.Width.Should().Be(width);
+        imageMetadata.Height.Should().Be(height);
+        imageMetadata.FileType.Should().Be(ImageFileType.Jpg);
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Constructor_Should_ThrowArgumentOutOfRangeException_When_WidthIsInvalid(int invalidWidth)
+    public void Constructor_Should_ThrowException_When_WidthIsInvalid(int invalidWidth)
     {
         // Arrange
         int height = 600;
-        string fileType = "JPEG";
+        int maxWidth = 1920;
+        int maxHeight = 1080;
+        ImageFileType fileType = ImageFileType.Jpg;
 
-        // Act & Assert
-        Assert.Throws<ArgumentOutOfRangeException>(() => new ImageMetadata(invalidWidth, height, fileType));
+        // Act
+        Func<ImageMetadata> result = ()
+            => new ImageMetadata(invalidWidth, height, maxWidth, maxHeight, fileType);
+
+        // Assert
+        result.Should().Throw<ArgumentOutOfRangeException>();
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Constructor_Should_ThrowArgumentOutOfRangeException_When_HeightIsInvalid(int invalidHeight)
+    public void Constructor_Should_ThrowException_When_HeightIsInvalid(int invalidHeight)
     {
         // Arrange
-        int width = 800;
-        string fileType = "JPEG";
-
-        // Act & Assert
-        Assert.Throws<ArgumentOutOfRangeException>(() => new ImageMetadata(width, invalidHeight, fileType));
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void Constructor_Should_ThrowArgumentException_When_FileTypeIsInvalid(string invalidFileType)
-    {
-        // Arrange
-        int width = 800;
-        int height = 600;
-
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => new ImageMetadata(width, height, invalidFileType));
-    }
-
-    [Theory]
-    [InlineData(" JPEG ", "jpeg")]
-    [InlineData("png", "png")]
-    [InlineData("  Gif  ", "gif")]
-    public void Constructor_Should_NormalizeFileType(string inputFileType, string expectedFileType)
-    {
-        // Arrange
-        int width = 800;
-        int height = 600;
+        int width = 600;
+        int maxWidth = 1920;
+        int maxHeight = 1080;
+        ImageFileType fileType = ImageFileType.Jpg;
 
         // Act
-        var imageMetadata = new ImageMetadata(width, height, inputFileType);
+        Func<ImageMetadata> result = ()
+            => new ImageMetadata(width, invalidHeight, maxWidth, maxHeight, fileType);
 
         // Assert
-        Assert.Equal(expectedFileType, imageMetadata.FileType);
+        result.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
+    public void Constructor_Should_ThrowException_When_WidthIsTooLarge()
+    {
+        // Arrange
+        int width = 1921;
+        int height = 1080;
+        int maxWidth = 1920;
+        int maxHeight = 1080;
+        ImageFileType fileType = ImageFileType.Jpg;
+
+        // Act
+        Func<ImageMetadata> result = ()
+            => new ImageMetadata(width, height, maxWidth, maxHeight, fileType);
+
+        // Assert
+        result.Should().Throw<ImageTooLargeDomainException>();
+    }
+
+    [Fact]
+    public void Constructor_Should_ThrowException_When_HeightIsTooLarge()
+    {
+        // Arrange
+        int width = 600;
+        int height = 1081;
+        int maxWidth = 1920;
+        int maxHeight = 1080;
+        ImageFileType fileType = ImageFileType.Jpg;
+
+        // Act
+        Func<ImageMetadata> result = ()
+            => new ImageMetadata(width, height, maxWidth, maxHeight, fileType);
+
+        // Assert
+        result.Should().Throw<ImageTooLargeDomainException>();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Constructor_Should_ThrowException_When_MaxWidthIsInvalid(int invalidMaxWidth)
+    {
+        // Arrange
+        int width = 600;
+        int height = 600;
+        int maxHeight = 1920;
+        ImageFileType fileType = ImageFileType.Jpg;
+
+        // Act
+        Func<ImageMetadata> result = ()
+            => new ImageMetadata(width, height, invalidMaxWidth, maxHeight, fileType);
+
+        // Assert
+        result.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Constructor_Should_ThrowException_When_MaxHeightIsInvalid(int invalidMaxHeight)
+    {
+        // Arrange
+        int width = 600;
+        int height = 600;
+        int maxWidth = 1920;
+        ImageFileType fileType = ImageFileType.Jpg;
+
+        // Act
+        Func<ImageMetadata> result = ()
+            => new ImageMetadata(width, height, maxWidth, invalidMaxHeight, fileType);
+
+        // Assert
+        result.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
+    public void Constructor_Should_ThrowException_When_FileTypeIsNull()
+    {
+        // Arrange
+        int width = 600;
+        int height = 600;
+        int maxWidth = 1920;
+        int maxHeight = 1080;
+
+        // Act
+        Func<ImageMetadata> result = ()
+            => new ImageMetadata(width, height, maxWidth, maxHeight, null!);
+
+        // Assert
+        result.Should().Throw<ArgumentNullException>();
     }
 }

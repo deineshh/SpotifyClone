@@ -9,7 +9,7 @@ public sealed class EntityTests
     public void EntitiesWithSameId_Should_BeEqual()
     {
         // Arrange
-        var id = new TestId(Guid.NewGuid());
+        var id = TestId.New();
         var entity1 = new TestEntity(id, "Entity One");
         var entity2 = new TestEntity(id, "Entity Two");
 
@@ -24,8 +24,8 @@ public sealed class EntityTests
     public void EntitiesWithDifferentIds_Should_NotBeEqual()
     {
         // Arrange
-        var entity1 = new TestEntity(new TestId(Guid.NewGuid()), "Entity One");
-        var entity2 = new TestEntity(new TestId(Guid.NewGuid()), "Entity Two");
+        var entity1 = new TestEntity(TestId.New(), "Entity One");
+        var entity2 = new TestEntity(TestId.New(), "Entity Two");
 
         // Act
         bool areEqual = entity1 == entity2;
@@ -38,7 +38,7 @@ public sealed class EntityTests
     public void EntitiesWithSameId_Should_HaveSameHashCode()
     {
         // Arrange
-        var id = new TestId(Guid.NewGuid());
+        var id = TestId.New();
         var entity1 = new TestEntity(id, "Entity One");
         var entity2 = new TestEntity(id, "Entity Two");
 
@@ -54,8 +54,8 @@ public sealed class EntityTests
     public void EntitiesWithDifferentIds_Should_HaveDifferentHashCodes()
     {
         // Arrange
-        var entity1 = new TestEntity(new TestId(Guid.NewGuid()), "Entity One");
-        var entity2 = new TestEntity(new TestId(Guid.NewGuid()), "Entity Two");
+        var entity1 = new TestEntity(TestId.New(), "Entity One");
+        var entity2 = new TestEntity(TestId.New(), "Entity Two");
 
         // Act
         int hashCode1 = entity1.GetHashCode();
@@ -69,9 +69,9 @@ public sealed class EntityTests
     public void EntitiesOfDifferentTypesWithSameId_Should_NotBeEqual()
     {
         // Arrange
-        var id = new TestId(Guid.NewGuid());
+        var id = TestId.New();
         var entity1 = new TestEntity(id, "Test Entity");
-        var entity2 = new OtherTestEntity(new OtherTestId(id.Value), "Other Test Entity");
+        var entity2 = new OtherTestEntity(OtherTestId.From(id.Value), "Other Test Entity");
 
         // Act
         bool areEqual = entity1.Equals(entity2);

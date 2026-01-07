@@ -2,4 +2,16 @@
 
 namespace SpotifyClone.Shared.Kernel.ValueObjects;
 
-public sealed record ImageId(Guid Value) : StronglyTypedId<Guid>(Value);
+public sealed record ImageId : StronglyTypedId<Guid>
+{
+    private ImageId(Guid value)
+        : base(value)
+    {
+    }
+
+    public static ImageId New()
+        => new(Guid.NewGuid());
+
+    public static ImageId From(Guid value)
+        => new(value);
+}

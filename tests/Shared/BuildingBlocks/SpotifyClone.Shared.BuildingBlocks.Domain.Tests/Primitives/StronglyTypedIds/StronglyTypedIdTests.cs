@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using FluentAssertions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
@@ -7,25 +8,35 @@ namespace SpotifyClone.Shared.BuildingBlocks.Domain.Tests.Primitives.StronglyTyp
 public sealed class StronglyTypedIdTests
 {
     [Fact]
-    public void Constructor_Should_AssignValue()
+    public void New_Should_AssignValue()
+    {
+        // Arrange & Act
+        var testId = TestId.New();
+
+        // Assert
+        testId.Value.Should().NotBe(Guid.Empty);
+    }
+
+    [Fact]
+    public void From_Should_AssignProvidedValue()
     {
         // Arrange
         var guid = Guid.NewGuid();
 
         // Act
-        var testId = new TestId(guid);
+        var testId = TestId.From(guid);
 
         // Assert
         testId.Value.Should().Be(guid);
     }
 
     [Fact]
-    public void StronglyTypedIdsWithEqualValues_Should_BeEqual()
+    public void StronglyTypedIds_Should_BeEqual_When_ValuesAreEqual()
     {
         // Arrange
         var guid = Guid.NewGuid();
-        var testId1 = new TestId(guid);
-        var testId2 = new TestId(guid);
+        var testId1 = TestId.From(guid);
+        var testId2 = TestId.From(guid);
 
         // Act
         bool areEqual = testId1 == testId2;
@@ -35,13 +46,13 @@ public sealed class StronglyTypedIdTests
     }
 
     [Fact]
-    public void StronglyTypedIdsWithNotEqualValues_Should_NotBeEqual()
+    public void StronglyTypedIds_Should_NotBeEqual_When_ValuesAreNotEqual()
     {
         // Arrange
         var guid1 = Guid.NewGuid();
         var guid2 = Guid.NewGuid();
-        var testId1 = new TestId(guid1);
-        var testId2 = new TestId(guid2);
+        var testId1 = TestId.From(guid1);
+        var testId2 = TestId.From(guid2);
 
         // Act
         bool areEqual = testId1 == testId2;
@@ -51,41 +62,37 @@ public sealed class StronglyTypedIdTests
     }
 
     [Fact]
-    public void StronglyTypedIdsWithEqualValues_Should_HaveSameHashCode()
+    public void StronglyTypedIds_Should_HaveSameHashCode_When_ValuesAreEqual()
     {
         // Arrange
         var guid = Guid.NewGuid();
 
         // Act
-        var testId1 = new TestId(guid);
-        var testId2 = new TestId(guid);
+        var testId1 = TestId.From(guid);
+        var testId2 = TestId.From(guid);
 
         // Assert
         testId1.GetHashCode().Should().Be(testId2.GetHashCode());
     }
 
     [Fact]
-    public void StronglyTypedIdsWithNotEqualValues_Should_HaveDifferentHashCodes()
+    public void StronglyTypedIds_Should_HaveDifferentHashCodes_When_ValuesAreNotEqual()
     {
-        // Arrange
-        var guid1 = Guid.NewGuid();
-        var guid2 = Guid.NewGuid();
-
-        // Act
-        var testId1 = new TestId(guid1);
-        var testId2 = new TestId(guid2);
+        // Arrange & Act
+        var testId1 = TestId.New();
+        var testId2 = TestId.New();
 
         // Assert
         testId1.GetHashCode().Should().NotBe(testId2.GetHashCode());
     }
 
     [Fact]
-    public void DifferentTypesWithSameValue_Should_NotBeEqual()
+    public void DifferentTypes_Should_NotBeEqual_When_ValuesAreSame()
     {
         // Arrange
         var guid = Guid.NewGuid();
-        var testId = new TestId(guid);
-        var otherTestId = new OtherTestId(guid);
+        var testId = TestId.From(guid);
+        var otherTestId = OtherTestId.From(guid);
 
         // Act
         bool areEqual = testId == otherTestId;
@@ -95,12 +102,12 @@ public sealed class StronglyTypedIdTests
     }
 
     [Fact]
-    public void DifferentTypesWithSameValue_Should_HaveDifferentHashCodes()
+    public void DifferentTypes_Should_HaveDifferentHashCodes_When_ValuesAreSame()
     {
         // Arrange
         var guid = Guid.NewGuid();
-        var testId = new TestId(guid);
-        var otherTestId = new OtherTestId(guid);
+        var testId = TestId.From(guid);
+        var otherTestId = OtherTestId.From(guid);
 
         // Act
         int hashCode1 = testId.GetHashCode();
