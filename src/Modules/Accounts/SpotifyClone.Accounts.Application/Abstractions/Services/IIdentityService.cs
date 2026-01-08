@@ -6,16 +6,16 @@ namespace SpotifyClone.Accounts.Application.Abstractions.Services;
 
 public interface IIdentityService
 {
-    Task<Result<IdentityUserInfo>> ValidateUserAsync(
+    Task<Result<IdentityUserInfo?>> ValidateUserAsync(
         string email,
         string password,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyCollection<string>> GetUserRolesAsync(
+    Task<Result<IReadOnlyCollection<string>?>> GetUserRolesAsync(
         UserId userId,
         CancellationToken cancellationToken = default);
 
-    Task<bool> IsTwoFactorEnabledAsync(
+    Task<Result<bool?>> IsTwoFactorEnabledAsync(
         UserId userId,
         CancellationToken cancellationToken = default);
 }

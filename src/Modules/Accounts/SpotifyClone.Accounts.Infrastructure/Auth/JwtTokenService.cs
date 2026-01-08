@@ -2,7 +2,6 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Infrastructure.Auth;

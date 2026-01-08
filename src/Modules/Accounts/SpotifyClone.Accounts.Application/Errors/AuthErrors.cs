@@ -4,19 +4,15 @@ namespace SpotifyClone.Accounts.Application.Errors;
 
 public static class AuthErrors
 {
-    public static readonly Error InvalidCredentials = new(
-        "Auth.InvalidCredentials",
-        "The provided credentials are invalid.");
+    public static readonly Error InvalidEmail = new(
+        "Auth.InvalidEmail",
+        "The provided email is invalid.");
 
-    public static readonly Error TwoFactorRequired = new(
-        "Auth.TwoFactorRequired",
-        "Two-factor authentication is required.");
+    public static readonly Error InvalidPassword = new(
+        "Auth.InvalidPassword",
+        "The provided password is invalid.");
 
-    public static readonly Error AccountLocked = new(
-        "Auth.AccountLocked",
-        "The account is locked.");
-
-    public static readonly Error RefreshTokenInvalid = new(
-        "Auth.RefreshTokenInvalid",
-        "Refresh token is invalid or expired.");
+    public static readonly Error SignInNotAllowed = new(
+        "Auth.SignInNotAllowed",
+        "Sign-in is not allowed for this user.");
 }
