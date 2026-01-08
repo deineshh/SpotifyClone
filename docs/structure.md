@@ -201,7 +201,7 @@ D - Delegate
             - RoleSeeder.cs (C)
             - ApplicationPolicies.cs (E)
             - ApplicationUser.cs (C)
-            - IdentityDbContext.cs (C)
+            - IdentityAppDbContext.cs (C)
             - IdentityService.cs (C)
             - Migrations/
           - Auth/
@@ -218,10 +218,9 @@ D - Delegate
             - Exceptions/
             - Migrations/
           - AccountsUnitOfWork.cs (C)
-        - Services/
-          - Auth/
-            - JwtOptions.cs (R)
-            - JwtTokenService.cs (C)
+        - Auth/
+          - JwtOptions.cs (R)
+          - JwtTokenService.cs (C)
         - DependencyInjection/
           - AccountsModule.cs
     - Catalog/
