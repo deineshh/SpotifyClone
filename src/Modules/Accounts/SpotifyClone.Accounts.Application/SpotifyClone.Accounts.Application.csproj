@@ -5,4 +5,7 @@
     <ProjectReference Include="..\..\..\Shared\Kernel\SpotifyClone.Shared.Kernel\SpotifyClone.Shared.Kernel.csproj" />
     <ProjectReference Include="..\SpotifyClone.Accounts.Domain\SpotifyClone.Accounts.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Features\" />
+  </ItemGroup>
 </Project>
