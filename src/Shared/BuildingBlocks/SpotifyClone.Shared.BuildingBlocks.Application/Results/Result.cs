@@ -2,7 +2,7 @@
 
 namespace SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
-public class Result : IResult
+public class Result
 {
     public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;
@@ -53,11 +53,4 @@ public class Result<TValue> : Result
 
     public static implicit operator Result<TValue>(TValue value)
         => new Result<TValue>(value, true);
-}
-
-public interface IResult
-{
-    bool IsSuccess { get; }
-    bool IsFailure { get; }
-    Error[] Errors { get; }
 }

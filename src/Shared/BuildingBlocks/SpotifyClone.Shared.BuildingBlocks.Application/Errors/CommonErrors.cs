@@ -18,10 +18,6 @@ public static class CommonErrors
         "Internal",
         "An internal error occurred.");
 
-    public static readonly Error EmailSendFailed = new Error(
-        "Email.SendFailed",
-        "Failed to send email.");
-
     public static Error Empty(string codeTitle, string descriptionTitle) => new Error(
         $"{codeTitle}.Empty",
         $"{descriptionTitle} cannot be empty.");

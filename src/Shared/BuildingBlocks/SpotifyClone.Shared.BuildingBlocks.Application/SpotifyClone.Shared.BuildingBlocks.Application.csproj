@@ -3,4 +3,7 @@
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="MediatR" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpotifyClone.Shared.BuildingBlocks.Domain\SpotifyClone.Shared.BuildingBlocks.Domain.csproj" />
+  </ItemGroup>
 </Project>
