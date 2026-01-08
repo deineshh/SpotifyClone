@@ -13,13 +13,14 @@ namespace SpotifyClone.Shared.BuildingBlocks.Application.Tests.Behaviors;
 
 public sealed class ExceptionHandlingPipelineBehaviorTests
 {
+    private readonly List<IDomainExceptionMapper> _mappers = Array.Empty<IDomainExceptionMapper>().ToList();
     private readonly Mock<ILogger<ExceptionHandlingPipelineBehavior<TestCommand, Result>>> _loggerMock = new();
     private readonly Mock<IDomainExceptionMapper> _mapperMock = new();
     private readonly ExceptionHandlingPipelineBehavior<TestCommand, Result> _behavior;
 
     public ExceptionHandlingPipelineBehaviorTests()
         => _behavior = new ExceptionHandlingPipelineBehavior<TestCommand, Result>(
-            _mapperMock.Object, _loggerMock.Object);
+            _mappers, _loggerMock.Object);
 
     [Fact]
     public async Task Handle_Should_ReturnSuccess_When_NoExceptionIsThrown()
@@ -43,22 +44,36 @@ public sealed class ExceptionHandlingPipelineBehaviorTests
         var request = new TestCommand();
         var testDomainEx = new TestDomainException("Test domain exception");
         RequestHandlerDelegate<Result> next = _ => throw testDomainEx;
+        _mappers.Add(_mapperMock.Object);
+
+        _mapperMock
+            .Setup(m => m.CanMap(It.IsAny<DomainExceptionBase>()))
+            .Returns(true);
+
+        _mapperMock
+            .Setup(m => m.MapToError(It.IsAny<DomainExceptionBase>()))
+            .Returns(CommonErrors.NotFound(
+                "Test.NotFound",
+                "This is a test error object."));
 
         // Act
         Result result = await _behavior.Handle(request, next, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
+
         _loggerMock.Verify(
             l => l.Log(
                 LogLevel.Warning,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(
-                    "Domain exception occured while handling TestCommand: Test domain exception")),
+                It.Is<It.IsAnyType>((state, _) =>
+                    state.ToString()!.Contains(
+                        "Domain exception occured while handling TestCommand")),
                 testDomainEx,
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((_, __) => true)),
             Times.Once);
     }
+
 
     [Fact]
     public async Task Handle_Should_ErrorLog_When_UnknownDomainExceptionIsThrown()
@@ -67,8 +82,13 @@ public sealed class ExceptionHandlingPipelineBehaviorTests
         var request = new TestCommand();
         var testDomainEx = new TestDomainException("Test domain exception");
         RequestHandlerDelegate<Result> next = _ => throw testDomainEx;
+
         _mapperMock
-            .Setup(mapper => mapper.MapToError(It.IsAny<DomainExceptionBase>()))
+            .Setup(m => m.CanMap(It.IsAny<DomainExceptionBase>()))
+            .Returns(true);
+
+        _mapperMock
+            .Setup(m => m.MapToError(It.IsAny<DomainExceptionBase>()))
             .Returns(CommonErrors.Unknown);
 
         // Act
@@ -76,6 +96,7 @@ public sealed class ExceptionHandlingPipelineBehaviorTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
+        result.Errors.Should().ContainSingle(e => e == CommonErrors.Unknown);
         _loggerMock.Verify(
             l => l.Log(
                 LogLevel.Error,
@@ -100,6 +121,7 @@ public sealed class ExceptionHandlingPipelineBehaviorTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
+        result.Errors.Should().ContainSingle(e => e == CommonErrors.Internal);
         _loggerMock.Verify(
             l => l.Log(
                 LogLevel.Error,

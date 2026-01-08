@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using MediatR;
+﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
@@ -9,13 +8,13 @@ using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 namespace SpotifyClone.Shared.BuildingBlocks.Application.Behaviors;
 
 public sealed class ExceptionHandlingPipelineBehavior<TRequest, TResponse>(
-    IDomainExceptionMapper mapper,
+    IEnumerable<IDomainExceptionMapper> mappers,
     ILogger<ExceptionHandlingPipelineBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
     where TResponse : notnull, Result
 {
-    private readonly IDomainExceptionMapper _mapper = mapper;
+    private readonly IEnumerable<IDomainExceptionMapper> _mappers = mappers;
     private readonly ILogger<ExceptionHandlingPipelineBehavior<TRequest, TResponse>> _logger = logger;
 
     public async Task<TResponse> Handle(
@@ -39,7 +38,14 @@ public sealed class ExceptionHandlingPipelineBehavior<TRequest, TResponse>(
                 return (TResponse)Result.Failure(CommonErrors.Internal);
             }
 
-            Error error = _mapper.MapToError(domainEx);
+            IDomainExceptionMapper? mapper = _mappers.FirstOrDefault(m => m.CanMap(domainEx));
+
+            Error error = CommonErrors.Unknown;
+
+            if (mapper is not null)
+            {
+                error = mapper.MapToError(domainEx);
+            }
 
             if (error == CommonErrors.Unknown)
             {
@@ -57,7 +63,7 @@ public sealed class ExceptionHandlingPipelineBehavior<TRequest, TResponse>(
                     domainEx.Message);
             }
 
-            return (TResponse)Result.Failure(_mapper.MapToError(domainEx));
+            return (TResponse)Result.Failure(error);
         }
     }
 }
