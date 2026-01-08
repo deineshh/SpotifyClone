@@ -1,4 +1,5 @@
 ﻿using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
+using SpotifyClone.Shared.Kernel.Enums;
 using SpotifyClone.Shared.Kernel.Exceptions;
 
 namespace SpotifyClone.Shared.Kernel.ValueObjects;
@@ -19,7 +20,7 @@ public sealed record ImageMetadata : ValueObject
 
         if (width > maxWidth || height > maxHeight)
         {
-            throw new ImageTooLargeDomainException(maxWidth, maxHeight);
+            throw new InvalidImageMetadataDomainException($"Image must not exceed {maxWidth}x{maxHeight}.");
         }
 
         Width = width;

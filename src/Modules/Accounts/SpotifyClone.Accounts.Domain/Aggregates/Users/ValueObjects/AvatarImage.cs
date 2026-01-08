@@ -1,8 +1,10 @@
-﻿using SpotifyClone.Accounts.Domain.Aggregates.User.Exceptions;
+﻿using SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
+using SpotifyClone.Shared.Kernel.Enums;
+using SpotifyClone.Shared.Kernel.IDs;
 using SpotifyClone.Shared.Kernel.ValueObjects;
 
-namespace SpotifyClone.Accounts.Domain.Aggregates.User.ValueObjects;
+namespace SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
 
 public sealed record AvatarImage : ValueObject
 {
@@ -19,12 +21,12 @@ public sealed record AvatarImage : ValueObject
 
         if (width != height)
         {
-            throw new AvatarImageInvalidShapeDomainException();
+            throw new InvalidAvatarImageDomainException("Avatar image must be square.");
         }
 
         if (!fileType.SupportsTransparency)
         {
-            throw new AvatarImageMustSupportTransparencyDomainException();
+            throw new InvalidAvatarImageDomainException("Avatar image must support transparency.");
         }
 
         ImageId = imageId;

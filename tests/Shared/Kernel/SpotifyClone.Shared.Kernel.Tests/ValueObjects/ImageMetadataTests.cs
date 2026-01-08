@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using SpotifyClone.Shared.Kernel.Enums;
 using SpotifyClone.Shared.Kernel.Exceptions;
 using SpotifyClone.Shared.Kernel.ValueObjects;
 
@@ -78,7 +79,7 @@ public sealed class ImageMetadataTests
             => new ImageMetadata(width, height, maxWidth, maxHeight, fileType);
 
         // Assert
-        result.Should().Throw<ImageTooLargeDomainException>();
+        result.Should().Throw<InvalidImageMetadataDomainException>();
     }
 
     [Fact]
@@ -96,7 +97,7 @@ public sealed class ImageMetadataTests
             => new ImageMetadata(width, height, maxWidth, maxHeight, fileType);
 
         // Assert
-        result.Should().Throw<ImageTooLargeDomainException>();
+        result.Should().Throw<InvalidImageMetadataDomainException>();
     }
 
     [Theory]

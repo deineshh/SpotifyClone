@@ -1,6 +1,6 @@
 ﻿using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
-namespace SpotifyClone.Shared.Kernel.ValueObjects;
+namespace SpotifyClone.Shared.Kernel.IDs;
 
 public sealed record ImageId : StronglyTypedId<Guid>
 {

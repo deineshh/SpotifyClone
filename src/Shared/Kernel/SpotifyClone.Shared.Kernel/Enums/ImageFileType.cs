@@ -1,7 +1,7 @@
 ﻿using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 using SpotifyClone.Shared.Kernel.Exceptions;
 
-namespace SpotifyClone.Shared.Kernel.ValueObjects;
+namespace SpotifyClone.Shared.Kernel.Enums;
 
 public sealed record ImageFileType : ValueObject
 {
@@ -31,7 +31,7 @@ public sealed record ImageFileType : ValueObject
 
         if (!Supported.Contains(normalized))
         {
-            throw new ImageFileTypeNotSupportedDomainException(normalized);
+            throw new InvalidImageFileTypeDomainException($"Image file type '{normalized}' is not supported.");
         }
 
         return new ImageFileType(normalized);

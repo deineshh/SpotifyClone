@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using FluentAssertions;
 using NetArchTest.Rules;
-using SpotifyClone.Accounts.Domain.Aggregates.User.ValueObjects;
+using SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
 namespace SpotifyClone.Accounts.Arch.Tests.Domain;

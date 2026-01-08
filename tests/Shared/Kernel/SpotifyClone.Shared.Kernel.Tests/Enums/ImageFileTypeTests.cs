@@ -1,9 +1,9 @@
 ﻿using FluentAssertions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
+using SpotifyClone.Shared.Kernel.Enums;
 using SpotifyClone.Shared.Kernel.Exceptions;
-using SpotifyClone.Shared.Kernel.ValueObjects;
 
-namespace SpotifyClone.Shared.Kernel.Tests.ValueObjects;
+namespace SpotifyClone.Shared.Kernel.Tests.Enums;
 
 public sealed class ImageFileTypeTests
 {
@@ -42,16 +42,17 @@ public sealed class ImageFileTypeTests
         Func<ImageFileType> result = () => ImageFileType.From(fileType);
 
         // Assert
-        result.Should().NotThrow<ImageFileTypeNotSupportedDomainException>();
+        result.Should().NotThrow<InvalidImageFileTypeDomainException>();
     }
 
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
-    public void From_Should_ThrowException_When_ValueIsNullOrWhitespace(string invalidFileType)
+    [InlineData(null)]
+    public void From_Should_ThrowException_When_ValueIsNullOrWhitespace(string? invalidFileType)
     {
         // Arrange & Act
-        Func<ImageFileType> result = () => ImageFileType.From(invalidFileType);
+        Func<ImageFileType> result = () => ImageFileType.From(invalidFileType!);
 
         // Assert
         result.Should().Throw<ArgumentException>();
@@ -59,14 +60,13 @@ public sealed class ImageFileTypeTests
 
     [Theory]
     [InlineData("gif")]
-    public void From_Should_ThrowException_When_ValueIsNotSupported
-        (string unsupportedFileType)
+    public void From_Should_ThrowException_When_ValueIsNotSupported(string unsupportedFileType)
     {
         // Arrange & Act
         Func<ImageFileType> result = () => ImageFileType.From(unsupportedFileType);
 
         // Assert
-        result.Should().Throw<ImageFileTypeNotSupportedDomainException>();
+        result.Should().Throw<InvalidImageFileTypeDomainException>();
     }
 
     [Fact]

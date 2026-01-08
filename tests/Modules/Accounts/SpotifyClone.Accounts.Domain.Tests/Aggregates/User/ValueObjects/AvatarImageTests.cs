@@ -1,9 +1,10 @@
 ﻿using FluentAssertions;
-using SpotifyClone.Accounts.Domain.Aggregates.User.Exceptions;
-using SpotifyClone.Accounts.Domain.Aggregates.User.ValueObjects;
-using SpotifyClone.Shared.Kernel.ValueObjects;
+using SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
+using SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
+using SpotifyClone.Shared.Kernel.Enums;
+using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Accounts.Domain.Tests.Aggregates.User.ValueObjects;
+namespace SpotifyClone.Accounts.Domain.Tests.Aggregates.Users.ValueObjects;
 
 public sealed class AvatarImageTests
 {
@@ -71,7 +72,7 @@ public sealed class AvatarImageTests
         Action act = () => new AvatarImage(imageId, width, height, fileType);
 
         // Assert
-        act.Should().Throw<AvatarImageInvalidShapeDomainException>();
+        act.Should().Throw<InvalidAvatarImageDomainException>();
     }
 
     [Fact]
@@ -87,6 +88,6 @@ public sealed class AvatarImageTests
         Action act = () => new AvatarImage(imageId, width, height, fileType);
 
         // Assert
-        act.Should().Throw<AvatarImageMustSupportTransparencyDomainException>();
+        act.Should().Throw<InvalidAvatarImageDomainException>();
     }
 }
