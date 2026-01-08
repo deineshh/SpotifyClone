@@ -15,4 +15,8 @@ public static class AuthErrors
     public static readonly Error SignInNotAllowed = new(
         "Auth.SignInNotAllowed",
         "Sign-in is not allowed for this user.");
+
+    public static readonly Error UserNotFound = new(
+        "Auth.UserNotFound",
+        "The specified user was not found.");
 }

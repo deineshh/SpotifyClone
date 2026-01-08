@@ -20,7 +20,7 @@ internal sealed class IdentityService : IIdentityService
         _signInManager = signInManager;
     }
 
-    public async Task<Result<IdentityUserInfo?>> ValidateUserAsync(
+    public async Task<Result<IdentityUserInfo>> ValidateUserAsync(
         string email,
         string password,
         CancellationToken cancellationToken = default)
@@ -55,10 +55,10 @@ internal sealed class IdentityService : IIdentityService
             user.EmailConfirmed,
             requiresTwoFactor);
 
-        return Result.Success<IdentityUserInfo?>(userInfo);
+        return Result.Success<IdentityUserInfo>(userInfo);
     }
 
-    public async Task<Result<IReadOnlyCollection<string>?>> GetUserRolesAsync(
+    public async Task<Result<IReadOnlyCollection<string>>> GetUserRolesAsync(
         UserId userId,
         CancellationToken cancellationToken = default)
     {
@@ -66,7 +66,7 @@ internal sealed class IdentityService : IIdentityService
 
         if (user is null)
         {
-            return Result.Failure<IReadOnlyCollection<string>>(AuthErrors.InvalidEmail);
+            return Result.Failure<IReadOnlyCollection<string>>(AuthErrors.UserNotFound);
         }
 
         IList<string> roles = await _userManager.GetRolesAsync(user);
@@ -74,7 +74,7 @@ internal sealed class IdentityService : IIdentityService
         return roles.AsReadOnly();
     }
 
-    public async Task<Result<bool?>> IsTwoFactorEnabledAsync(
+    public async Task<Result<bool>> IsTwoFactorEnabledAsync(
         UserId userId,
         CancellationToken cancellationToken = default)
     {
@@ -82,7 +82,7 @@ internal sealed class IdentityService : IIdentityService
 
         if (user is null)
         {
-            return false;
+            return Result.Failure<bool>(AuthErrors.UserNotFound);
         }
 
         return await _userManager.GetTwoFactorEnabledAsync(user);
