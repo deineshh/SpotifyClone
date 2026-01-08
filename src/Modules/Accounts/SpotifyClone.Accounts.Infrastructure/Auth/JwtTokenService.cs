@@ -1,0 +1,66 @@
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
+using SpotifyClone.Accounts.Application.Abstractions.Services;
+using SpotifyClone.Accounts.Infrastructure.Auth;
+using SpotifyClone.Shared.Kernel.IDs;
+
+namespace SpotifyClone.Accounts.Infrastructure.Services;
+
+internal sealed class JwtTokenService : ITokenService
+{
+    private readonly JwtOptions _options;
+    private readonly JwtSecurityTokenHandler _tokenHandler = new();
+
+    public JwtTokenService(IOptions<JwtOptions> options)
+        => _options = options.Value;
+
+    public string GenerateAccessToken(
+        UserId userId,
+        string email,
+        IReadOnlyCollection<string> roles,
+        IReadOnlyDictionary<string, string>? claims = null)
+    {
+        DateTime now = DateTime.UtcNow;
+
+        var jwtClaims = new List<Claim>
+        {
+            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub, userId.Value.ToString()),
+            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email, email),
+            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Iat,
+                new DateTimeOffset(now).ToUnixTimeSeconds().ToString(),
+                ClaimValueTypes.Integer64)
+        };
+
+        foreach (string role in roles)
+        {
+            jwtClaims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        if (claims is not null)
+        {
+            foreach ((string? key, string? value) in claims)
+            {
+                jwtClaims.Add(new Claim(key, value));
+            }
+        }
+
+        var signingCredentials = new SigningCredentials(
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey)),
+            SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _options.Issuer,
+            audience: _options.Audience,
+            claims: jwtClaims,
+            notBefore: now,
+            expires: now.AddMinutes(_options.AccessTokenLifetimeMinutes),
+            signingCredentials: signingCredentials);
+
+        return _tokenHandler.WriteToken(token);
+    }
+}

@@ -219,8 +219,9 @@ D - Delegate
             - Migrations/
           - AccountsUnitOfWork.cs (C)
         - Services/
-          - JwtTokenService.cs (C)
-          - Exceptions/
+          - Auth/
+            - JwtOptions.cs (R)
+            - JwtTokenService.cs (C)
         - DependencyInjection/
           - AccountsModule.cs
     - Catalog/
