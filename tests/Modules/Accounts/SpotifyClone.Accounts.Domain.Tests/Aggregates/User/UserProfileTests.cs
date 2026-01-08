@@ -6,7 +6,7 @@ using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Domain.Tests.Aggregates.Users;
 
-public sealed class UserTests
+public sealed class UserProfileTests
 {
     [Fact]
     public void Create_ShouldCreateUser_WhenValidParametersAreProvided()
@@ -19,7 +19,7 @@ public sealed class UserTests
         AvatarImage? avatarImage = null;
 
         // Act
-        var user = User.Create(userId, displayName, birthDate, gender, avatarImage);
+        var user = UserProfile.Create(userId, displayName, birthDate, gender, avatarImage);
 
         // Assert
         user.Id.Should().Be(userId);
