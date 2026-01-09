@@ -15,7 +15,4 @@
 	<ItemGroup>
 		<InternalsVisibleTo Include="SpotifyClone.Accounts.Infrastructure.Tests" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Persistence\Auth\" />
-	</ItemGroup>
 </Project>

@@ -10,9 +10,11 @@ internal sealed class UserProfileEfCoreConfiguration : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<UserProfile> builder)
     {
-        builder.HasKey(u => u.Id);
+        builder.ToTable("user_profiles");
 
-        builder.Property(u => u.Id)
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id)
             .HasConversion(AccountsEfCoreValueConverters.UserIdConverter)
             .ValueGeneratedNever();
 
