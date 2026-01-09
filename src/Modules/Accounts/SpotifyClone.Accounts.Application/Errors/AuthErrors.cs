@@ -19,4 +19,8 @@ public static class AuthErrors
     public static readonly Error UserNotFound = new(
         "Auth.UserNotFound",
         "The specified user was not found.");
+
+    public static readonly Error InvalidToken = new(
+        "Auth.InvalidToken",
+        "The specified token is invalid.");
 }

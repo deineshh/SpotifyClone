@@ -1,5 +1,5 @@
 ﻿namespace SpotifyClone.Accounts.Domain.Aggregates.Users;
 
-public interface IUserRepository
+public interface IUserProfileRepository
 {
 }

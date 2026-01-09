@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Configurations.Converters;
 
-namespace SpotifyClone.Accounts.Infrastructure.Persistence.Auth;
+namespace SpotifyClone.Accounts.Infrastructure.Persistence.Auth.Configurations;
 
 internal sealed class RefreshTokenEfCoreConfiguration
     : IEntityTypeConfiguration<RefreshToken>

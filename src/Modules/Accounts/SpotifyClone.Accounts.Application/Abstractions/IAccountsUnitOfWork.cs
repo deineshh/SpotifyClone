@@ -4,8 +4,8 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 
 namespace SpotifyClone.Accounts.Application.Abstractions;
 
-internal interface IAccountsUnitOfWork : IUnitOfWork
+public interface IAccountsUnitOfWork : IUnitOfWork
 {
-    IUserRepository Users { get; }
+    IUserProfileRepository Users { get; }
     IRefreshTokenRepository RefreshTokens { get; }
 }

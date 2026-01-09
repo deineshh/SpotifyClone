@@ -205,15 +205,19 @@ D - Delegate
             - IdentityService.cs (C)
             - Migrations/
           - Auth/
+            - Sha256TokenHasher.cs (SC)
             - RefreshToken.cs (C)
-            - RefreshTokenConfiguration.cs (C)
+            - RefreshTokenEfCoreConfiguration.cs (C)
             - RefreshTokenRepository.cs (C)
             - Converters/
           - Accounts/
-            - UserProfileRepository.cs (C)
             - AccountsAppDbContext.cs (C)
-            - AccountsEfCoreValueConverters.cs (SC)
+            - Repositories/
+              - UserProfileRepository.cs (C)
+              - RefreshTokenRepository.cs (C)
             - Configurations/
+              - Converters/
+                - AccountsEfCoreValueConverters.cs (SC)
               - AvatarImageEfCoreConfiguration.cs (SC)
               - ImageMetadataEfCoreConfiguration.cs (SC)
               - UserProfileEfCoreConfiguration.cs (C)
