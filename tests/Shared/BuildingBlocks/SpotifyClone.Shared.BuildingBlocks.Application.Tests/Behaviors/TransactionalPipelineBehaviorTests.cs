@@ -53,7 +53,7 @@ public sealed class TransactionalPipelineBehaviorTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        _unitOfWorkMock.Verify(u => u.Commit(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public sealed class TransactionalPipelineBehaviorTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWorkMock.Verify(u => u.Commit(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

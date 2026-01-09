@@ -30,7 +30,7 @@ public sealed class TransactionalPipelineBehavior<TRequest, TResponse>(
             return response;
         }
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.Commit(cancellationToken);
 
         _logger.LogInformation("Committed transaction for {RequestType}", typeof(TRequest).Name);
 
