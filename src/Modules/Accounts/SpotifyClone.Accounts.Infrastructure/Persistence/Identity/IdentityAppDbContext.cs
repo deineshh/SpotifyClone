@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Identity;
 
-public sealed class IdentityAppDbContext(DbContextOptions<IdentityAppDbContext> options)
+internal sealed class IdentityAppDbContext(DbContextOptions<IdentityAppDbContext> options)
     : IdentityDbContext<
         ApplicationUser,
         IdentityRole<Guid>,

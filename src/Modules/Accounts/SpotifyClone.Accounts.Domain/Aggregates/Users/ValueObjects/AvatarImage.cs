@@ -8,8 +8,8 @@ namespace SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
 
 public sealed record AvatarImage : ValueObject
 {
-    private const int MaxWidth = 1024;
-    private const int MaxHeight = 1024;
+    public const int MaxWidth = 1024;
+    public const int MaxHeight = 1024;
 
     public ImageMetadata Metadata { get; init; }
     public ImageId ImageId { get; init; }

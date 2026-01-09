@@ -209,13 +209,14 @@ D - Delegate
             - RefreshTokenConfiguration.cs (C)
             - RefreshTokenRepository.cs (C)
             - Converters/
-            - Exceptions/
           - Accounts/
-            - UserConfiguration.cs (C)
-            - UserRepository.cs (C)
-            - AccountsDbContext.cs (C)
-            - Converters/
-            - Exceptions/
+            - UserProfileRepository.cs (C)
+            - AccountsAppDbContext.cs (C)
+            - AccountsEfCoreValueConverters.cs (SC)
+            - Configurations/
+              - AvatarImageEfCoreConfiguration.cs (SC)
+              - ImageMetadataEfCoreConfiguration.cs (SC)
+              - UserProfileEfCoreConfiguration.cs (C)
             - Migrations/
           - AccountsUnitOfWork.cs (C)
         - Auth/
