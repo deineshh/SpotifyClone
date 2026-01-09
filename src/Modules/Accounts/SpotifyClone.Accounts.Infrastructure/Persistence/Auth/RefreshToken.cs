@@ -18,25 +18,20 @@ internal sealed class RefreshToken
     {
     }
 
-    public RefreshToken(UserId userId, string tokenHash, DateTimeOffset createdAt, DateTimeOffset expiresAt)
+    public RefreshToken(UserId userId, string tokenHash, DateTimeOffset expiresAt)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(tokenHash);
 
         Id = Guid.NewGuid();
         UserId = userId;
         TokenHash = tokenHash;
-        CreatedAt = createdAt;
+        CreatedAt = DateTimeOffset.UtcNow;
         ExpiresAt = expiresAt;
     }
 
-    public void Revoke(DateTimeOffset revokedAt, string? replacedByTokenHash)
+    public void Revoke(string? replacedByTokenHash = null)
     {
-        if (RevokedAt is not null)
-        {
-            return;
-        }
-
-        RevokedAt = revokedAt;
+        RevokedAt = DateTimeOffset.UtcNow;
 
         if (!string.IsNullOrWhiteSpace(replacedByTokenHash))
         {

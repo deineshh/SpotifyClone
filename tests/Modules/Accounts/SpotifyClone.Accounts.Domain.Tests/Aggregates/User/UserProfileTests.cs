@@ -2,7 +2,6 @@
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
 using SpotifyClone.Accounts.Domain.Aggregates.Users.Enums;
 using SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
-using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Domain.Tests.Aggregates.Users;
 
@@ -12,17 +11,15 @@ public sealed class UserProfileTests
     public void Create_ShouldCreateUser_WhenValidParametersAreProvided()
     {
         // Arrange
-        var userId = UserId.New();
         string displayName = "John Doe";
         var birthDate = new DateTimeOffset(new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         Gender gender = Gender.Male;
         AvatarImage? avatarImage = null;
 
         // Act
-        var user = UserProfile.Create(userId, displayName, birthDate, gender, avatarImage);
+        var user = UserProfile.Create(displayName, birthDate, gender, avatarImage);
 
         // Assert
-        user.Id.Should().Be(userId);
         user.DisplayName.Should().Be(displayName);
         user.BirthDate.Should().Be(birthDate);
         user.AvatarImage.Should().BeNull();

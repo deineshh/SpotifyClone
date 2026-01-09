@@ -20,7 +20,7 @@ internal sealed class RefreshTokenEfCoreRepository : IRefreshTokenRepository
     {
         if (string.IsNullOrWhiteSpace(tokenHash))
         {
-            return Result.Failure<bool>(AuthErrors.InvalidToken);
+            return Result.Failure<bool>(RefreshTokenErrors.InvalidToken);
         }
 
         bool isValid = await _refreshTokens
@@ -43,13 +43,12 @@ internal sealed class RefreshTokenEfCoreRepository : IRefreshTokenRepository
     {
         if (string.IsNullOrWhiteSpace(tokenHash))
         {
-            return Result.Failure(AuthErrors.InvalidToken);
+            return Result.Failure(RefreshTokenErrors.InvalidToken);
         }
 
         var token = new RefreshToken(
             userId,
             tokenHash,
-            DateTimeOffset.UtcNow,
             expiresAt);
 
         await _refreshTokens.AddAsync(token, cancellationToken);
@@ -64,7 +63,7 @@ internal sealed class RefreshTokenEfCoreRepository : IRefreshTokenRepository
     {
         if (string.IsNullOrWhiteSpace(tokenHash))
         {
-            return Result.Failure(AuthErrors.InvalidToken);
+            return Result.Failure(RefreshTokenErrors.InvalidToken);
         }
 
         RefreshToken? token = await _refreshTokens
@@ -77,7 +76,7 @@ internal sealed class RefreshTokenEfCoreRepository : IRefreshTokenRepository
             return Result.Success();
         }
 
-        token.Revoke(DateTimeOffset.UtcNow, replacedByTokenHash: null);
+        token.Revoke();
 
         return Result.Success();
     }
@@ -90,11 +89,9 @@ internal sealed class RefreshTokenEfCoreRepository : IRefreshTokenRepository
             .Where(t => t.UserId == userId && t.RevokedAt == null)
             .ToListAsync(cancellationToken);
 
-        DateTimeOffset now = DateTimeOffset.UtcNow;
-
         foreach (RefreshToken token in tokens)
         {
-            token.Revoke(now, replacedByTokenHash: null);
+            token.Revoke();
         }
 
         return Result.Success();
