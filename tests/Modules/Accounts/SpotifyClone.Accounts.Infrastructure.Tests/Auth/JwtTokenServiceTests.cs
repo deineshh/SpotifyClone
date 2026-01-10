@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
+using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Infrastructure.Auth;
 using SpotifyClone.Accounts.Infrastructure.Services;
 using SpotifyClone.Shared.Kernel.IDs;
@@ -15,17 +16,17 @@ public sealed class JwtTokenServiceTests
     {
         // Arrange
         IOptions<JwtOptions> options = Options.Create(
-            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5));
+            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5, 30));
         var service = new JwtTokenService(options);
 
         // Act
-        string token = service.GenerateAccessToken(
+        AccessToken token = service.GenerateAccessToken(
             UserId.From(Guid.NewGuid()),
             "test@email.com",
             new[] { "User" });
 
         // Assert
-        token.Should().NotBeNullOrWhiteSpace();
+        token.Should().NotBeNull();
     }
 
     [Fact]
@@ -34,15 +35,15 @@ public sealed class JwtTokenServiceTests
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
         IOptions<JwtOptions> options = Options.Create(
-            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5));
+            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5, 30));
         var service = new JwtTokenService(options);
-        string token = service.GenerateAccessToken(
+        AccessToken token = service.GenerateAccessToken(
             userId,
             "user@test.com",
             new[] { "Admin", "User" });
 
         // Act
-        JwtSecurityToken jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
+        JwtSecurityToken jwt = new JwtSecurityTokenHandler().ReadJwtToken(token.RawToken);
 
         // Assert
         jwt.Subject.Should().Be(userId.Value.ToString());
@@ -57,17 +58,39 @@ public sealed class JwtTokenServiceTests
         // Arrange
         DateTime now = DateTime.UtcNow;
         IOptions<JwtOptions> options = Options.Create(
-            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5));
+            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5, 30));
         var service = new JwtTokenService(options);
-        string token = service.GenerateAccessToken(
+        AccessToken token = service.GenerateAccessToken(
             UserId.From(Guid.NewGuid()),
             "user@test.com",
             Array.Empty<string>());
 
         // Act
-        JwtSecurityToken jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
+        JwtSecurityToken jwt = new JwtSecurityTokenHandler().ReadJwtToken(token.RawToken);
 
         // Assert
         jwt.ValidTo.Should().BeAfter(now);
     }
+
+    [Fact]
+    public void GenerateRefreshToken_Should_ReturnValidToken()
+    {
+        // Arrange
+        IOptions<JwtOptions> options = Options.Create(
+            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5, 30));
+        var service = new JwtTokenService(options);
+
+        // Act
+        RefreshTokenEnvelope token1 = service.GenerateRefreshToken();
+        RefreshTokenEnvelope token2 = service.GenerateRefreshToken();
+
+        // Assert
+        token1.RawToken.Should().NotBeNullOrWhiteSpace();
+        token1.RawToken.Length.Should().Be(128);
+        token1.ExpiresAt.Should().BeCloseTo(DateTimeOffset.UtcNow.AddDays(30), TimeSpan.FromSeconds(1));
+
+        // Tokens should be unique
+        token1.RawToken.Should().NotBe(token2.RawToken);
+    }
+
 }

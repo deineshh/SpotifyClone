@@ -1,8 +1,6 @@
-﻿using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
+﻿namespace SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
 
-namespace SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
-
-public sealed class InvalidGenderDomainException : DomainExceptionBase
+public sealed class InvalidGenderDomainException : AccountsDomainExceptionBase
 {
     public InvalidGenderDomainException(string message)
         : base(message)

@@ -1,9 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
+using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Infrastructure.Auth;
 using SpotifyClone.Shared.Kernel.IDs;
 
@@ -17,7 +19,7 @@ internal sealed class JwtTokenService : ITokenService
     public JwtTokenService(IOptions<JwtOptions> options)
         => _options = options.Value;
 
-    public string GenerateAccessToken(
+    public AccessToken GenerateAccessToken(
         UserId userId,
         string email,
         IReadOnlyCollection<string> roles,
@@ -52,14 +54,34 @@ internal sealed class JwtTokenService : ITokenService
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey)),
             SecurityAlgorithms.HmacSha256);
 
+        DateTime expiresAt = DateTime.UtcNow.AddMinutes(_options.AccessTokenLifetimeMinutes);
+
         var token = new JwtSecurityToken(
             issuer: _options.Issuer,
             audience: _options.Audience,
             claims: jwtClaims,
             notBefore: now,
-            expires: now.AddMinutes(_options.AccessTokenLifetimeMinutes),
+            expires: expiresAt,
             signingCredentials: signingCredentials);
 
-        return _tokenHandler.WriteToken(token);
+        string accessToken = _tokenHandler.WriteToken(token);
+
+        return new AccessToken(accessToken, expiresAt);
+    }
+
+    public RefreshTokenEnvelope GenerateRefreshToken()
+    {
+        const int tokenLength = 64;
+        byte[] randomBytes = new byte[tokenLength];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomBytes);
+        }
+
+        string rawToken = Convert.ToHexString(randomBytes);
+        DateTimeOffset expiresAt = DateTimeOffset.UtcNow
+            .AddDays(_options.RefreshTokenLifetimeDays);
+
+        return new RefreshTokenEnvelope(rawToken, expiresAt);
     }
 }

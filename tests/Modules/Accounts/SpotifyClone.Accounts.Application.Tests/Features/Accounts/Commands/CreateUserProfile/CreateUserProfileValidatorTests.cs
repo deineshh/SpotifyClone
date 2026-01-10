@@ -1,6 +1,5 @@
 ﻿using FluentValidation.TestHelper;
 using SpotifyClone.Accounts.Application.Features.Accounts.Commands.CreateUserProfile;
-using SpotifyClone.Accounts.Application.Features.Auth.Commands.CreateUserProfile;
 
 namespace SpotifyClone.Accounts.Application.Tests.Features.Accounts.Commands.CreateUserProfile;
 

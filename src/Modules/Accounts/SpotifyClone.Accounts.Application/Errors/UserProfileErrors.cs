@@ -16,6 +16,10 @@ public static class UserProfileErrors
         "UserProfile.InvalidDisplayName",
         "The provided display name is invalid.");
 
+    public static readonly Error InvalidGender = new(
+        "UserProfile.InvalidGender",
+        "The provider gender is invalid.");
+
     public static readonly Error AlreadyExists = new(
         "UserProfile.AlreadyExists",
         "The specified user profile is already exists.");

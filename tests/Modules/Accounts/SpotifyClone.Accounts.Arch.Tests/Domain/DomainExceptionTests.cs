@@ -17,6 +17,8 @@ public sealed class DomainExceptionTests
         TestResult result = Types.InAssembly(_domainAssembly)
             .That()
             .Inherit(typeof(DomainExceptionBase))
+            .And()
+            .AreNotAbstract()
             .Should()
             .BeSealed()
             .GetResult();
@@ -32,6 +34,8 @@ public sealed class DomainExceptionTests
         TestResult result = Types.InAssembly(_domainAssembly)
             .That()
             .Inherit(typeof(DomainExceptionBase))
+            .And()
+            .AreNotAbstract()
             .Should()
             .HaveNameEndingWith("DomainException")
             .GetResult();
