@@ -2,7 +2,8 @@
 
 namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
 
-internal sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
+internal sealed class RegisterUserCommandValidator
+    : AbstractValidator<RegisterUserCommand>
 {
     public RegisterUserCommandValidator()
     {

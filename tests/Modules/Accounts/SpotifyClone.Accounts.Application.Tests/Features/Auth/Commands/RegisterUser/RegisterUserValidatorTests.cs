@@ -3,7 +3,7 @@ using SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
 
 namespace SpotifyClone.Accounts.Application.Tests.Features.Auth.Commands.RegisterUser;
 
-public sealed class RegisterUserCommandValidatorTests
+public sealed class RegisterUserValidatorTests
 {
     [Fact]
     public void Validate_Should_NotHaveAnyValidationErrors_When_DataIsValid()

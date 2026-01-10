@@ -6,6 +6,6 @@ namespace SpotifyClone.Accounts.Application.Abstractions;
 
 public interface IAccountsUnitOfWork : IUnitOfWork
 {
-    IUserProfileRepository Users { get; }
+    IUserProfileRepository UserProfiles { get; }
     IRefreshTokenRepository RefreshTokens { get; }
 }

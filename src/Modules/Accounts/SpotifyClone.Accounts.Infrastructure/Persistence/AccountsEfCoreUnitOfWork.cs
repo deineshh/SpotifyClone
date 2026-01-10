@@ -9,9 +9,9 @@ using SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence;
 namespace SpotifyClone.Accounts.Infrastructure.Persistence;
 
 internal sealed class AccountsEfCoreUnitOfWork(
-    AccountsAppDbContext context, UserProfileEfCoreRepository users, RefreshTokenEfCoreRepository refreshTokens)
+    AccountsAppDbContext context, UserProfileEfCoreRepository userProfiles, RefreshTokenEfCoreRepository refreshTokens)
     : EfCoreUnitOfWorkBase<AccountsAppDbContext>(context), IAccountsUnitOfWork
 {
-    public IUserProfileRepository Users => users;
+    public IUserProfileRepository UserProfiles => userProfiles;
     public IRefreshTokenRepository RefreshTokens => refreshTokens;
 }

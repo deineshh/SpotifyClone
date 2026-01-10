@@ -102,6 +102,20 @@ internal sealed class IdentityService : IIdentityService
         return false;
     }
 
+    public async Task<bool> UserExistsAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(id.ToString());
+
+        if (user is null)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     public async Task<Result<Guid>> CreateUserAsync(
         string email,
         string password,

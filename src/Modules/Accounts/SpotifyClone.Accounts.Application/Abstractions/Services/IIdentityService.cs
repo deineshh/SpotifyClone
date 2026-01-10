@@ -23,6 +23,10 @@ public interface IIdentityService
         string email,
         CancellationToken cancellationToken = default);
 
+    Task<bool> UserExistsAsync(
+        Guid id,
+        CancellationToken cancellationToken = default);
+
     Task<Result<Guid>> CreateUserAsync(
         string email,
         string password,
