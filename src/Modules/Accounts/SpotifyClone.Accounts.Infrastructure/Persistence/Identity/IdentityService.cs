@@ -87,4 +87,43 @@ internal sealed class IdentityService : IIdentityService
 
         return await _userManager.GetTwoFactorEnabledAsync(user);
     }
+
+    public async Task<bool> EmailExistsAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+
+        if (user is null)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public async Task<Result<Guid>> CreateUserAsync(
+        string email,
+        string password,
+        CancellationToken cancellationToken = default)
+    {
+        var user = new IdentityUser<Guid>
+        {
+            Id = Guid.NewGuid(),
+            UserName = email,
+            Email = email
+        };
+
+        IdentityResult result =
+            await _userManager.CreateAsync((ApplicationUser)user, password);
+
+        if (!result.Succeeded)
+        {
+            return Result.Failure<Guid>(
+                result.Errors.Select(e =>
+                    AuthErrors.Identity(e.Code, e.Description)).ToArray());
+        }
+
+        return Result.Success(user.Id);
+    }
 }

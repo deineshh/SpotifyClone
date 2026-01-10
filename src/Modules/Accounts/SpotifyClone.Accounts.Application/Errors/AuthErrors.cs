@@ -19,4 +19,12 @@ public static class AuthErrors
     public static readonly Error UserNotFound = new(
         "Auth.UserNotFound",
         "The specified user was not found.");
+
+    public static readonly Error EmailAlreadyInUse = new(
+        "Auth.EmailAlreadyInUse",
+        "The specified email is already in use.");
+
+    public static Error Identity(string code, string description) => new(
+        $"Identity.{code}",
+        description);
 }

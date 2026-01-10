@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
+using SpotifyClone.Shared.BuildingBlocks.Application.Behaviors.Extensions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
@@ -40,7 +41,7 @@ public sealed class ValidationPipelineBehavior<TRequest, TResponse>
             .SelectMany(r => r.Errors)
             .ToErrors();
 
-        if (failures.Length != 0)
+        if (failures.Length > 0)
         {
             return (TResponse)(object)Result.Failure(failures);
         }

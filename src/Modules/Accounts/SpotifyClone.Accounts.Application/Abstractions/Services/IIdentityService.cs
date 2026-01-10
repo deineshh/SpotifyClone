@@ -18,4 +18,13 @@ public interface IIdentityService
     Task<Result<bool>> IsTwoFactorEnabledAsync(
         UserId userId,
         CancellationToken cancellationToken = default);
+
+    Task<bool> EmailExistsAsync(
+        string email,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<Guid>> CreateUserAsync(
+        string email,
+        string password,
+        CancellationToken cancellationToken = default);
 }

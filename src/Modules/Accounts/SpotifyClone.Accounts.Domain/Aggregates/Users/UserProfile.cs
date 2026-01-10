@@ -14,7 +14,7 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
     public AvatarImage? AvatarImage { get; private set; }
 
     private UserProfile(
-        UserId id, string displayName, DateTimeOffset birthDate, Gender gender, AvatarImage? avatarImage)
+        UserId id, string displayName, DateTimeOffset birthDate, Gender gender, AvatarImage? avatarImage = null)
         : base(id)
     {
         DisplayName = displayName;
@@ -24,11 +24,11 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
     }
 
     public static UserProfile Create(
-        string displayName, DateTimeOffset birthDate, Gender gender, AvatarImage? avatarImage)
+        UserId id, string displayName, DateTimeOffset birthDate, Gender gender)
     {
         DisplayNameRules.Validate(displayName);
         BirthDateRules.Validate(birthDate);
 
-        return new UserProfile(UserId.New(), displayName, birthDate, gender, avatarImage);
+        return new UserProfile(id, displayName, birthDate, gender);
     }
 }

@@ -2,4 +2,7 @@
 
 public interface IUserProfileRepository
 {
+    Task AddAsync(
+        UserProfile user,
+        CancellationToken cancellationToken = default);
 }

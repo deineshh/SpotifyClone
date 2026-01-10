@@ -208,13 +208,13 @@ D - Delegate
             - Sha256TokenHasher.cs (SC)
             - RefreshToken.cs (C)
             - RefreshTokenEfCoreConfiguration.cs (C)
-            - RefreshTokenRepository.cs (C)
+            - Repositories/
+              - RefreshTokenRepository.cs (C)
             - Converters/
           - Accounts/
             - AccountsAppDbContext.cs (C)
             - Repositories/
               - UserProfileRepository.cs (C)
-              - RefreshTokenRepository.cs (C)
             - Configurations/
               - Converters/
                 - AccountsEfCoreValueConverters.cs (SC)
