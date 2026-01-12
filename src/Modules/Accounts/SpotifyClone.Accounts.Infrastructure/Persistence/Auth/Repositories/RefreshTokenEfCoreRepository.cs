@@ -1,17 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Accounts.Application.Abstractions.Repositories;
 using SpotifyClone.Accounts.Application.Errors;
+using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Auth.Repositories;
 
-internal sealed class RefreshTokenEfCoreRepository : IRefreshTokenRepository
+internal sealed class RefreshTokenEfCoreRepository(AccountsAppDbContext context) : IRefreshTokenRepository
 {
-    private readonly DbSet<RefreshToken> _refreshTokens;
-
-    public RefreshTokenEfCoreRepository(DbSet<RefreshToken> refreshTokens)
-        => _refreshTokens = refreshTokens;
+    private readonly DbSet<RefreshToken> _refreshTokens = context.RefreshTokens;
 
     public async Task<Result<bool>> IsValidAsync(
         UserId userId,

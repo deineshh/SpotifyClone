@@ -45,4 +45,7 @@
     <Project Path="tests/Shared/Kernel/SpotifyClone.Shared.Kernel.Arch.Tests/SpotifyClone.Shared.Kernel.Arch.Tests.csproj" />
     <Project Path="tests/Shared/Kernel/SpotifyClone.Shared.Kernel.Tests/SpotifyClone.Shared.Kernel.Tests.csproj" />
   </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
 </Solution>

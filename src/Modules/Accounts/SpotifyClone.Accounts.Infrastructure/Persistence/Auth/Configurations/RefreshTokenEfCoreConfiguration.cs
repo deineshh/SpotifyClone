@@ -14,25 +14,32 @@ internal sealed class RefreshTokenEfCoreConfiguration
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
+            .HasColumnName("id")
             .ValueGeneratedNever();
 
         builder.Property(x => x.UserId)
+            .HasColumnName("user_id")
             .HasConversion(AccountsEfCoreValueConverters.UserIdConverter)
             .IsRequired();
 
         builder.Property(x => x.TokenHash)
+            .HasColumnName("token_hash")
             .HasMaxLength(256)
             .IsRequired();
 
         builder.Property(x => x.CreatedAt)
+            .HasColumnName("created_at")
             .IsRequired();
 
         builder.Property(x => x.ExpiresAt)
+            .HasColumnName("expires_at")
             .IsRequired();
 
-        builder.Property(x => x.RevokedAt);
+        builder.Property(x => x.RevokedAt)
+            .HasColumnName("revoked_at");
 
         builder.Property(x => x.ReplacedByTokenHash)
+            .HasColumnName("replaced_by_token_hash")
             .HasMaxLength(256);
 
         builder.HasIndex(x => x.TokenHash)
@@ -41,4 +48,3 @@ internal sealed class RefreshTokenEfCoreConfiguration
         builder.HasIndex(x => x.UserId);
     }
 }
-

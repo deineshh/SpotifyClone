@@ -3,9 +3,9 @@ using SpotifyClone.Accounts.Domain.Aggregates.Users;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence.Database;
 
-namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts;
+namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 
-internal sealed class AccountsAppDbContext(DbContextOptions<AccountsAppDbContext> options)
+public sealed class AccountsAppDbContext(DbContextOptions<AccountsAppDbContext> options)
     : ApplicationDbContext<AccountsAppDbContext>("accounts", options)
 {
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();

@@ -1,14 +1,15 @@
 ﻿using System.Net;
 using System.Net.Mail;
+using Microsoft.Extensions.Options;
 using SpotifyClone.Shared.BuildingBlocks.Application.Email;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Infrastructure.Messaging;
 
-public sealed class SmtpEmailSender(SmtpOptions options) : IEmailSender
+public sealed class SmtpEmailSender(IOptions<SmtpOptions> options) : IEmailSender
 {
-    private readonly SmtpOptions _options = options ?? throw new ArgumentNullException(nameof(options));
+    private readonly SmtpOptions _options = options.Value ?? throw new ArgumentNullException(nameof(options));
 
     public async Task<Result> SendAsync(
         EmailMessage message,

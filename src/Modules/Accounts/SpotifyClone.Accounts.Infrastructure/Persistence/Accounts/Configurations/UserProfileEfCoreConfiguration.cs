@@ -15,17 +15,21 @@ internal sealed class UserProfileEfCoreConfiguration : IEntityTypeConfiguration<
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
+            .HasColumnName("id")
             .HasConversion(AccountsEfCoreValueConverters.UserIdConverter)
             .ValueGeneratedNever();
 
         builder.Property(x => x.DisplayName)
+            .HasColumnName("display_name")
             .HasMaxLength(DisplayNameRules.MaxLength)
             .IsRequired();
 
         builder.Property(x => x.BirthDate)
+            .HasColumnName("birth_date")
             .IsRequired();
 
         builder.Property(x => x.Gender)
+            .HasColumnName("gender")
             .HasConversion(AccountsEfCoreValueConverters.GenderConverter)
             .HasMaxLength(20)
             .IsRequired();
@@ -34,5 +38,7 @@ internal sealed class UserProfileEfCoreConfiguration : IEntityTypeConfiguration<
 
         builder.Navigation(x => x.AvatarImage)
             .IsRequired(false);
+
+        builder.Ignore(u => u.DomainEvents);
     }
 }

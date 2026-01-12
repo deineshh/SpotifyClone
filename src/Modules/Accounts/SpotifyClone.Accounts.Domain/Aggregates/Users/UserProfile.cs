@@ -13,6 +13,13 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
     public Gender Gender { get; private set; }
     public AvatarImage? AvatarImage { get; private set; }
 
+    private UserProfile()
+        : base(default!)
+    {
+        DisplayName = null!;
+        Gender = null!;
+    }
+
     private UserProfile(
         UserId id, string displayName, DateTimeOffset birthDate, Gender gender, AvatarImage? avatarImage = null)
         : base(id)

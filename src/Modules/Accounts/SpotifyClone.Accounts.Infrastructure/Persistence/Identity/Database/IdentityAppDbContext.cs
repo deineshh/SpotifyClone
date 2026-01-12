@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace SpotifyClone.Accounts.Infrastructure.Persistence.Identity;
+namespace SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
 
-internal sealed class IdentityAppDbContext(DbContextOptions<IdentityAppDbContext> options)
+public sealed class IdentityAppDbContext(DbContextOptions<IdentityAppDbContext> options)
     : IdentityDbContext<
         ApplicationUser,
         IdentityRole<Guid>,
@@ -28,7 +28,7 @@ internal sealed class IdentityAppDbContext(DbContextOptions<IdentityAppDbContext
     {
         builder.Entity<ApplicationUser>(entity =>
         {
-            entity.ToTable("Users");
+            entity.ToTable("users");
 
             entity.Property(u => u.Email)
                 .HasMaxLength(320);
@@ -38,21 +38,21 @@ internal sealed class IdentityAppDbContext(DbContextOptions<IdentityAppDbContext
         });
 
         builder.Entity<IdentityRole<Guid>>(entity
-            => entity.ToTable("Roles"));
+            => entity.ToTable("roles"));
 
         builder.Entity<IdentityUserRole<Guid>>(entity
-            => entity.ToTable("UserRoles"));
+            => entity.ToTable("user_roles"));
 
         builder.Entity<IdentityUserClaim<Guid>>(entity
-            => entity.ToTable("UserClaims"));
+            => entity.ToTable("user_claims"));
 
         builder.Entity<IdentityUserLogin<Guid>>(entity
-            => entity.ToTable("UserLogins"));
+            => entity.ToTable("user_logins"));
 
         builder.Entity<IdentityRoleClaim<Guid>>(entity
-            => entity.ToTable("RoleClaims"));
+            => entity.ToTable("role_claims"));
 
         builder.Entity<IdentityUserToken<Guid>>(entity
-            => entity.ToTable("UserTokens"));
+            => entity.ToTable("user_tokens"));
     }
 }

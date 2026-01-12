@@ -2,4 +2,4 @@
 
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Identity;
 
-internal sealed class ApplicationUser : IdentityUser<Guid>;
+public sealed class ApplicationUser : IdentityUser<Guid>;

@@ -2,7 +2,7 @@
 
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Auth;
 
-internal sealed class RefreshToken
+public sealed class RefreshToken
 {
     public Guid Id { get; private set; }
     public UserId UserId { get; private set; } = default!;

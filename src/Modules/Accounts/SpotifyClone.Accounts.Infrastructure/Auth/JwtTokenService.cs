@@ -11,13 +11,10 @@ using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Infrastructure.Services;
 
-internal sealed class JwtTokenService : ITokenService
+internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenService
 {
-    private readonly JwtOptions _options;
+    private readonly JwtOptions _options = options.Value;
     private readonly JwtSecurityTokenHandler _tokenHandler = new();
-
-    public JwtTokenService(IOptions<JwtOptions> options)
-        => _options = options.Value;
 
     public AccessToken GenerateAccessToken(
         UserId userId,

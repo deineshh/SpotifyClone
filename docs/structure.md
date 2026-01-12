@@ -713,7 +713,6 @@ D - Delegate
       - DependencyInjection/
         - ServiceCollectionExtensions.cs (SC)
       - Configuration/
-        - JwtOptions.cs (R)
         - DatabaseOptions.cs (R)
         - BlobStorageOptions.cs (R)
       - Middleware/

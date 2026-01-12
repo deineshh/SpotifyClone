@@ -14,6 +14,12 @@ public sealed record AvatarImage : ValueObject
     public ImageMetadata Metadata { get; init; }
     public ImageId ImageId { get; init; }
 
+    private AvatarImage()
+    {
+        Metadata = null!;
+        ImageId = null!;
+    }
+
     public AvatarImage(ImageId imageId, int width, int height, ImageFileType fileType)
     {
         ArgumentNullException.ThrowIfNull(imageId);

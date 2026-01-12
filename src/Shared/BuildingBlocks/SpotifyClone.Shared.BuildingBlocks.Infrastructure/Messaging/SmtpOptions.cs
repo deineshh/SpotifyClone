@@ -7,4 +7,7 @@ public sealed record SmtpOptions(
     string? UserName = null,
     string? Password = null,
     string? DefaultFromEmail = null,
-    string? DefaultFromName = null);
+    string? DefaultFromName = null)
+{
+    public const string SectionName = "Smtp";
+}

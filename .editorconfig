@@ -5,6 +5,12 @@
 
 #### Static code analysis rule customizations
 
+# S1144: Unused private types or members should be removed
+dotnet_diagnostic.S1144.severity = suggestion
+
+# S2139: Exceptions should be either logged or rethrown but not both
+dotnet_diagnostic.S2139.severity = suggestion
+
 # S3871: Exception types should be "public"
 dotnet_diagnostic.S3871.severity = suggestion
 

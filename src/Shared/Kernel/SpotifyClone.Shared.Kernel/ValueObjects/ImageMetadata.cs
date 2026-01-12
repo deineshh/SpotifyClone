@@ -10,6 +10,13 @@ public sealed record ImageMetadata : ValueObject
     public int Height { get; }
     public ImageFileType FileType { get; }
 
+    private ImageMetadata()
+    {
+        Width = default;
+        Height = default;
+        FileType = null!;
+    }
+
     public ImageMetadata(int width, int height, int maxWidth, int maxHeight, ImageFileType fileType)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
