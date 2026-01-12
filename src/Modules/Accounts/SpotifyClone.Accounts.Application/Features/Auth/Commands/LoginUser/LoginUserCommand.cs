@@ -5,4 +5,4 @@ namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginUser;
 public sealed record LoginUserCommand(
     string Email,
     string Password)
-    : ICommand<LoginUserResponse>;
+    : IPersistentCommand<LoginUserResult>;

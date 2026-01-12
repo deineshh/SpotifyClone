@@ -14,7 +14,6 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
     public AvatarImage? AvatarImage { get; private set; }
 
     private UserProfile()
-        : base(default!)
     {
         DisplayName = null!;
         Gender = null!;

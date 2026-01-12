@@ -1,11 +1,12 @@
 ﻿namespace SpotifyClone.Accounts.Infrastructure.Auth;
 
-public sealed record JwtOptions(
-    string Issuer,
-    string Audience,
-    string SecretKey,
-    int AccessTokenLifetimeMinutes,
-    int RefreshTokenLifetimeDays)
+public sealed record JwtOptions
 {
     public const string SectionName = "Jwt";
+
+    public required string Issuer { get; init; }
+    public required string Audience { get; init; }
+    public required string SecretKey { get; init; }
+    public required int AccessTokenLifetimeMinutes { get; init; }
+    public required int RefreshTokenLifetimeDays { get; init; }
 }

@@ -46,8 +46,10 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console());
 
 builder.Services.AddCors(options =>
-options.AddPolicy(name: "FrontEnd",
-        policy => policy.WithOrigins("https://localhost:3000\"")
+options.AddPolicy(name: "DevCors",
+        policy => policy.WithOrigins(
+            "https://localhost:3000",
+            "http://localhost:8080")
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials()));
@@ -63,7 +65,7 @@ app.MapHealthChecks("/health");
 
 app.MapControllers();
 
-app.UseCors("FrontEnd");
+app.UseCors("DevCors");
 
 if (app.Environment.IsDevelopment())
 {

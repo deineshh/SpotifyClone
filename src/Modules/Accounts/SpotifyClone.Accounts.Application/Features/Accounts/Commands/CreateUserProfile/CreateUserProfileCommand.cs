@@ -7,4 +7,4 @@ public sealed record CreateUserProfileCommand(
     string DisplayName,
     DateTimeOffset BirthDate,
     string Gender)
-    : ICommand<Guid>;
+    : IPersistentCommand<Guid>;

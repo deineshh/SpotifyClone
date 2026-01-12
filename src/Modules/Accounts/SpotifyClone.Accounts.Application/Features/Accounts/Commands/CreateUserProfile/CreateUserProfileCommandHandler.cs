@@ -19,15 +19,16 @@ internal sealed class CreateUserProfileCommandHandler(
 
     public async Task<Result<Guid>> Handle(CreateUserProfileCommand request, CancellationToken cancellationToken)
     {
-        bool identityUserExists = await _identityService.UserExistsAsync(request.UserId, cancellationToken);
-        if (!identityUserExists)
+        bool userExists = await _identityService.UserExistsAsync(request.UserId, cancellationToken);
+        if (!userExists)
         {
             return Result.Failure<Guid>(AuthErrors.UserNotFound);
         }
 
         var userId = UserId.From(request.UserId);
 
-        if (await _unit.UserProfiles.GetByUserIdAsync(userId, cancellationToken) is not null)
+        UserProfile? existingUserProfile = await _unit.UserProfiles.GetByUserIdAsync(userId, cancellationToken);
+        if (existingUserProfile is not null)
         {
             return Result.Failure<Guid>(UserProfileErrors.AlreadyExists);
         }

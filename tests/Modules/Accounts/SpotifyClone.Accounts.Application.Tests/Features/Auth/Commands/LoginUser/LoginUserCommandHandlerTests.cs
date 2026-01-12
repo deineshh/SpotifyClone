@@ -38,7 +38,7 @@ public sealed class LoginUserCommandHandlerTests
             .ReturnsAsync(Result.Failure<IdentityUserInfo>(error));
 
         // Act
-        Result<LoginUserResponse> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginUserResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -83,7 +83,7 @@ public sealed class LoginUserCommandHandlerTests
             .ReturnsAsync(Result.Failure(error));
 
         // Act
-        Result<LoginUserResponse> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginUserResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -129,12 +129,8 @@ public sealed class LoginUserCommandHandlerTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
 
-        _unitMock
-            .Setup(x => x.Commit(It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(1));
-
         // Act
-        Result<LoginUserResponse> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginUserResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -152,7 +148,5 @@ public sealed class LoginUserCommandHandlerTests
                 It.IsAny<DateTimeOffset>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
-
-        _unitMock.Verify(x => x.Commit(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

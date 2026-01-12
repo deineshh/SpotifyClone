@@ -5,7 +5,7 @@ using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
 namespace SpotifyClone.Accounts.Application.Errors;
 
-internal class AccountsDomainExceptionMapper : IDomainExceptionMapper
+public class AccountsDomainExceptionMapper : IDomainExceptionMapper
 {
     public bool CanMap(DomainExceptionBase domainException)
         => domainException is AccountsDomainExceptionBase;

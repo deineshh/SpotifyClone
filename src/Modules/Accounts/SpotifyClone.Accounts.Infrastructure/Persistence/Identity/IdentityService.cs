@@ -96,10 +96,10 @@ internal sealed class IdentityService : IIdentityService
 
         if (user is null)
         {
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     public async Task<bool> UserExistsAsync(
@@ -110,10 +110,10 @@ internal sealed class IdentityService : IIdentityService
 
         if (user is null)
         {
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     public async Task<Result<Guid>> CreateUserAsync(
@@ -121,7 +121,7 @@ internal sealed class IdentityService : IIdentityService
         string password,
         CancellationToken cancellationToken = default)
     {
-        var user = new IdentityUser<Guid>
+        var user = new ApplicationUser
         {
             Id = Guid.NewGuid(),
             UserName = email,
@@ -129,7 +129,7 @@ internal sealed class IdentityService : IIdentityService
         };
 
         IdentityResult result =
-            await _userManager.CreateAsync((ApplicationUser)user, password);
+            await _userManager.CreateAsync(user, password);
 
         if (!result.Succeeded)
         {

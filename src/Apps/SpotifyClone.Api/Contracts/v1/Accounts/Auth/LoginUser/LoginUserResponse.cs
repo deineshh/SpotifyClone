@@ -1,4 +1,4 @@
-﻿namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginUser;
+﻿namespace SpotifyClone.Api.Contracts.v1.Accounts.Auth.LoginUser;
 
 public sealed record LoginUserResponse(
     Guid UserId,

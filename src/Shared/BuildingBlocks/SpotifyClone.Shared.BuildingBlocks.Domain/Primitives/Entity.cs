@@ -5,7 +5,7 @@ public abstract class Entity<TId, TIdValue>
     where TId : notnull, StronglyTypedId<TIdValue>
     where TIdValue : notnull
 {
-    public TId Id { get; private init; }
+    public TId Id { get; private set; }
 
     protected Entity()
         => Id = default!;

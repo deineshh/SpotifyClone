@@ -12,14 +12,14 @@ internal sealed class LoginUserCommandHandler(
     IIdentityService identity,
     ITokenService tokenService,
     ITokenHasher tokenHasher)
-    : ICommandHandler<LoginUserCommand, LoginUserResponse>
+    : ICommandHandler<LoginUserCommand, LoginUserResult>
 {
     private readonly IAccountsUnitOfWork _unit = unit;
     private readonly IIdentityService _identity = identity;
     private readonly ITokenService _tokenService = tokenService;
     private readonly ITokenHasher _tokenHasher = tokenHasher;
 
-    public async Task<Result<LoginUserResponse>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LoginUserResult>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
         Result<IdentityUserInfo> identityResult = await _identity.ValidateUserAsync(
             request.Email,
@@ -28,7 +28,7 @@ internal sealed class LoginUserCommandHandler(
 
         if (identityResult.IsFailure)
         {
-            return Result.Failure<LoginUserResponse>(identityResult.Errors);
+            return Result.Failure<LoginUserResult>(identityResult.Errors);
         }
 
         UserId userId = identityResult.Value.UserId;
@@ -43,12 +43,10 @@ internal sealed class LoginUserCommandHandler(
 
         if (storeResult.IsFailure)
         {
-            return Result.Failure<LoginUserResponse>(storeResult.Errors);
+            return Result.Failure<LoginUserResult>(storeResult.Errors);
         }
 
-        await _unit.Commit(cancellationToken);
-
-        return Result.Success(new LoginUserResponse(
+        return Result.Success(new LoginUserResult(
             userId.Value,
             accessToken.RawToken,
             accessToken.ExpiresAt,
