@@ -5,21 +5,21 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginUser;
+namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
 
-internal sealed class LoginUserCommandHandler(
+internal sealed class LoginWithPasswordCommandHandler(
     IAccountsUnitOfWork unit,
     IIdentityService identity,
     ITokenService tokenService,
     ITokenHasher tokenHasher)
-    : ICommandHandler<LoginUserCommand, LoginUserResult>
+    : ICommandHandler<LoginWithPasswordCommand, LoginWithPasswordResult>
 {
     private readonly IAccountsUnitOfWork _unit = unit;
     private readonly IIdentityService _identity = identity;
     private readonly ITokenService _tokenService = tokenService;
     private readonly ITokenHasher _tokenHasher = tokenHasher;
 
-    public async Task<Result<LoginUserResult>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LoginWithPasswordResult>> Handle(LoginWithPasswordCommand request, CancellationToken cancellationToken)
     {
         Result<IdentityUserInfo> identityResult = await _identity.ValidateUserAsync(
             request.Email,
@@ -28,28 +28,31 @@ internal sealed class LoginUserCommandHandler(
 
         if (identityResult.IsFailure)
         {
-            return Result.Failure<LoginUserResult>(identityResult.Errors);
+            return Result.Failure<LoginWithPasswordResult>(identityResult.Errors);
         }
 
         UserId userId = identityResult.Value.UserId;
         string email = identityResult.Value.Email;
 
         AccessToken accessToken = _tokenService.GenerateAccessToken(userId, email, ["User"]);
-        RefreshTokenEnvelope refreshToken = _tokenService.GenerateRefreshToken();
+        RefreshTokenEnvelope refreshToken = _tokenService.GenerateRefreshToken(userId);
         string refreshTokenHash = _tokenHasher.Hash(refreshToken.RawToken);
+
+        Result revokeResult = await _unit.RefreshTokens.RevokeAllAsync(userId, refreshTokenHash, cancellationToken);
+        if (revokeResult.IsFailure)
+        {
+            return Result.Failure<LoginWithPasswordResult>(revokeResult.Errors);
+        }
 
         Result storeResult = await _unit.RefreshTokens.StoreAsync(
             userId, refreshTokenHash, refreshToken.ExpiresAt, cancellationToken);
-
         if (storeResult.IsFailure)
         {
-            return Result.Failure<LoginUserResult>(storeResult.Errors);
+            return Result.Failure<LoginWithPasswordResult>(storeResult.Errors);
         }
 
-        return Result.Success(new LoginUserResult(
-            userId.Value,
+        return Result.Success(new LoginWithPasswordResult(
             accessToken.RawToken,
-            accessToken.ExpiresAt,
             refreshToken.RawToken));
     }
 }

@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
+﻿using System.Security.Claims;
+using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
@@ -11,9 +12,16 @@ public interface IIdentityService
         string password,
         CancellationToken cancellationToken = default);
 
+    Task<Result<IdentityUserInfo>> GetUserInfoAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default);
+
     Task<Result<IReadOnlyCollection<string>>> GetUserRolesAsync(
         UserId userId,
         CancellationToken cancellationToken = default);
+
+    Task<Result<IReadOnlyCollection<Claim>>> GetUserClaimsAsync(
+        UserId userId);
 
     Task<Result<bool>> IsTwoFactorEnabledAsync(
         UserId userId,

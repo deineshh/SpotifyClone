@@ -66,7 +66,7 @@ internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenServ
         return new AccessToken(accessToken, expiresAt);
     }
 
-    public RefreshTokenEnvelope GenerateRefreshToken()
+    public RefreshTokenEnvelope GenerateRefreshToken(UserId userId)
     {
         const int tokenLength = 64;
         byte[] randomBytes = new byte[tokenLength];
@@ -79,6 +79,6 @@ internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenServ
         DateTimeOffset expiresAt = DateTimeOffset.UtcNow
             .AddDays(_options.RefreshTokenLifetimeDays);
 
-        return new RefreshTokenEnvelope(rawToken, expiresAt);
+        return new RefreshTokenEnvelope(userId, rawToken, expiresAt, true);
     }
 }

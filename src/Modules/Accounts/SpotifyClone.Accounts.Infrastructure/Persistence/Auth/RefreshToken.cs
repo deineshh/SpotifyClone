@@ -31,11 +31,12 @@ public sealed class RefreshToken
 
     public void Revoke(string? replacedByTokenHash = null)
     {
-        RevokedAt = DateTimeOffset.UtcNow;
-
-        if (!string.IsNullOrWhiteSpace(replacedByTokenHash))
+        if (!IsActive)
         {
-            ReplacedByTokenHash = replacedByTokenHash;
+            return;
         }
+
+        RevokedAt = DateTimeOffset.UtcNow;
+        ReplacedByTokenHash = replacedByTokenHash;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Application.Errors;
@@ -49,13 +50,36 @@ internal sealed class IdentityService : IIdentityService
 
         bool requiresTwoFactor = await _userManager.GetTwoFactorEnabledAsync(user);
 
-        var userInfo = new IdentityUserInfo(
+        return new IdentityUserInfo(
             UserId.From(user.Id),
             user.Email!,
             user.EmailConfirmed,
             requiresTwoFactor);
+    }
 
-        return Result.Success<IdentityUserInfo>(userInfo);
+    public async Task<Result<IdentityUserInfo>> GetUserInfoAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId.Value.ToString());
+
+        if (user is null)
+        {
+            return Result.Failure<IdentityUserInfo>(AuthErrors.UserNotFound);
+        }
+
+        if (!await _signInManager.CanSignInAsync(user))
+        {
+            return Result.Failure<IdentityUserInfo>(AuthErrors.SignInNotAllowed);
+        }
+
+        bool requiresTwoFactor = await _userManager.GetTwoFactorEnabledAsync(user);
+
+        return new IdentityUserInfo(
+            UserId.From(user.Id),
+            user.Email!,
+            user.EmailConfirmed,
+            requiresTwoFactor);
     }
 
     public async Task<Result<IReadOnlyCollection<string>>> GetUserRolesAsync(
@@ -72,6 +96,21 @@ internal sealed class IdentityService : IIdentityService
         IList<string> roles = await _userManager.GetRolesAsync(user);
 
         return roles.AsReadOnly();
+    }
+
+    public async Task<Result<IReadOnlyCollection<Claim>>> GetUserClaimsAsync(
+        UserId userId)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId.Value.ToString());
+
+        if (user is null)
+        {
+            return Result.Failure<IReadOnlyCollection<Claim>>(AuthErrors.UserNotFound);
+        }
+
+        IList<Claim> claims = await _userManager.GetClaimsAsync(user);
+
+        return claims.AsReadOnly();
     }
 
     public async Task<Result<bool>> IsTwoFactorEnabledAsync(

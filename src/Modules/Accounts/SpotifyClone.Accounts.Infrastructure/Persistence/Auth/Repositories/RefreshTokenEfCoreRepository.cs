@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Accounts.Application.Abstractions.Repositories;
+using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -11,26 +12,23 @@ internal sealed class RefreshTokenEfCoreRepository(AccountsAppDbContext context)
 {
     private readonly DbSet<RefreshToken> _refreshTokens = context.RefreshTokens;
 
-    public async Task<Result<bool>> IsValidAsync(
-        UserId userId,
+    public async Task<Result<RefreshTokenEnvelope>> GetByTokenHashAsync(
         string tokenHash,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(tokenHash))
+        RefreshToken? refreshToken = await _refreshTokens
+            .FirstOrDefaultAsync(rt => rt.TokenHash == tokenHash, cancellationToken);
+
+        if (refreshToken is null)
         {
-            return Result.Failure<bool>(RefreshTokenErrors.InvalidToken);
+            return Result.Failure<RefreshTokenEnvelope>(RefreshTokenErrors.NotFound);
         }
 
-        bool isValid = await _refreshTokens
-            .AsNoTracking()
-            .AnyAsync(
-                t => t.UserId == userId
-                     && t.TokenHash == tokenHash
-                     && t.RevokedAt == null
-                     && t.ExpiresAt > DateTimeOffset.UtcNow,
-                cancellationToken);
-
-        return Result.Success(isValid);
+        return new RefreshTokenEnvelope(
+            refreshToken.UserId,
+            refreshToken.TokenHash,
+            refreshToken.ExpiresAt,
+            refreshToken.IsActive);
     }
 
     public async Task<Result> StoreAsync(
@@ -55,8 +53,8 @@ internal sealed class RefreshTokenEfCoreRepository(AccountsAppDbContext context)
     }
 
     public async Task<Result> RevokeAsync(
-        UserId userId,
         string tokenHash,
+        string? replacedByTokenHash,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(tokenHash))
@@ -66,7 +64,7 @@ internal sealed class RefreshTokenEfCoreRepository(AccountsAppDbContext context)
 
         RefreshToken? token = await _refreshTokens
             .FirstOrDefaultAsync(
-                t => t.UserId == userId && t.TokenHash == tokenHash,
+                t => t.TokenHash == tokenHash,
                 cancellationToken);
 
         if (token is null)
@@ -74,13 +72,14 @@ internal sealed class RefreshTokenEfCoreRepository(AccountsAppDbContext context)
             return Result.Success();
         }
 
-        token.Revoke();
+        token.Revoke(replacedByTokenHash);
 
         return Result.Success();
     }
 
     public async Task<Result> RevokeAllAsync(
         UserId userId,
+        string? replacedByTokenHash,
         CancellationToken cancellationToken = default)
     {
         List<RefreshToken> tokens = await _refreshTokens
@@ -89,10 +88,9 @@ internal sealed class RefreshTokenEfCoreRepository(AccountsAppDbContext context)
 
         foreach (RefreshToken token in tokens)
         {
-            token.Revoke();
+            token.Revoke(replacedByTokenHash);
         }
 
-        return Result.Success();
+        return Result.Success(replacedByTokenHash);
     }
 }
-

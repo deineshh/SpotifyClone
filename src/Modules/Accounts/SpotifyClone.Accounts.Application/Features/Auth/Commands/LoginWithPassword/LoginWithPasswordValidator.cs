@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
 
-namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginUser;
+namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
 
-internal sealed class LoginUserValidator
-    : AbstractValidator<LoginUserCommand>
+internal sealed class LoginWithPasswordValidator
+    : AbstractValidator<LoginWithPasswordCommand>
 {
-    public LoginUserValidator()
+    public LoginWithPasswordValidator()
     {
         RuleFor(x => x.Email)
             .NotNull().WithMessage("Email is required.")

@@ -18,7 +18,7 @@ public sealed class AccountsController : ApiController
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> CreateUserProfile(
+    public async Task<ActionResult<CreateUserProfileResponse>> CreateUserProfile(
         CreateUserProfileRequest request,
         CancellationToken ct)
     {

@@ -11,5 +11,5 @@ public interface ITokenService
         IReadOnlyCollection<string> roles,
         IReadOnlyDictionary<string, string>? claims = null);
 
-    RefreshTokenEnvelope GenerateRefreshToken();
+    RefreshTokenEnvelope GenerateRefreshToken(UserId userId);
 }

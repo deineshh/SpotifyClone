@@ -4,23 +4,23 @@ using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Application.Errors;
-using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginUser;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Accounts.Application.Tests.Features.Auth.Commands.LoginUser;
+namespace SpotifyClone.Accounts.Application.Tests.Features.Auth.Commands.LoginWithPassword;
 
-public sealed class LoginUserCommandHandlerTests
+public sealed class LoginWithPasswordCommandHandlerTests
 {
     private readonly Mock<IIdentityService> _identityMock = new();
     private readonly Mock<ITokenService> _tokenServiceMock = new();
     private readonly Mock<IAccountsUnitOfWork> _unitMock = new();
     private readonly Mock<ITokenHasher> _tokenHasherMock = new();
-    private readonly LoginUserCommandHandler _handler;
+    private readonly LoginWithPasswordCommandHandler _handler;
 
-    public LoginUserCommandHandlerTests()
-        => _handler = new LoginUserCommandHandler(
+    public LoginWithPasswordCommandHandlerTests()
+        => _handler = new LoginWithPasswordCommandHandler(
             _unitMock.Object,
             _identityMock.Object,
             _tokenServiceMock.Object,
@@ -30,7 +30,7 @@ public sealed class LoginUserCommandHandlerTests
     public async Task Handle_Should_ReturnFailure_When_IdentityValidationFails()
     {
         // Arrange
-        var command = new LoginUserCommand("test@test.com", "Password123!");
+        var command = new LoginWithPasswordCommand("test@test.com", "Password123!");
         Error error = AuthErrors.InvalidEmail;
 
         _identityMock
@@ -38,7 +38,7 @@ public sealed class LoginUserCommandHandlerTests
             .ReturnsAsync(Result.Failure<IdentityUserInfo>(error));
 
         // Act
-        Result<LoginUserResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginWithPasswordResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -49,10 +49,10 @@ public sealed class LoginUserCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ReturnFailure_When_RefreshTokenStoreFails()
+    public async Task Handle_Should_ReturnFailure_When_RevokeRefreshTokensFails()
     {
         // Arrange
-        var command = new LoginUserCommand("test@test.com", "Password123!");
+        var command = new LoginWithPasswordCommand("test@test.com", "Password123!");
         var userId = UserId.New();
         var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
 
@@ -65,14 +65,66 @@ public sealed class LoginUserCommandHandlerTests
             .Returns(new AccessToken("accessToken", DateTimeOffset.UtcNow.AddMinutes(5)));
 
         _tokenServiceMock
-            .Setup(x => x.GenerateRefreshToken())
-            .Returns(new RefreshTokenEnvelope("rawRefreshToken", DateTimeOffset.UtcNow.AddDays(30)));
+            .Setup(x => x.GenerateRefreshToken(userId))
+            .Returns(new RefreshTokenEnvelope(userId, "rawRefreshToken", DateTimeOffset.UtcNow.AddDays(30), true));
+
+        _tokenHasherMock
+            .Setup(x => x.Hash("rawRefreshToken"))
+            .Returns("hashedRefreshToken");
+
+        _unitMock
+            .Setup(x => x.RefreshTokens.RevokeAllAsync(
+                userId,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Failure());
+
+        // Act
+        Result<LoginWithPasswordResult> result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+
+        _unitMock.Verify(
+            x => x.RefreshTokens.RevokeAllAsync(
+                userId,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_Should_ReturnFailure_When_RefreshTokenStoreFails()
+    {
+        // Arrange
+        var command = new LoginWithPasswordCommand("test@test.com", "Password123!");
+        var userId = UserId.New();
+        var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
+
+        _identityMock
+            .Setup(x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(identityInfo));
+
+        _tokenServiceMock
+            .Setup(x => x.GenerateAccessToken(userId, identityInfo.Email, It.IsAny<IReadOnlyCollection<string>>()))
+            .Returns(new AccessToken("accessToken", DateTimeOffset.UtcNow.AddMinutes(5)));
+
+        _tokenServiceMock
+            .Setup(x => x.GenerateRefreshToken(userId))
+            .Returns(new RefreshTokenEnvelope(userId, "rawRefreshToken", DateTimeOffset.UtcNow.AddDays(30), true));
 
         _tokenHasherMock
             .Setup(x => x.Hash("rawRefreshToken"))
             .Returns("hashedRefreshToken");
 
         Error error = RefreshTokenErrors.InvalidToken;
+
+        _unitMock
+            .Setup(x => x.RefreshTokens.RevokeAllAsync(
+                userId,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
 
         _unitMock
             .Setup(x => x.RefreshTokens.StoreAsync(
@@ -83,11 +135,18 @@ public sealed class LoginUserCommandHandlerTests
             .ReturnsAsync(Result.Failure(error));
 
         // Act
-        Result<LoginUserResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginWithPasswordResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e == error);
+
+        _unitMock.Verify(
+            x => x.RefreshTokens.RevokeAllAsync(
+                userId,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
 
         _unitMock.Verify(
             x => x.RefreshTokens.StoreAsync(
@@ -101,7 +160,7 @@ public sealed class LoginUserCommandHandlerTests
     public async Task Handle_Should_ReturnSuccess_When_LoginSucceeds()
     {
         // Arrange
-        var command = new LoginUserCommand("test@test.com", "Password123!");
+        var command = new LoginWithPasswordCommand("test@test.com", "Password123!");
         var userId = UserId.New();
         var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
 
@@ -114,12 +173,19 @@ public sealed class LoginUserCommandHandlerTests
             .Returns(new AccessToken("accessToken", DateTimeOffset.UtcNow));
 
         _tokenServiceMock
-            .Setup(x => x.GenerateRefreshToken())
-            .Returns(new RefreshTokenEnvelope("rawRefreshToken123", DateTimeOffset.UtcNow.AddDays(7)));
+            .Setup(x => x.GenerateRefreshToken(userId))
+            .Returns(new RefreshTokenEnvelope(userId, "rawRefreshToken123", DateTimeOffset.UtcNow.AddDays(7), true));
 
         _tokenHasherMock
             .Setup(x => x.Hash("rawRefreshToken123"))
             .Returns("hashedRefreshToken123");
+
+        _unitMock
+            .Setup(x => x.RefreshTokens.RevokeAllAsync(
+                userId,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
 
         _unitMock
             .Setup(x => x.RefreshTokens.StoreAsync(
@@ -130,13 +196,12 @@ public sealed class LoginUserCommandHandlerTests
             .ReturnsAsync(Result.Success());
 
         // Act
-        Result<LoginUserResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginWithPasswordResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.AccessToken.Should().Be("accessToken");
         result.Value.RefreshToken.Should().Be("rawRefreshToken123");
-        result.Value.UserId.Should().Be(userId.Value);
 
         _identityMock.Verify(
             x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()),

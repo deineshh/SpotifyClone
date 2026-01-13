@@ -16,7 +16,14 @@ public sealed class JwtTokenServiceTests
     {
         // Arrange
         IOptions<JwtOptions> options = Options.Create(
-            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5, 30));
+            new JwtOptions
+            {
+                Issuer = "test-issuer",
+                Audience = "test-audience",
+                SecretKey = "super_super_long_secret_key_123456789",
+                AccessTokenLifetimeMinutes = 5,
+                RefreshTokenLifetimeDays = 30,
+            });
         var service = new JwtTokenService(options);
 
         // Act
@@ -35,7 +42,14 @@ public sealed class JwtTokenServiceTests
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
         IOptions<JwtOptions> options = Options.Create(
-            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5, 30));
+            new JwtOptions
+            {
+                Issuer = "test-issuer",
+                Audience = "test-audience",
+                SecretKey = "super_super_long_secret_key_123456789",
+                AccessTokenLifetimeMinutes = 5,
+                RefreshTokenLifetimeDays = 30,
+            });
         var service = new JwtTokenService(options);
         AccessToken token = service.GenerateAccessToken(
             userId,
@@ -58,7 +72,14 @@ public sealed class JwtTokenServiceTests
         // Arrange
         DateTime now = DateTime.UtcNow;
         IOptions<JwtOptions> options = Options.Create(
-            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5, 30));
+            new JwtOptions
+            {
+                Issuer = "test-issuer",
+                Audience = "test-audience",
+                SecretKey = "super_super_long_secret_key_123456789",
+                AccessTokenLifetimeMinutes = 5,
+                RefreshTokenLifetimeDays = 30,
+            });
         var service = new JwtTokenService(options);
         AccessToken token = service.GenerateAccessToken(
             UserId.From(Guid.NewGuid()),
@@ -77,12 +98,20 @@ public sealed class JwtTokenServiceTests
     {
         // Arrange
         IOptions<JwtOptions> options = Options.Create(
-            new JwtOptions("test-issuer", "test-audience", "super_super_long_secret_key_123456789", 5, 30));
+            new JwtOptions
+            {
+                Issuer = "test-issuer",
+                Audience = "test-audience",
+                SecretKey = "super_super_long_secret_key_123456789",
+                AccessTokenLifetimeMinutes = 5,
+                RefreshTokenLifetimeDays = 30,
+            });
         var service = new JwtTokenService(options);
+        var userId = UserId.New();
 
         // Act
-        RefreshTokenEnvelope token1 = service.GenerateRefreshToken();
-        RefreshTokenEnvelope token2 = service.GenerateRefreshToken();
+        RefreshTokenEnvelope token1 = service.GenerateRefreshToken(userId);
+        RefreshTokenEnvelope token2 = service.GenerateRefreshToken(userId);
 
         // Assert
         token1.RawToken.Should().NotBeNullOrWhiteSpace();
