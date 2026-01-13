@@ -3,5 +3,4 @@
 public sealed record LoginUserResponse(
     Guid UserId,
     string AccessToken,
-    DateTimeOffset AccessTokenExpiresAt,
-    string RefreshToken);
+    DateTimeOffset AccessTokenExpiresAt);

@@ -67,7 +67,6 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             new LoginUserResponse(
                 result.Value.UserId,
                 result.Value.AccessToken,
-                result.Value.AccessTokenExpiresAt,
-                result.Value.RefreshToken));
+                result.Value.AccessTokenExpiresAt));
     }
 }
