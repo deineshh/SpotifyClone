@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefreshToken;
@@ -41,6 +42,8 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     }
 
     [HttpPost("login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<LoginWithPasswordResponse>> Login(
         LoginWithPasswordRequest request,
         CancellationToken cancellationToken)
@@ -70,7 +73,11 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
                 result.Value.AccessToken));
     }
 
+    [Authorize]
     [HttpPost("refresh")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LoginWithRefreshTokenResponse>> Refresh(
         LoginWithRefreshTokenRequest request,
         CancellationToken cancellationToken)
@@ -81,7 +88,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
 
         if (result.IsFailure)
         {
-            return Unauthorized(result.Errors);
+            return BadRequest(result.Errors);
         }
 
         var cookieOptions = new CookieOptions
