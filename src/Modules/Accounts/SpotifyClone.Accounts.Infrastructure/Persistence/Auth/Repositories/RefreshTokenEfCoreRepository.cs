@@ -91,6 +91,6 @@ internal sealed class RefreshTokenEfCoreRepository(AccountsAppDbContext context)
             token.Revoke(replacedByTokenHash);
         }
 
-        return Result.Success(replacedByTokenHash);
+        return Result.Success();
     }
 }

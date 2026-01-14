@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefreshToken;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Logout;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.LoginWithPassword;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.LoginWithRefreshToken;
@@ -105,5 +106,23 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
         return Ok(
             new LoginWithRefreshTokenResponse(
                 result.Value.AccessToken));
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    {
+        Result result = await Mediator.Send(new LogoutCommand(), cancellationToken);
+        if (result.IsFailure)
+        {
+            return BadRequest(result.Errors);
+        }
+
+        Response.Cookies.Delete("refreshToken");
+
+        return Ok();
     }
 }

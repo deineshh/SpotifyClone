@@ -24,6 +24,8 @@ builder.Services.AddAccountsModule(builder.Configuration);
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services
     .AddAuthentication(options =>
     {
@@ -47,6 +49,7 @@ builder.Services
         ClockSkew = TimeSpan.Zero
     });
 
+builder.Services.AddAuthorization();
 
 builder.Services.AddHealthChecks();
 

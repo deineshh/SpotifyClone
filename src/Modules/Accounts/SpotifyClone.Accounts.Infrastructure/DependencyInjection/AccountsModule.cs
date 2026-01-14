@@ -9,6 +9,7 @@ using SpotifyClone.Accounts.Application.Abstractions.Repositories;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
+using SpotifyClone.Accounts.Infrastructure.Auth;
 using SpotifyClone.Accounts.Infrastructure.Persistence;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Repositories;
@@ -52,10 +53,11 @@ public static class AccountsModule
         services.AddScoped<IRefreshTokenRepository, RefreshTokenEfCoreRepository>();
 
         services.AddScoped<IIdentityService, IdentityService>();
-        services.AddScoped<ITokenHasher, Sha256TokenHasher>();
-        services.AddScoped<ITokenService, JwtTokenService>();
 
         services.AddSingleton<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
+        services.AddSingleton<ITokenHasher, Sha256TokenHasher>();
+        services.AddSingleton<ITokenService, JwtTokenService>();
+        services.AddSingleton<ICurrentUser, CurrentUser>();
 
         services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options
             => options.User.RequireUniqueEmail = true)
