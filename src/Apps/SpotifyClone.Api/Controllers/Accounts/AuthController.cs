@@ -63,7 +63,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             HttpOnly = true,
             Secure = !_hostEnvironment.IsDevelopment(),
             SameSite = SameSiteMode.Lax,
-            Path = "/api/auth/refresh",
+            Path = "/",
             MaxAge = TimeSpan.FromDays(30)
         };
 
@@ -97,7 +97,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             HttpOnly = true,
             Secure = !_hostEnvironment.IsDevelopment(),
             SameSite = SameSiteMode.Lax,
-            Path = "/api/auth/refresh",
+            Path = "/",
             MaxAge = TimeSpan.FromDays(30)
         };
 
@@ -121,8 +121,25 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             return BadRequest(result.Errors);
         }
 
-        Response.Cookies.Delete("refreshToken");
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = !_hostEnvironment.IsDevelopment(),
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
+            MaxAge = TimeSpan.FromDays(30)
+        };
+
+        Response.Cookies.Delete("refreshToken", cookieOptions);
 
         return Ok();
     }
+
+    [HttpPost("debug/refresh-token-status")]
+    public IActionResult DebugRefreshTokenStatus()
+        => Ok(new
+        {
+            HasCookie = HttpContext.Request.Cookies.ContainsKey("refreshToken"),
+            Cookies = HttpContext.Request.Cookies.Keys
+        });
 }
