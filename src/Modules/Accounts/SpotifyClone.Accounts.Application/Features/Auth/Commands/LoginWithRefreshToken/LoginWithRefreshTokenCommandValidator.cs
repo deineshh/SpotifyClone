@@ -2,10 +2,10 @@
 
 namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefreshToken;
 
-internal sealed class LoginWithRefreshTokenValidator
+public sealed class LoginWithRefreshTokenCommandValidator
     : AbstractValidator<LoginWithRefreshTokenCommand>
 {
-    public LoginWithRefreshTokenValidator()
+    public LoginWithRefreshTokenCommandValidator()
         => RuleFor(x => x.RawToken)
         .NotNull().WithMessage("Refresh token is required.")
         .NotEmpty().WithMessage("Refresh token is required.");

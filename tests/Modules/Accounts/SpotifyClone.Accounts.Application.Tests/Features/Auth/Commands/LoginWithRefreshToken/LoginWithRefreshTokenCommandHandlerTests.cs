@@ -49,7 +49,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .Setup(x => x.GetByTokenHashAsync(hash, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure<RefreshTokenEnvelope>(error));
 
-        Result<LoginWithRefreshTokenResult> result =
+        Result<LoginWithRefreshTokenCommandResult> result =
             await _handler.Handle(command, CancellationToken.None);
 
         result.IsFailure.Should().BeTrue();
@@ -76,13 +76,13 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .Setup(x => x.GetByTokenHashAsync(hash, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(storedToken));
 
-        Error error = AuthErrors.UserNotFound;
+        Error error = IdentityUserErrors.NotFound;
 
         _identity
             .Setup(x => x.GetUserInfoAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure<IdentityUserInfo>(error));
 
-        Result<LoginWithRefreshTokenResult> result =
+        Result<LoginWithRefreshTokenCommandResult> result =
             await _handler.Handle(command, CancellationToken.None);
 
         result.IsFailure.Should().BeTrue();
@@ -136,7 +136,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .Setup(x => x.RevokeAsync(hash, newHash, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure(error));
 
-        Result<LoginWithRefreshTokenResult> result =
+        Result<LoginWithRefreshTokenCommandResult> result =
             await _handler.Handle(command, CancellationToken.None);
 
         result.IsFailure.Should().BeTrue();
@@ -190,7 +190,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .Setup(x => x.StoreAsync(userId, newHash, newRefreshToken.ExpiresAt, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
 
-        Result<LoginWithRefreshTokenResult> result =
+        Result<LoginWithRefreshTokenCommandResult> result =
             await _handler.Handle(command, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();

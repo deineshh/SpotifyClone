@@ -12,14 +12,14 @@ internal sealed class LoginWithRefreshTokenCommandHandler(
     ITokenService tokenService,
     ITokenHasher tokenHasher,
     IIdentityService identity)
-    : ICommandHandler<LoginWithRefreshTokenCommand, LoginWithRefreshTokenResult>
+    : ICommandHandler<LoginWithRefreshTokenCommand, LoginWithRefreshTokenCommandResult>
 {
     private readonly IAccountsUnitOfWork _unit = unit;
     private readonly ITokenService _tokenService = tokenService;
     private readonly ITokenHasher _tokenHasher = tokenHasher;
     private readonly IIdentityService _identity = identity;
 
-    public async Task<Result<LoginWithRefreshTokenResult>> Handle(
+    public async Task<Result<LoginWithRefreshTokenCommandResult>> Handle(
         LoginWithRefreshTokenCommand request,
         CancellationToken cancellationToken)
     {
@@ -30,7 +30,7 @@ internal sealed class LoginWithRefreshTokenCommandHandler(
 
         if (refreshTokenResult.IsFailure)
         {
-            return Result.Failure<LoginWithRefreshTokenResult>(refreshTokenResult.Errors);
+            return Result.Failure<LoginWithRefreshTokenCommandResult>(refreshTokenResult.Errors);
         }
 
         RefreshTokenEnvelope refreshToken = refreshTokenResult.Value;
@@ -43,10 +43,10 @@ internal sealed class LoginWithRefreshTokenCommandHandler(
 
             if (revokeWithoutNewTokenResult.IsFailure)
             {
-                return Result.Failure<LoginWithRefreshTokenResult>(refreshTokenResult.Errors);
+                return Result.Failure<LoginWithRefreshTokenCommandResult>(refreshTokenResult.Errors);
             }
 
-            return Result.Failure<LoginWithRefreshTokenResult>(RefreshTokenErrors.Expired);
+            return Result.Failure<LoginWithRefreshTokenCommandResult>(RefreshTokenErrors.Expired);
         }
 
         Result<IdentityUserInfo> identityResult =
@@ -54,7 +54,7 @@ internal sealed class LoginWithRefreshTokenCommandHandler(
 
         if (identityResult.IsFailure)
         {
-            return Result.Failure<LoginWithRefreshTokenResult>(identityResult.Errors);
+            return Result.Failure<LoginWithRefreshTokenCommandResult>(identityResult.Errors);
         }
 
         IdentityUserInfo user = identityResult.Value;
@@ -70,7 +70,7 @@ internal sealed class LoginWithRefreshTokenCommandHandler(
 
         if (revokeWithNewTokenResult.IsFailure)
         {
-            return Result.Failure<LoginWithRefreshTokenResult>(revokeWithNewTokenResult.Errors);
+            return Result.Failure<LoginWithRefreshTokenCommandResult>(revokeWithNewTokenResult.Errors);
         }
 
         Result storeResult = await _unit.RefreshTokens.StoreAsync(
@@ -81,10 +81,10 @@ internal sealed class LoginWithRefreshTokenCommandHandler(
 
         if (storeResult.IsFailure)
         {
-            return Result.Failure<LoginWithRefreshTokenResult>(storeResult.Errors);
+            return Result.Failure<LoginWithRefreshTokenCommandResult>(storeResult.Errors);
         }
 
-        return Result.Success(new LoginWithRefreshTokenResult(
+        return Result.Success(new LoginWithRefreshTokenCommandResult(
             accessToken.RawToken,
             newRefreshToken.RawToken));
     }

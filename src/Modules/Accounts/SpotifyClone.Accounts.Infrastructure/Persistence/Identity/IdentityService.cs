@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Application.Errors;
+using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
@@ -65,7 +66,7 @@ internal sealed class IdentityService : IIdentityService
 
         if (user is null)
         {
-            return Result.Failure<IdentityUserInfo>(AuthErrors.UserNotFound);
+            return Result.Failure<IdentityUserInfo>(IdentityUserErrors.NotFound);
         }
 
         if (!await _signInManager.CanSignInAsync(user))
@@ -90,7 +91,7 @@ internal sealed class IdentityService : IIdentityService
 
         if (user is null)
         {
-            return Result.Failure<IReadOnlyCollection<string>>(AuthErrors.UserNotFound);
+            return Result.Failure<IReadOnlyCollection<string>>(IdentityUserErrors.NotFound);
         }
 
         IList<string> roles = await _userManager.GetRolesAsync(user);
@@ -105,7 +106,7 @@ internal sealed class IdentityService : IIdentityService
 
         if (user is null)
         {
-            return Result.Failure<IReadOnlyCollection<Claim>>(AuthErrors.UserNotFound);
+            return Result.Failure<IReadOnlyCollection<Claim>>(IdentityUserErrors.NotFound);
         }
 
         IList<Claim> claims = await _userManager.GetClaimsAsync(user);
@@ -121,7 +122,7 @@ internal sealed class IdentityService : IIdentityService
 
         if (user is null)
         {
-            return Result.Failure<bool>(AuthErrors.UserNotFound);
+            return Result.Failure<bool>(IdentityUserErrors.NotFound);
         }
 
         return await _userManager.GetTwoFactorEnabledAsync(user);
@@ -173,10 +174,29 @@ internal sealed class IdentityService : IIdentityService
         if (!result.Succeeded)
         {
             return Result.Failure<Guid>(
-                result.Errors.Select(e =>
-                    AuthErrors.Identity(e.Code, e.Description)).ToArray());
+                IdentityErrorsToApplicationErrors(result.Errors));
         }
 
-        return Result.Success(user.Id);
+        return user.Id;
     }
+
+    public async Task<Result> DeleteUserAsync(Guid id)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(id.ToString());
+        if (user is null)
+        {
+            return Result.Failure(IdentityUserErrors.NotFound);
+        }
+
+        IdentityResult result = await _userManager.DeleteAsync(user);
+        if (!result.Succeeded)
+        {
+            return Result.Failure<Guid>(IdentityErrorsToApplicationErrors(result.Errors));
+        }
+
+        return Result.Success();
+    }
+
+    private static Error[] IdentityErrorsToApplicationErrors(IEnumerable<IdentityError> identityErrors)
+        => identityErrors.Select(e => AuthErrors.Identity(e.Code, e.Description)).ToArray();
 }

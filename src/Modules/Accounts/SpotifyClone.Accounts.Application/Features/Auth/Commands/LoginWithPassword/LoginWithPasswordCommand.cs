@@ -5,4 +5,4 @@ namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPass
 public sealed record LoginWithPasswordCommand(
     string Email,
     string Password)
-    : IPersistentCommand<LoginWithPasswordResult>;
+    : IPersistentCommand<LoginWithPasswordCommandResult>;

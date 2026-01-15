@@ -4,4 +4,4 @@ namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefr
 
 public sealed record LoginWithRefreshTokenCommand(
     string RawToken)
-    : IPersistentCommand<LoginWithRefreshTokenResult>;
+    : IPersistentCommand<LoginWithRefreshTokenCommandResult>;

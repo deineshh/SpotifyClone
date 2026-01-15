@@ -24,6 +24,8 @@ builder.Services.AddAccountsModule(builder.Configuration);
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 
+builder.Services.AddProblemDetails();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services
@@ -62,6 +64,7 @@ builder.Services.AddCors(options =>
 options.AddPolicy(name: "DevCors",
         policy => policy.WithOrigins(
             "https://localhost:3000",
+            "http://localhost:3000",
             "http://localhost:8080")
         .AllowAnyHeader()
         .AllowAnyMethod()
@@ -72,6 +75,10 @@ WebApplication app = builder.Build();
 app.MapStaticAssets();
 
 app.UseRouting();
+
+app.UseExceptionHandler();
+
+app.UseStatusCodePages();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -107,24 +114,6 @@ if (app.Environment.IsDevelopment())
             .WithTheme(ScalarTheme.Moon)
             .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
     );
-}
-else
-{
-    app.UseExceptionHandler(errorApp =>
-        errorApp.Run(async context =>
-        {
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            context.Response.ContentType = "application/json";
-
-            IExceptionHandlerFeature? error = context.Features.Get<IExceptionHandlerFeature>();
-            if (error?.Error is not null)
-            {
-                ILogger<Program> logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-                logger.LogError(error.Error, "Global unhandled exception");
-
-                await context.Response.WriteAsJsonAsync(new { error = "An unexpected error occurred." });
-            }
-        }));
 }
 
 await app.RunAsync();

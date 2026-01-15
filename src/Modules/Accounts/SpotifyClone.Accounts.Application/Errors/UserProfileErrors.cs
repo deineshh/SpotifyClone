@@ -18,7 +18,7 @@ public static class UserProfileErrors
 
     public static readonly Error InvalidGender = new(
         "UserProfile.InvalidGender",
-        "The provider gender is invalid.");
+        "The provided gender is invalid.");
 
     public static readonly Error AlreadyExists = new(
         "UserProfile.AlreadyExists",

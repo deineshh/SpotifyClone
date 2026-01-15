@@ -1,7 +1,7 @@
 ﻿using FluentValidation.Results;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 
-namespace SpotifyClone.Shared.BuildingBlocks.Application.Behaviors.Extensions;
+namespace SpotifyClone.Shared.BuildingBlocks.Application.Behaviors.Helpers;
 
 public static class ValidationFailureExtensions
 {

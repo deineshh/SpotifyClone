@@ -9,7 +9,7 @@ public sealed class LoginWithRefreshTokenValidatorTests
     public void Validate_Should_NotHaveAnyValidationErrors_When_DataIsValid()
     {
         // Arrange
-        var validator = new LoginWithRefreshTokenValidator();
+        var validator = new LoginWithRefreshTokenCommandValidator();
 
         // Act
         TestValidationResult<LoginWithRefreshTokenCommand> result = validator.TestValidate(
@@ -25,7 +25,7 @@ public sealed class LoginWithRefreshTokenValidatorTests
     public void Email_Should_NotBeNullOrEmpty(string? invalidRefreshToken)
     {
         // Arrange
-        var validator = new LoginWithRefreshTokenValidator();
+        var validator = new LoginWithRefreshTokenCommandValidator();
 
         // Act
         TestValidationResult<LoginWithRefreshTokenCommand> result = validator.TestValidate(

@@ -18,7 +18,6 @@ using SpotifyClone.Accounts.Infrastructure.Persistence.Auth.Repositories;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
 using SpotifyClone.Accounts.Infrastructure.Services;
-using SpotifyClone.Shared.BuildingBlocks.Application;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
 
@@ -30,11 +29,10 @@ public static class AccountsModule
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddValidatorsFromAssembly(AccountsApplicationAssemblyReference.Assembly);
-
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
-            BuildingBlocksApplicationAssemblyReference.Assembly,
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(
             AccountsApplicationAssemblyReference.Assembly));
+
+        services.AddValidatorsFromAssembly(AccountsApplicationAssemblyReference.Assembly);
 
         services.AddDbContext<AccountsAppDbContext>(options =>
             options.UseNpgsql(

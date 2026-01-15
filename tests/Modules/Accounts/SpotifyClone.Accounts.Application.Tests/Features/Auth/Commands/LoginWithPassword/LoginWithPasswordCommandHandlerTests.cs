@@ -38,7 +38,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Failure<IdentityUserInfo>(error));
 
         // Act
-        Result<LoginWithPasswordResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginWithPasswordCommandResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -80,7 +80,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Failure());
 
         // Act
-        Result<LoginWithPasswordResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginWithPasswordCommandResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -135,7 +135,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Failure(error));
 
         // Act
-        Result<LoginWithPasswordResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginWithPasswordCommandResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -196,7 +196,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Success());
 
         // Act
-        Result<LoginWithPasswordResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginWithPasswordCommandResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

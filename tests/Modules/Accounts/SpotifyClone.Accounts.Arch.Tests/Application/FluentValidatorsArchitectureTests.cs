@@ -45,7 +45,7 @@ public sealed class FluentValidatorsArchitectureTests
     }
 
     [Fact]
-    public void Validators_Should_NotBePublic()
+    public void Validators_Should_BePublic()
     {
         // Arrange
         Assembly applicationAssembly = AccountsApplicationAssemblyReference.Assembly;
@@ -55,7 +55,7 @@ public sealed class FluentValidatorsArchitectureTests
             .That()
             .Inherit(typeof(AbstractValidator<>))
             .Should()
-            .NotBePublic()
+            .BePublic()
             .GetResult();
 
         // Assert

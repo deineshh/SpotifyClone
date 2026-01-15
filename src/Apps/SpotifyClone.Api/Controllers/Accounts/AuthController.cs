@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefreshToken;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.Logout;
@@ -12,34 +14,70 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Api.Controllers.Accounts;
 
-[Route("api/auth")]
+[Route("api/v1/auth")]
 public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvironment)
     : ApiController(mediator)
 {
     private readonly IHostEnvironment _hostEnvironment = hostEnvironment;
 
-    [HttpPost("register")]
+    private readonly CookieOptions _cookieOptions = new CookieOptions
+    {
+        HttpOnly = true,
+        Secure = !hostEnvironment.IsDevelopment(),
+        SameSite = SameSiteMode.Lax,
+        Path = "/",
+        MaxAge = TimeSpan.FromDays(30)
+    };
+
+[HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<RegisterUserResponse>> RegisterUser(
         RegisterUserRequest request,
         CancellationToken cancellationToken = default)
     {
-        Result<Guid> result = await Mediator.Send(
+        Result<RegisterUserCommandResult> registrationResult = await Mediator.Send(
             new RegisterUserCommand(
+                request.Email,
+                request.Password,
+                request.DisplayName,
+                request.BirthDate,
+                request.Gender),
+            cancellationToken);
+        if (registrationResult.IsFailure)
+        {
+            if (registrationResult.Errors.Contains(AuthErrors.EmailAlreadyInUse))
+            {
+                return Conflict(registrationResult.Errors);
+            }
+
+            return BadRequest(registrationResult.Errors);
+        }
+
+        Result<LoginWithPasswordCommandResult> loginResult = await Mediator.Send(
+            new LoginWithPasswordCommand(
                 request.Email,
                 request.Password),
             cancellationToken);
-
-        if (result.IsFailure)
+        if (loginResult.IsFailure)
         {
-            return BadRequest(result.Errors);
+            return BadRequest(loginResult.Errors);
         }
 
+        RegisterUserCommandResult registrationResultData = registrationResult.Value;
+        LoginWithPasswordCommandResult loginResultData = loginResult.Value;
+
+        Response.Cookies.Append("refreshToken", loginResultData.RefreshToken, _cookieOptions);
+
         return Created(
-            uri: new Uri($"/api/auth/register/{result.Value}"),
+            uri: new Uri($"/api/auth/register/{registrationResult.Value}"),
             value: new RegisterUserResponse(
-                result.Value));
+                registrationResultData.UserId,
+                registrationResultData.Email,
+                registrationResultData.DisplayName,
+                registrationResultData.BirthDate,
+                registrationResultData.Gender,
+                loginResultData.AccessToken));
     }
 
     [HttpPost("login")]
@@ -49,25 +87,17 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
         LoginWithPasswordRequest request,
         CancellationToken cancellationToken)
     {
-        Result<LoginWithPasswordResult> result = await Mediator.Send(
+        Result<LoginWithPasswordCommandResult> result = await Mediator.Send(
             new LoginWithPasswordCommand(request.Email, request.Password),
             cancellationToken);
-
         if (result.IsFailure)
         {
-            return Unauthorized(result.Errors);
+            return BadRequest(result.Errors);
         }
 
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = !_hostEnvironment.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
-            Path = "/",
-            MaxAge = TimeSpan.FromDays(30)
-        };
+        LoginWithPasswordCommandResult resultData = result.Value;
 
-        Response.Cookies.Append("refreshToken", result.Value.RefreshToken, cookieOptions);
+        Response.Cookies.Append("refreshToken", resultData.RefreshToken, _cookieOptions);
 
         return Ok(
             new LoginWithPasswordResponse(
@@ -80,28 +110,25 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LoginWithRefreshTokenResponse>> Refresh(
-        LoginWithRefreshTokenRequest request,
         CancellationToken cancellationToken)
     {
-        Result<LoginWithRefreshTokenResult> result = await Mediator.Send(
-            new LoginWithRefreshTokenCommand(request.RefreshToken),
-            cancellationToken);
+        string? refreshToken = Request.Cookies["refreshToken"];
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            return Unauthorized("Refresh token not found.");
+        }
 
+        Result<LoginWithRefreshTokenCommandResult> result = await Mediator.Send(
+            new LoginWithRefreshTokenCommand(refreshToken),
+            cancellationToken);
         if (result.IsFailure)
         {
             return BadRequest(result.Errors);
         }
 
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = !_hostEnvironment.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
-            Path = "/",
-            MaxAge = TimeSpan.FromDays(30)
-        };
+        LoginWithRefreshTokenCommandResult resultData = result.Value;
 
-        Response.Cookies.Append("refreshToken", result.Value.RefreshToken, cookieOptions);
+        Response.Cookies.Append("refreshToken", resultData.RefreshToken, _cookieOptions);
 
         return Ok(
             new LoginWithRefreshTokenResponse(
@@ -113,7 +140,8 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    public async Task<IActionResult> Logout(
+        CancellationToken cancellationToken)
     {
         Result result = await Mediator.Send(new LogoutCommand(), cancellationToken);
         if (result.IsFailure)
@@ -121,25 +149,8 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             return BadRequest(result.Errors);
         }
 
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = !_hostEnvironment.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
-            Path = "/",
-            MaxAge = TimeSpan.FromDays(30)
-        };
-
-        Response.Cookies.Delete("refreshToken", cookieOptions);
+        Response.Cookies.Delete("refreshToken", _cookieOptions);
 
         return Ok();
     }
-
-    [HttpPost("debug/refresh-token-status")]
-    public IActionResult DebugRefreshTokenStatus()
-        => Ok(new
-        {
-            HasCookie = HttpContext.Request.Cookies.ContainsKey("refreshToken"),
-            Cookies = HttpContext.Request.Cookies.Keys
-        });
 }

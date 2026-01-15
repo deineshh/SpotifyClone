@@ -9,7 +9,7 @@ public sealed class LoginWithPasswordValidatorTests
     public void Validate_Should_NotHaveAnyValidationErrors_When_DataIsValid()
     {
         // Arrange
-        var validator = new LoginWithPasswordValidator();
+        var validator = new LoginWithPasswordCommandValidator();
 
         // Act
         TestValidationResult<LoginWithPasswordCommand> result = validator.TestValidate(
@@ -25,7 +25,7 @@ public sealed class LoginWithPasswordValidatorTests
     public void Email_Should_NotBeNullOrEmpty(string? invalidEmail)
     {
         // Arrange
-        var validator = new LoginWithPasswordValidator();
+        var validator = new LoginWithPasswordCommandValidator();
 
         // Act
         TestValidationResult<LoginWithPasswordCommand> result = validator.TestValidate(
@@ -41,7 +41,7 @@ public sealed class LoginWithPasswordValidatorTests
     public void Password_Should_NotBeNullOrEmpty(string? invalidPassword)
     {
         // Arrange
-        var validator = new LoginWithPasswordValidator();
+        var validator = new LoginWithPasswordCommandValidator();
 
         // Act
         TestValidationResult<LoginWithPasswordCommand> result = validator.TestValidate(

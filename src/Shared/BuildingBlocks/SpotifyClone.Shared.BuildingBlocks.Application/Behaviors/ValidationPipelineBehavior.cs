@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
-using SpotifyClone.Shared.BuildingBlocks.Application.Behaviors.Extensions;
+using SpotifyClone.Shared.BuildingBlocks.Application.Behaviors.Helpers;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
@@ -10,7 +10,7 @@ namespace SpotifyClone.Shared.BuildingBlocks.Application.Behaviors;
 public sealed class ValidationPipelineBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : class, IRequest<TResponse>
-    where TResponse : Result
+    where TResponse : IResult
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
 
@@ -37,13 +37,13 @@ public sealed class ValidationPipelineBehavior<TRequest, TResponse>
 
         ValidationResult[] results = await Task.WhenAll(validationTasks);
 
-        Error[] failures = results
+        Error[] errors = results
             .SelectMany(r => r.Errors)
             .ToErrors();
 
-        if (failures.Length > 0)
+        if (errors.Length > 0)
         {
-            return (TResponse)(object)Result.Failure(failures);
+            return ResultFactory.CreateFailureResult<TResponse>(errors);
         }
 
         return await next(cancellationToken);

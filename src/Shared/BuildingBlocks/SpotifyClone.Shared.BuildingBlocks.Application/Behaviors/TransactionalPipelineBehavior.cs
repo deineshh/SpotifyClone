@@ -11,7 +11,7 @@ public sealed class TransactionalPipelineBehavior<TRequest, TResponse>(
     ILogger<TransactionalPipelineBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
-    where TResponse : Result
+    where TResponse : IResult
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ILogger<TransactionalPipelineBehavior<TRequest, TResponse>> _logger = logger;

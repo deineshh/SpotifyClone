@@ -39,4 +39,6 @@ public interface IIdentityService
         string email,
         string password,
         CancellationToken cancellationToken = default);
+
+    Task<Result> DeleteUserAsync(Guid id);
 }

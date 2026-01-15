@@ -68,7 +68,7 @@ internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenServ
 
     public RefreshTokenEnvelope GenerateRefreshToken(UserId userId)
     {
-        const int tokenLength = 64;
+        const int tokenLength = 32;
         byte[] randomBytes = new byte[tokenLength];
         using (var rng = RandomNumberGenerator.Create())
         {

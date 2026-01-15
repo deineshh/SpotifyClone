@@ -11,4 +11,7 @@
   <ItemGroup>
   	<InternalsVisibleTo Include="SpotifyClone.Accounts.Application.Tests" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Features\Accounts\Commands\" />
+  </ItemGroup>
 </Project>

@@ -115,7 +115,7 @@ public sealed class JwtTokenServiceTests
 
         // Assert
         token1.RawToken.Should().NotBeNullOrWhiteSpace();
-        token1.RawToken.Length.Should().Be(128);
+        token1.RawToken.Length.Should().Be(64);
         token1.ExpiresAt.Should().BeCloseTo(DateTimeOffset.UtcNow.AddDays(30), TimeSpan.FromSeconds(1));
 
         // Tokens should be unique

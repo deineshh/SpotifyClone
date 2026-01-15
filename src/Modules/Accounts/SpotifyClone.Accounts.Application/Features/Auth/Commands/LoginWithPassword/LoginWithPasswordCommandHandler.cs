@@ -12,14 +12,14 @@ internal sealed class LoginWithPasswordCommandHandler(
     IIdentityService identity,
     ITokenService tokenService,
     ITokenHasher tokenHasher)
-    : ICommandHandler<LoginWithPasswordCommand, LoginWithPasswordResult>
+    : ICommandHandler<LoginWithPasswordCommand, LoginWithPasswordCommandResult>
 {
     private readonly IAccountsUnitOfWork _unit = unit;
     private readonly IIdentityService _identity = identity;
     private readonly ITokenService _tokenService = tokenService;
     private readonly ITokenHasher _tokenHasher = tokenHasher;
 
-    public async Task<Result<LoginWithPasswordResult>> Handle(LoginWithPasswordCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LoginWithPasswordCommandResult>> Handle(LoginWithPasswordCommand request, CancellationToken cancellationToken)
     {
         Result<IdentityUserInfo> identityResult = await _identity.ValidateUserAsync(
             request.Email,
@@ -28,7 +28,7 @@ internal sealed class LoginWithPasswordCommandHandler(
 
         if (identityResult.IsFailure)
         {
-            return Result.Failure<LoginWithPasswordResult>(identityResult.Errors);
+            return Result.Failure<LoginWithPasswordCommandResult>(identityResult.Errors);
         }
 
         UserId userId = identityResult.Value.UserId;
@@ -41,17 +41,17 @@ internal sealed class LoginWithPasswordCommandHandler(
         Result revokeResult = await _unit.RefreshTokens.RevokeAllAsync(userId, refreshTokenHash, cancellationToken);
         if (revokeResult.IsFailure)
         {
-            return Result.Failure<LoginWithPasswordResult>(revokeResult.Errors);
+            return Result.Failure<LoginWithPasswordCommandResult>(revokeResult.Errors);
         }
 
         Result storeResult = await _unit.RefreshTokens.StoreAsync(
             userId, refreshTokenHash, refreshToken.ExpiresAt, cancellationToken);
         if (storeResult.IsFailure)
         {
-            return Result.Failure<LoginWithPasswordResult>(storeResult.Errors);
+            return Result.Failure<LoginWithPasswordCommandResult>(storeResult.Errors);
         }
 
-        return Result.Success(new LoginWithPasswordResult(
+        return Result.Success(new LoginWithPasswordCommandResult(
             accessToken.RawToken,
             refreshToken.RawToken));
     }

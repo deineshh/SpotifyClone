@@ -2,10 +2,10 @@
 
 namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
 
-internal sealed class LoginWithPasswordValidator
+public sealed class LoginWithPasswordCommandValidator
     : AbstractValidator<LoginWithPasswordCommand>
 {
-    public LoginWithPasswordValidator()
+    public LoginWithPasswordCommandValidator()
     {
         RuleFor(x => x.Email)
             .NotNull().WithMessage("Email is required.")
