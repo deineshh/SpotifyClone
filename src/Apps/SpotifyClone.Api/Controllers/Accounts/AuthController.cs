@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using System.Net;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
@@ -10,6 +10,7 @@ using SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.LoginWithPassword;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.LoginWithRefreshToken;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.RegisterUser;
+using SpotifyClone.Api.Mappers;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Api.Controllers.Accounts;
@@ -46,12 +47,22 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             cancellationToken);
         if (registrationResult.IsFailure)
         {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                registrationResult,
+                HttpContext);
+
+            int? statusCode = problemDetails.Status;
+
             if (registrationResult.Errors.Contains(AuthErrors.EmailAlreadyInUse))
             {
-                return Conflict(registrationResult.Errors);
+                statusCode = (int)HttpStatusCode.Conflict;
+                problemDetails.Status = statusCode;
             }
 
-            return BadRequest(registrationResult.Errors);
+            return new ObjectResult(problemDetails)
+            {
+                StatusCode = statusCode
+            };
         }
 
         Result<LoginWithPasswordCommandResult> loginResult = await Mediator.Send(
@@ -61,7 +72,11 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             cancellationToken);
         if (loginResult.IsFailure)
         {
-            return BadRequest(loginResult.Errors);
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                loginResult,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
         RegisterUserCommandResult registrationResultData = registrationResult.Value;
@@ -92,7 +107,11 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             cancellationToken);
         if (result.IsFailure)
         {
-            return BadRequest(result.Errors);
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
         LoginWithPasswordCommandResult resultData = result.Value;
@@ -123,7 +142,11 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             cancellationToken);
         if (result.IsFailure)
         {
-            return BadRequest(result.Errors);
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
         LoginWithRefreshTokenCommandResult resultData = result.Value;
@@ -146,7 +169,11 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
         Result result = await Mediator.Send(new LogoutCommand(), cancellationToken);
         if (result.IsFailure)
         {
-            return BadRequest(result.Errors);
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
         Response.Cookies.Delete("refreshToken", _cookieOptions);

@@ -58,5 +58,6 @@ public class Result<TValue> : Result
 public interface IResult
 {
     bool IsSuccess { get; }
-    bool IsFailure { get; }
+    bool IsFailure => !IsSuccess;
+    Error[] Errors { get; }
 }
