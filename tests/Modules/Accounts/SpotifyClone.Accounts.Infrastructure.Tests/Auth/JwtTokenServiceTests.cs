@@ -3,8 +3,7 @@ using System.Security.Claims;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
-using SpotifyClone.Accounts.Infrastructure.Auth;
-using SpotifyClone.Accounts.Infrastructure.Services;
+using SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
 using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Infrastructure.Tests.Auth;
@@ -28,8 +27,10 @@ public sealed class JwtTokenServiceTests
 
         // Act
         AccessToken token = service.GenerateAccessToken(
-            UserId.From(Guid.NewGuid()),
-            "test@email.com",
+            new(
+                UserId.From(Guid.NewGuid()),
+                "test@email.com",
+                false, true),
             new[] { "User" });
 
         // Assert
@@ -52,8 +53,10 @@ public sealed class JwtTokenServiceTests
             });
         var service = new JwtTokenService(options);
         AccessToken token = service.GenerateAccessToken(
-            userId,
-            "user@test.com",
+            new(
+                userId,
+                "test@email.com",
+                false, true),
             new[] { "Admin", "User" });
 
         // Act
@@ -82,8 +85,10 @@ public sealed class JwtTokenServiceTests
             });
         var service = new JwtTokenService(options);
         AccessToken token = service.GenerateAccessToken(
-            UserId.From(Guid.NewGuid()),
-            "user@test.com",
+            new(
+                UserId.From(Guid.NewGuid()),
+                "test@email.com",
+                false, true),
             Array.Empty<string>());
 
         // Act

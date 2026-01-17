@@ -1,4 +1,5 @@
 ﻿using SpotifyClone.Accounts.Domain.Aggregates.Users.Enums;
+using SpotifyClone.Accounts.Domain.Aggregates.Users.Events;
 using SpotifyClone.Accounts.Domain.Aggregates.Users.Rules;
 using SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
@@ -37,4 +38,10 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
 
         return new UserProfile(id, displayName, birthDate, gender);
     }
+
+    public void ProcessRegistration(string email, string confirmationToken)
+        => RaiseDomainEvent(new UserRegisteredDomainEvent(
+            Id.Value,
+            email,
+            confirmationToken));
 }

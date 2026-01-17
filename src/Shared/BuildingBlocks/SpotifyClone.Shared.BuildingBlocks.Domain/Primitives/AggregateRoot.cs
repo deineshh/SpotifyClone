@@ -1,6 +1,6 @@
 ﻿namespace SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
-public abstract class AggregateRoot<TId, TIdValue> : Entity<TId, TIdValue>
+public abstract class AggregateRoot<TId, TIdValue> : Entity<TId, TIdValue>, IHasDomainEvents
     where TId : notnull, StronglyTypedId<TIdValue>
     where TIdValue : notnull
 {
@@ -21,6 +21,6 @@ public abstract class AggregateRoot<TId, TIdValue> : Entity<TId, TIdValue>
     protected void RaiseDomainEvent(DomainEvent domainEvent)
         => _domainEvents.Add(domainEvent);
 
-    protected void ClearDomainEvents()
+    public void ClearDomainEvents()
         => _domainEvents.Clear();
 }

@@ -22,4 +22,7 @@
     <ProjectReference Include="..\..\Shared\BuildingBlocks\SpotifyClone.Shared.BuildingBlocks.Application\SpotifyClone.Shared.BuildingBlocks.Application.csproj" />
     <ProjectReference Include="..\..\Shared\BuildingBlocks\SpotifyClone.Shared.BuildingBlocks.Infrastructure\SpotifyClone.Shared.BuildingBlocks.Infrastructure.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Contracts\v1\Accounts\Profile\" />
+  </ItemGroup>
 </Project>

@@ -41,4 +41,20 @@ public interface IIdentityService
         CancellationToken cancellationToken = default);
 
     Task<Result> DeleteUserAsync(Guid id);
+
+    Task<Result<string>> GenerateEmailConfirmationTokenAsync(
+        Guid userId);
+
+    Task<Result> ConfirmEmailAsync(
+        Guid userId,
+        string token);
+
+    Task<Result<string>> GeneratePhoneNumberConfirmationTokenAsync(
+        Guid userId,
+        string phoneNumber);
+
+    Task<Result> ConfirmPhoneNumberAsync(
+        Guid userId,
+        string phoneNumber,
+        string token);
 }

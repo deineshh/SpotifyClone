@@ -117,8 +117,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
 
         _tokenService
             .Setup(x => x.GenerateAccessToken(
-                userId,
-                identity.Email,
+                identity,
                 It.IsAny<IReadOnlyCollection<string>>()))
             .Returns(new AccessToken("access", DateTimeOffset.UtcNow.AddMinutes(5)));
 
@@ -175,7 +174,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .ReturnsAsync(Result.Success(identity));
 
         _tokenService
-            .Setup(x => x.GenerateAccessToken(userId, identity.Email, It.IsAny<IReadOnlyCollection<string>>()))
+            .Setup(x => x.GenerateAccessToken(identity, It.IsAny<IReadOnlyCollection<string>>()))
             .Returns(accessToken);
 
         _tokenService

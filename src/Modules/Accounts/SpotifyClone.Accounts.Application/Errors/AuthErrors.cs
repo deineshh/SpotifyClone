@@ -24,7 +24,23 @@ public static class AuthErrors
         "Auth.RegistrationFailed",
         "Registration of the specified user failed.");
 
-    public static Error Identity(string code, string description) => new(
-        $"Identity.{code}",
+    public static readonly Error EmailAlreadyConfirmed = new(
+        "Auth.EmailAlreadyConfirmed",
+        "Email is already confirmed.");
+
+    public static readonly Error PhoneNumberAlreadyConfirmed = new(
+        "Auth.PhoneNumberAlreadyConfirmed",
+        "Phone number is already confirmed.");
+
+    public static readonly Error InvalidEmailConfirmationToken = Identity(
+        "InvalidEmailConfirmationToken",
+        "Email confirmation token is invalid.");
+
+    public static readonly Error InvalidPhoneNumberConfirmationToken = Identity(
+        "InvalidPhoneNumberConfirmationToken",
+        "Phone number confirmation token is invalid.");
+
+    public static Error Identity(string codeTitle, string description) => new(
+        $"Identity.{codeTitle}",
         description);
 }

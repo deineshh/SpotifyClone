@@ -5,6 +5,15 @@
 
 #### Static code analysis rule customizations
 
+# CA1056: URI-like properties should not be strings
+dotnet_diagnostic.CA1056.severity = suggestion
+
+# CA1054: URI-like parameters should not be strings
+dotnet_diagnostic.CA1054.severity = suggestion
+
+# CS9124: Parameter is captured into the state of the enclosing type and its value is also used to initialize a field, property, or event.
+dotnet_diagnostic.CS9124.severity = suggestion
+
 # CA1823: Avoid unused private fields
 dotnet_diagnostic.CA1823.severity = suggestion
 

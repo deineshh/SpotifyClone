@@ -61,7 +61,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Success(identityInfo));
 
         _tokenServiceMock
-            .Setup(x => x.GenerateAccessToken(userId, identityInfo.Email, It.IsAny<IReadOnlyCollection<string>>()))
+            .Setup(x => x.GenerateAccessToken(identityInfo, It.IsAny<IReadOnlyCollection<string>>()))
             .Returns(new AccessToken("accessToken", DateTimeOffset.UtcNow.AddMinutes(5)));
 
         _tokenServiceMock
@@ -106,7 +106,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Success(identityInfo));
 
         _tokenServiceMock
-            .Setup(x => x.GenerateAccessToken(userId, identityInfo.Email, It.IsAny<IReadOnlyCollection<string>>()))
+            .Setup(x => x.GenerateAccessToken(identityInfo, It.IsAny<IReadOnlyCollection<string>>()))
             .Returns(new AccessToken("accessToken", DateTimeOffset.UtcNow.AddMinutes(5)));
 
         _tokenServiceMock
@@ -169,7 +169,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Success(identityInfo));
 
         _tokenServiceMock
-            .Setup(x => x.GenerateAccessToken(userId, identityInfo.Email, It.IsAny<IReadOnlyCollection<string>>()))
+            .Setup(x => x.GenerateAccessToken(identityInfo, It.IsAny<IReadOnlyCollection<string>>()))
             .Returns(new AccessToken("accessToken", DateTimeOffset.UtcNow));
 
         _tokenServiceMock

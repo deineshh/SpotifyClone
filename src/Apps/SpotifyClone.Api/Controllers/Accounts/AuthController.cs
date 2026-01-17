@@ -2,14 +2,21 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefreshToken;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.Logout;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.SendVerificationSms;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.VerifyEmail;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.VerifyPhoneNumber;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.LoginWithPassword;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.LoginWithRefreshToken;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.RegisterUser;
+using SpotifyClone.Api.Contracts.v1.Accounts.Auth.SendVerificationSms;
+using SpotifyClone.Api.Contracts.v1.Accounts.Auth.VerifyEmail;
+using SpotifyClone.Api.Contracts.v1.Accounts.Auth.VerifyPhoneNumber;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
@@ -30,7 +37,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
         MaxAge = TimeSpan.FromDays(30)
     };
 
-[HttpPost("register")]
+    [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<RegisterUserResponse>> RegisterUser(
@@ -100,7 +107,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<LoginWithPasswordResponse>> Login(
         LoginWithPasswordRequest request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         Result<LoginWithPasswordCommandResult> result = await Mediator.Send(
             new LoginWithPasswordCommand(request.Email, request.Password),
@@ -129,7 +136,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LoginWithRefreshTokenResponse>> Refresh(
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         string? refreshToken = Request.Cookies["refreshToken"];
         if (string.IsNullOrEmpty(refreshToken))
@@ -164,7 +171,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Logout(
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         Result result = await Mediator.Send(new LogoutCommand(), cancellationToken);
         if (result.IsFailure)
@@ -179,5 +186,75 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
         Response.Cookies.Delete("refreshToken", _cookieOptions);
 
         return Ok();
+    }
+
+    [HttpPost("email/verify")]
+    [EnableRateLimiting("verification-limits")]
+    public async Task<ActionResult> VerifyEmail(
+        VerifyEmailRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result result = await Mediator.Send(
+            new VerifyEmailCommand(
+                request.UserId,
+                request.Code),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(new { Message = "Email verified successfully" });
+    }
+
+    [HttpPost("phone/send-code")]
+    [EnableRateLimiting("send-limits")]
+    public async Task<ActionResult> SendVerificationSms(
+        SendVerificationSmsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result result = await Mediator.Send(
+            new SendVerificationSmsCommand(
+                request.UserId,
+                request.PhoneNumber),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(new { Message = "Verification SMS sent successfully" });
+    }
+
+    [HttpPost("phone/verify")]
+    //[EnableRateLimiting("verification-limits")]
+    public async Task<ActionResult> VerifyPhoneNumber(
+        VerifyPhoneNumberRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result result = await Mediator.Send(
+            new VerifyPhoneNumberCommand(
+                request.UserId,
+                request.PhoneNumber,
+                request.Code),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(new { Message = "Phone number verified successfully" });
     }
 }

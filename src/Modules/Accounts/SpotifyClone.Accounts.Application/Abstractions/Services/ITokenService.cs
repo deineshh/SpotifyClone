@@ -6,8 +6,7 @@ namespace SpotifyClone.Accounts.Application.Abstractions.Services;
 public interface ITokenService
 {
     AccessToken GenerateAccessToken(
-        UserId userId,
-        string email,
+        IdentityUserInfo user,
         IReadOnlyCollection<string> roles,
         IReadOnlyDictionary<string, string>? claims = null);
 

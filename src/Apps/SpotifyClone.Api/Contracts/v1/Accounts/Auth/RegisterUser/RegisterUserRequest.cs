@@ -1,7 +1,10 @@
-﻿namespace SpotifyClone.Api.Contracts.v1.Accounts.Auth.RegisterUser;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SpotifyClone.Api.Contracts.v1.Accounts.Auth.RegisterUser;
 
 public sealed record RegisterUserRequest
 {
+    [EmailAddress]
     public required string Email { get; set; }
     public required string Password { get; set; }
     public required string DisplayName { get; set; }

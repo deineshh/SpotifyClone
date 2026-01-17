@@ -58,7 +58,7 @@ internal sealed class LoginWithRefreshTokenCommandHandler(
         }
 
         IdentityUserInfo user = identityResult.Value;
-        AccessToken accessToken = _tokenService.GenerateAccessToken(user.UserId, user.Email, [ "User" ]);
+        AccessToken accessToken = _tokenService.GenerateAccessToken(user, [ "User" ]);
 
         RefreshTokenEnvelope newRefreshToken = _tokenService.GenerateRefreshToken(user.UserId);
         string newTokenHash = _tokenHasher.Hash(newRefreshToken.RawToken);

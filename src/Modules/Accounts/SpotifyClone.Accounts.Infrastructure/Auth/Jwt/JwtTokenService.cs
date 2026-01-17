@@ -6,10 +6,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
-using SpotifyClone.Accounts.Infrastructure.Auth;
 using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Accounts.Infrastructure.Services;
+namespace SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
 
 internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenService
 {
@@ -17,8 +16,7 @@ internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenServ
     private readonly JwtSecurityTokenHandler _tokenHandler = new();
 
     public AccessToken GenerateAccessToken(
-        UserId userId,
-        string email,
+        IdentityUserInfo user,
         IReadOnlyCollection<string> roles,
         IReadOnlyDictionary<string, string>? claims = null)
     {
@@ -26,8 +24,9 @@ internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenServ
 
         var jwtClaims = new List<Claim>
         {
-            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub, userId.Value.ToString()),
-            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email, email),
+            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub, user.UserId.Value.ToString()),
+            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email, user.Email),
+            new("email_confirmed", user.EmailConfirmed.ToString().ToLowerInvariant()),
             new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Iat,
                 new DateTimeOffset(now).ToUnixTimeSeconds().ToString(),

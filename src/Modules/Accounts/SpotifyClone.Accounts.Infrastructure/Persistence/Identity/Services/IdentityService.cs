@@ -7,7 +7,7 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Accounts.Infrastructure.Persistence.Identity;
+namespace SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Services;
 
 internal sealed class IdentityService : IIdentityService
 {
@@ -192,6 +192,80 @@ internal sealed class IdentityService : IIdentityService
         if (!result.Succeeded)
         {
             return Result.Failure<Guid>(IdentityErrorsToApplicationErrors(result.Errors));
+        }
+
+        return Result.Success();
+    }
+
+    public async Task<Result<string>> GenerateEmailConfirmationTokenAsync(
+        Guid userId)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return Result.Failure<string>(IdentityUserErrors.NotFound);
+        }
+
+        return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+    }
+
+    public async Task<Result> ConfirmEmailAsync(
+        Guid userId,
+        string token)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return Result.Failure(IdentityUserErrors.NotFound);
+        }
+
+        if (user.EmailConfirmed)
+        {
+            return Result.Failure(AuthErrors.EmailAlreadyConfirmed);
+        }
+
+        IdentityResult result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            return Result.Failure(AuthErrors.InvalidEmailConfirmationToken);
+        }
+
+        return Result.Success();
+    }
+
+    public async Task<Result<string>> GeneratePhoneNumberConfirmationTokenAsync(
+        Guid userId,
+        string phoneNumber)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return Result.Failure<string>(IdentityUserErrors.NotFound);
+        }
+
+        return await _userManager.GenerateChangePhoneNumberTokenAsync(user, phoneNumber);
+    }
+
+    public async Task<Result> ConfirmPhoneNumberAsync(
+        Guid userId,
+        string phoneNumber,
+        string token)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return Result.Failure(IdentityUserErrors.NotFound);
+        }
+
+        if (user.PhoneNumberConfirmed)
+        {
+            return Result.Failure(AuthErrors.PhoneNumberAlreadyConfirmed);
+        }
+
+        IdentityResult result = await _userManager.ChangePhoneNumberAsync(user, phoneNumber, token);
+        if (!result.Succeeded)
+        {
+            return Result.Failure(AuthErrors.InvalidPhoneNumberConfirmationToken);
         }
 
         return Result.Success();

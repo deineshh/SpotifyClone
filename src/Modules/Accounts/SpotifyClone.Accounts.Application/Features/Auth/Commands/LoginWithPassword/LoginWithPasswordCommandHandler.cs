@@ -32,9 +32,8 @@ internal sealed class LoginWithPasswordCommandHandler(
         }
 
         UserId userId = identityResult.Value.UserId;
-        string email = identityResult.Value.Email;
 
-        AccessToken accessToken = _tokenService.GenerateAccessToken(userId, email, ["User"]);
+        AccessToken accessToken = _tokenService.GenerateAccessToken(identityResult.Value, ["User"]);
         RefreshTokenEnvelope refreshToken = _tokenService.GenerateRefreshToken(userId);
         string refreshTokenHash = _tokenHasher.Hash(refreshToken.RawToken);
 
