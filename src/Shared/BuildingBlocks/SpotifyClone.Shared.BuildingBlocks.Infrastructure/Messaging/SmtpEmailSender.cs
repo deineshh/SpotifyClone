@@ -1,15 +1,17 @@
 ﻿using System.Net;
 using System.Net.Mail;
+using Microsoft.Extensions.Options;
 using SpotifyClone.Shared.BuildingBlocks.Application.Email;
-using SpotifyClone.Shared.BuildingBlocks.Application.Exceptions;
+using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
+using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Infrastructure.Messaging;
 
-public sealed class SmtpEmailSender(SmtpOptions options) : IEmailSender
+public sealed class SmtpEmailSender(IOptions<SmtpOptions> options) : IEmailSender
 {
-    private readonly SmtpOptions _options = options ?? throw new ArgumentNullException(nameof(options));
+    private readonly SmtpOptions _options = options.Value ?? throw new ArgumentNullException(nameof(options));
 
-    public async Task SendAsync(
+    public async Task<Result> SendAsync(
         EmailMessage message,
         IEnumerable<EmailAttachment>? attachments = null,
         EmailPriority priority = EmailPriority.Normal,
@@ -84,18 +86,12 @@ public sealed class SmtpEmailSender(SmtpOptions options) : IEmailSender
         {
             await smtp.SendMailAsync(mail, cancellationToken);
         }
-        catch (SmtpException ex)
+        catch (Exception)
         {
-            throw new EmailSendFailedApplicationException(
-                "Failed to send email via SMTP.",
-                ex);
+            return Result.Failure(EmailErrors.SendFailed);
         }
-        catch (Exception ex)
-        {
-            throw new EmailSendFailedApplicationException(
-                "Unexpected error occurred while sending email via SMTP.",
-                ex);
-        }
+
+        return Result.Success();
     }
 
     private static MailPriority MapPriority(EmailPriority priority) => priority switch

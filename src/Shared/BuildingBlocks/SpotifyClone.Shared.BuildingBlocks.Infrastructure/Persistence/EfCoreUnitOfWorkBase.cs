@@ -1,16 +1,39 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
+using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence;
 
-public abstract class EfCoreUnitOfWorkBase<TDbContext> : IUnitOfWork
+public abstract class EfCoreUnitOfWorkBase<TDbContext>(
+    TDbContext dbContext,
+    IPublisher publisher)
+    : IUnitOfWork
     where TDbContext : DbContext
 {
-    protected TDbContext DbContext { get; }
+    protected TDbContext DbContext { get; } = dbContext;
+    protected IPublisher Publisher { get; } = publisher;
 
-    protected EfCoreUnitOfWorkBase(TDbContext dbContext)
-        => DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+    public virtual async Task<int> Commit(CancellationToken cancellationToken = default)
+    {
+        var domainEntities = DbContext.ChangeTracker
+            .Entries<IHasDomainEvents>()
+            .Where(x => x.Entity.DomainEvents.Count != 0)
+            .ToList();
 
-    public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        => await DbContext.SaveChangesAsync(cancellationToken);
+        var domainEvents = domainEntities
+            .SelectMany(x => x.Entity.DomainEvents)
+            .ToList();
+
+        domainEntities.ForEach(x => x.Entity.ClearDomainEvents());
+
+        int result = await DbContext.SaveChangesAsync(cancellationToken);
+
+        foreach (DomainEvent? domainEvent in domainEvents)
+        {
+            await publisher.Publish(domainEvent, cancellationToken);
+        }
+
+        return result;
+    }
 }

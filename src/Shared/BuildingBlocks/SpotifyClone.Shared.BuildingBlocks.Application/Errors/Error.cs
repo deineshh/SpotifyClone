@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace SpotifyClone.Shared.BuildingBlocks.Application.Errors;
+﻿namespace SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 
 public sealed record Error
 {

@@ -1,4 +1,6 @@
-﻿namespace SpotifyClone.Shared.BuildingBlocks.Application.Email;
+﻿using SpotifyClone.Shared.BuildingBlocks.Application.Results;
+
+namespace SpotifyClone.Shared.BuildingBlocks.Application.Email;
 
 public interface IEmailSender
 {
@@ -15,8 +17,8 @@ public interface IEmailSender
     /// <param name="replyTo">Reply-to address</param>
     /// <param name="attachments">File attachments</param>
     /// <param name="priority">Email priority (normal, high, low)</param>
-    /// <returns>Result indicating success/failure (optional, but useful)</returns>
-    Task SendAsync(
+    /// <returns>Result indicating success/failure</returns>
+    Task<Result> SendAsync(
         EmailMessage message,
         IEnumerable<EmailAttachment>? attachments = null,
         EmailPriority priority = EmailPriority.Normal,

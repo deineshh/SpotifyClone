@@ -4,14 +4,13 @@ using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence.Converters;
 
-public abstract class StronglyTypedIdEfCoreConverter<TId, TValue> : ValueConverter<TId, TValue>
+public sealed class StronglyTypedIdEfCoreConverter<TId, TValue> : ValueConverter<TId, TValue>
     where TId : StronglyTypedId<TValue>
     where TValue : notnull
 {
-    protected StronglyTypedIdEfCoreConverter(
-        Expression<Func<TId, TValue>> toProvider,
+    public StronglyTypedIdEfCoreConverter(
         Expression<Func<TValue, TId>> fromProvider)
-        : base(toProvider, fromProvider)
+        : base(id => id.Value, fromProvider)
     {
     }
 }

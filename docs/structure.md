@@ -201,26 +201,31 @@ D - Delegate
             - RoleSeeder.cs (C)
             - ApplicationPolicies.cs (E)
             - ApplicationUser.cs (C)
-            - IdentityDbContext.cs (C)
+            - IdentityAppDbContext.cs (C)
             - IdentityService.cs (C)
             - Migrations/
           - Auth/
+            - Sha256TokenHasher.cs (SC)
             - RefreshToken.cs (C)
-            - RefreshTokenConfiguration.cs (C)
-            - RefreshTokenRepository.cs (C)
+            - RefreshTokenEfCoreConfiguration.cs (C)
+            - Repositories/
+              - RefreshTokenRepository.cs (C)
             - Converters/
-            - Exceptions/
           - Accounts/
-            - UserConfiguration.cs (C)
-            - UserRepository.cs (C)
-            - AccountsDbContext.cs (C)
-            - Converters/
-            - Exceptions/
+            - AccountsAppDbContext.cs (C)
+            - Repositories/
+              - UserProfileRepository.cs (C)
+            - Configurations/
+              - Converters/
+                - AccountsEfCoreValueConverters.cs (SC)
+              - AvatarImageEfCoreConfiguration.cs (SC)
+              - ImageMetadataEfCoreConfiguration.cs (SC)
+              - UserProfileEfCoreConfiguration.cs (C)
             - Migrations/
           - AccountsUnitOfWork.cs (C)
-        - Services/
+        - Auth/
+          - JwtOptions.cs (R)
           - JwtTokenService.cs (C)
-          - Exceptions/
         - DependencyInjection/
           - AccountsModule.cs
     - Catalog/
@@ -708,7 +713,6 @@ D - Delegate
       - DependencyInjection/
         - ServiceCollectionExtensions.cs (SC)
       - Configuration/
-        - JwtOptions.cs (R)
         - DatabaseOptions.cs (R)
         - BlobStorageOptions.cs (R)
       - Middleware/

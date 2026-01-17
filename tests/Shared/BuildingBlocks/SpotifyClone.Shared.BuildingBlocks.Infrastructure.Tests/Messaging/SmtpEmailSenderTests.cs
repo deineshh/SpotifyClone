@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.Options;
+using Moq;
 using SpotifyClone.Shared.BuildingBlocks.Application.Email;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.Messaging;
 
@@ -6,11 +8,19 @@ namespace SpotifyClone.Shared.BuildingBlocks.Infrastructure.Tests.Messaging;
 
 public sealed class SmtpEmailSenderTests
 {
+    private readonly Mock<IOptions<SmtpOptions>> _optionsMock = new();
+
     [Fact]
     public void SendAsync_Should_NotThrowForValidMessage()
     {
         // Arrange
-        var sender = new SmtpEmailSender(new SmtpOptions("Host", 1234, false));
+        _optionsMock.Setup(o => o.Value).Returns(new SmtpOptions
+        {
+            Host = "Host",
+            Port = 1234,
+            EnableSsl = false
+        });
+        var sender = new SmtpEmailSender(_optionsMock.Object);
         var message = new EmailMessage(["test@example.com"], "Test");
 
         // Act
@@ -24,7 +34,13 @@ public sealed class SmtpEmailSenderTests
     public async Task SendAsync_ShouldHonorCancellation()
     {
         // Arrange
-        var sender = new SmtpEmailSender(new SmtpOptions("Host", 1234, false));
+        _optionsMock.Setup(o => o.Value).Returns(new SmtpOptions
+        {
+            Host = "Host",
+            Port = 1234,
+            EnableSsl = false
+        });
+        var sender = new SmtpEmailSender(_optionsMock.Object);
         var message = new EmailMessage(["test@example.com"], "Test");
 
         using var cts = new CancellationTokenSource();

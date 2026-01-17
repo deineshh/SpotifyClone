@@ -10,8 +10,8 @@ public sealed class TransactionalPipelineBehavior<TRequest, TResponse>(
     IUnitOfWork unitOfWork,
     ILogger<TransactionalPipelineBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IPersistentCommand
-    where TResponse : Result
+    where TRequest : notnull
+    where TResponse : IResult
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ILogger<TransactionalPipelineBehavior<TRequest, TResponse>> _logger = logger;
@@ -21,6 +21,12 @@ public sealed class TransactionalPipelineBehavior<TRequest, TResponse>(
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
+        if (!typeof(IPersistentCommand).IsAssignableFrom(typeof(TRequest)) &&
+            !ImplementsGenericInterface(typeof(TRequest), typeof(IPersistentCommand<>)))
+        {
+            return await next(cancellationToken);
+        }
+
         _logger.LogInformation("Beginning transaction for {RequestType}", typeof(TRequest).Name);
 
         TResponse response = await next(cancellationToken);
@@ -30,10 +36,14 @@ public sealed class TransactionalPipelineBehavior<TRequest, TResponse>(
             return response;
         }
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.Commit(cancellationToken);
 
         _logger.LogInformation("Committed transaction for {RequestType}", typeof(TRequest).Name);
 
         return response;
     }
+
+    private static bool ImplementsGenericInterface(Type type, Type genericInterface)
+        => type.GetInterfaces()
+        .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == genericInterface);
 }

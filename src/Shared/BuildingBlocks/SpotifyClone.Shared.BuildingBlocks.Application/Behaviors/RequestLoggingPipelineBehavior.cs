@@ -9,6 +9,7 @@ public sealed class RequestLoggingPipelineBehavior<TRequest, TResponse>(
     ILogger<RequestLoggingPipelineBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
+    where TResponse : IResult
 {
     private readonly ILogger<RequestLoggingPipelineBehavior<TRequest, TResponse>> _logger = logger;
 
