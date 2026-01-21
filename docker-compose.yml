@@ -8,11 +8,15 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      DOTNET_RUNNING_IN_CONTAINER: true
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__MainDb: Host=postgres;Port=5432;Database=spotifyclone_dev;Username=postgres;Password=postgres
     ports:
       - "8080:8080"
+    volumes:
+      - ./storage/music:/app/wwwroot/music
+      - ./storage/temp:/app/wwwroot/temp
 
   postgres:
     image: postgres:15

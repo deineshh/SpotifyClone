@@ -2,6 +2,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -10,15 +11,18 @@ using SpotifyClone.Accounts.Infrastructure.DependencyInjection;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.DependencyInjection;
+using SpotifyClone.Streaming.Infrastructure.DependencyInjection;
+using Xabe.FFmpeg;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddBuildingBlocks(builder.Configuration);
+builder.Services.AddAccountsModule(builder.Configuration);
+builder.Services.AddStreamingModule();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
-
-builder.Services.AddBuildingBlocks(builder.Configuration);
-builder.Services.AddAccountsModule(builder.Configuration);
 
 builder.Services.AddProblemDetails();
 
@@ -89,6 +93,19 @@ options.AddPolicy(name: "DevCors",
         .AllowAnyMethod()
         .AllowCredentials()));
 
+if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
+{
+    FFmpeg.SetExecutablesPath("/usr/bin");
+}
+else
+{
+    string? ffmpegPath = builder.Configuration["FFmpegConfig:ExecutablesPath"];
+    if (!string.IsNullOrEmpty(ffmpegPath))
+    {
+        FFmpeg.SetExecutablesPath(ffmpegPath);
+    }
+}
+
 WebApplication app = builder.Build();
 
 app.MapStaticAssets();
@@ -105,6 +122,15 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/health");
+
+var provider = new FileExtensionContentTypeProvider();
+provider.Mappings[".m3u8"] = "application/x-mpegURL";
+provider.Mappings[".ts"] = "video/MP2T";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = provider
+});
 
 app.MapControllers();
 

@@ -2,11 +2,17 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+
+USER root
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 USER $APP_UID
+
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
-
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
@@ -36,4 +42,10 @@ RUN dotnet publish "./SpotifyClone.Api.csproj" -c $BUILD_CONFIGURATION -o /app/p
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+USER root
+RUN mkdir -p /app/wwwroot/music /app/wwwroot/temp && \
+    chmod -R 777 /app/wwwroot
+USER $APP_UID
+
 ENTRYPOINT ["dotnet", "SpotifyClone.Api.dll"]
