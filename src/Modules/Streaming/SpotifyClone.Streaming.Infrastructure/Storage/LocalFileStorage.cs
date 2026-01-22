@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using SpotifyClone.Streaming.Application.Errors;
+using SpotifyClone.Streaming.Application.Abstractions.Services;
 
 namespace SpotifyClone.Streaming.Infrastructure.Storage;
 
-public class LocalFileStorage(IHostingEnvironment env) : IFileStorage
+public class LocalFileStorage(IWebHostEnvironment env) : IFileStorage
 {
     public string GetFullPath(string relativePath) =>
         Path.Combine(env.WebRootPath, relativePath);
@@ -24,7 +24,7 @@ public class LocalFileStorage(IHostingEnvironment env) : IFileStorage
         await stream.CopyToAsync(fileStream);
     }
 
-    public void DeleteFile(string relativePath)
+    public async Task DeleteFileAsync(string relativePath)
     {
         string fullPath = GetFullPath(relativePath);
         if (File.Exists(fullPath))

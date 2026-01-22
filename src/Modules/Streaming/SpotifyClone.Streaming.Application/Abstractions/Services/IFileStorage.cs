@@ -1,4 +1,4 @@
-﻿namespace SpotifyClone.Streaming.Application.Errors;
+﻿namespace SpotifyClone.Streaming.Application.Abstractions.Services;
 
 public interface IFileStorage
 {
@@ -8,5 +8,5 @@ public interface IFileStorage
 
     Task SaveFileAsync(Stream stream, string relativePath);
 
-    void DeleteFile(string relativePath);
+    Task DeleteFileAsync(string relativePath);
 }

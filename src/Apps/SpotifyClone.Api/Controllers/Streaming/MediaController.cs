@@ -21,8 +21,6 @@ public sealed class MediaController(IMediator mediator)
 
         Result<UploadAudioAssetCommandResult> result = await Mediator.Send(
             new UploadAudioAssetCommand(
-                request.Title,
-                request.Artist,
                 request.File.FileName,
                 stream),
             cancellationToken);

@@ -15,4 +15,8 @@ public static class MediaErrors
     public static readonly Error ConversionFailed = new(
         "Media.ConversionFailed",
         "Audio file conversion failed.");
+
+    public static readonly Error UploadFailed = new(
+        "Media.UploadFailed",
+        "Audio file upload failed.");
 }

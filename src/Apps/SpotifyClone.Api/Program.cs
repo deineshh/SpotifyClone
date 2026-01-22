@@ -1,5 +1,6 @@
 using System.Text;
 using System.Threading.RateLimiting;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.StaticFiles;
@@ -124,8 +125,9 @@ app.UseAuthorization();
 app.MapHealthChecks("/health");
 
 var provider = new FileExtensionContentTypeProvider();
-provider.Mappings[".m3u8"] = "application/x-mpegURL";
-provider.Mappings[".ts"] = "video/MP2T";
+provider.Mappings[".m3u8"] = "application/vnd.apple.mpegurl";
+provider.Mappings[".mpd"] = "application/dash+xml";
+provider.Mappings[".m4s"] = "video/iso.segment";
 
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -150,11 +152,11 @@ if (app.Environment.IsDevelopment())
     }
 
     app.UseHttpsRedirection();
-
     app.UseDeveloperExceptionPage();
 
-    app.MapOpenApi();
+    app.MapHangfireDashboardWithNoAuthorizationFilters();
 
+    app.MapOpenApi();
     app.MapScalarApiReference(options
         => options
             .WithTitle("SpotifyClone API")

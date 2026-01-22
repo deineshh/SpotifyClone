@@ -1,6 +1,7 @@
 services:
   spotifyclone.api:
     image: spotifyclone.api
+    user: root
     build:
       context: .
       dockerfile: src/Apps/SpotifyClone.Api/Dockerfile
@@ -15,8 +16,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./storage/music:/app/wwwroot/music
-      - ./storage/temp:/app/wwwroot/temp
+      - music_data:/app/wwwroot/music
+      - temp_data:/app/wwwroot/temp
 
   postgres:
     image: postgres:15
@@ -37,3 +38,5 @@ services:
 
 volumes:
   postgres_data:
+  music_data:
+  temp_data:

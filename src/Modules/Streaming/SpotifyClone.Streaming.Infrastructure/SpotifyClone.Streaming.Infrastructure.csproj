@@ -2,7 +2,10 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Hangfire.AspNetCore" />
+    <PackageReference Include="Hangfire.MemoryStorage" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" />
+    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Xabe.FFmpeg" />
   </ItemGroup>
 

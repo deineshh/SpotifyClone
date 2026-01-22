@@ -1,17 +1,19 @@
 ﻿using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
 using SpotifyClone.Streaming.Application.Errors;
+using SpotifyClone.Streaming.Application.Jobs;
 
 namespace SpotifyClone.Streaming.Application.Features.Media.Commands.UploadAudioAsset;
 
 public sealed class UploadAudioAssetCommandHandler(
-    IMediaService mediaService,
-    IFileStorage storage)
+    IFileStorage storage,
+    IBackgroundJobService jobService)
     : ICommandHandler<UploadAudioAssetCommand, UploadAudioAssetCommandResult>
 {
-    private readonly IMediaService _mediaService = mediaService;
     private readonly IFileStorage _storage = storage;
+    private readonly IBackgroundJobService _jobService = jobService;
 
     public async Task<Result<UploadAudioAssetCommandResult>> Handle(
         UploadAudioAssetCommand request,
@@ -25,22 +27,16 @@ public sealed class UploadAudioAssetCommandHandler(
             using Stream stream = request.FileStream;
             await _storage.SaveFileAsync(stream, tempFileName);
 
-            string sourcePath = _storage.GetFullPath(tempFileName);
             string musicFolder = _storage.GetMusicRootPath();
 
-            Result<string> convertResult = await _mediaService.ConvertToHlsAsync(
-                sourcePath, musicFolder, songId);
-
-            if (convertResult.IsFailure)
-            {
-                return Result.Failure<UploadAudioAssetCommandResult>(convertResult.Errors);
-            }
+            _jobService.Enqueue<AudioConversionJob>(job =>
+                job.ProcessAsync(tempFileName, songId, musicFolder));
 
             return new UploadAudioAssetCommandResult(songId);
         }
-        finally
+        catch
         {
-            _storage.DeleteFile(tempFileName);
+            return Result.Failure<UploadAudioAssetCommandResult>(MediaErrors.UploadFailed);
         }
     }
 }
