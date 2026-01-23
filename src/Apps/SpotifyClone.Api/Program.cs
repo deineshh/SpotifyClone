@@ -13,13 +13,14 @@ using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.DependencyInjection;
 using SpotifyClone.Streaming.Infrastructure.DependencyInjection;
+using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
 using Xabe.FFmpeg;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddBuildingBlocks(builder.Configuration);
 builder.Services.AddAccountsModule(builder.Configuration);
-builder.Services.AddStreamingModule();
+builder.Services.AddStreamingModule(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -149,6 +150,9 @@ if (app.Environment.IsDevelopment())
 
         IdentityAppDbContext identityDb = services.GetRequiredService<IdentityAppDbContext>();
         await identityDb.Database.MigrateAsync();
+
+        StreamingAppDbContext streamingDb = services.GetRequiredService<StreamingAppDbContext>();
+        await streamingDb.Database.MigrateAsync();
     }
 
     app.UseHttpsRedirection();

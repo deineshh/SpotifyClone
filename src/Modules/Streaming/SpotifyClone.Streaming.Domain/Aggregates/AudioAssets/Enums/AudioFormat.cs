@@ -1,5 +1,5 @@
 ﻿using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
-using SpotifyClone.Streaming.Domain.Aggregates.ImageAssets.Exceptions;
+using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Exceptions;
 
 namespace SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Enums;
 
