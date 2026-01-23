@@ -12,6 +12,10 @@ public static class MediaErrors
         "Media.AudioStreamNotFound",
         "No audio stream found in file.");
 
+    public static readonly Error AudioFileNotFound = new(
+        "Media.AudioFileNotFound",
+        "The audio file was not found or the upload is not yet complete.");
+
     public static readonly Error ConversionFailed = new(
         "Media.ConversionFailed",
         "Audio file conversion failed.");

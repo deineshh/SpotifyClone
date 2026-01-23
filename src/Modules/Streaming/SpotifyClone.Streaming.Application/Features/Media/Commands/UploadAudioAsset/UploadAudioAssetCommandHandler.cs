@@ -19,20 +19,20 @@ public sealed class UploadAudioAssetCommandHandler(
         UploadAudioAssetCommand request,
         CancellationToken cancellationToken)
     {
-        var songId = Guid.NewGuid();
-        string tempFileName = $"temp/{songId}{Path.GetExtension(request.FileName)}";
+        var audioId = Guid.NewGuid();
+        string tempFileName = $"temp/{audioId}{Path.GetExtension(request.FileName)}";
 
         try
         {
             using Stream stream = request.FileStream;
             await _storage.SaveFileAsync(stream, tempFileName);
 
-            string musicFolder = _storage.GetMusicRootPath();
+            string musicFolder = _storage.GetAudioRootPath();
 
             _jobService.Enqueue<AudioConversionJob>(job =>
-                job.ProcessAsync(tempFileName, songId, musicFolder));
+                job.ProcessAsync(tempFileName, audioId, musicFolder));
 
-            return new UploadAudioAssetCommandResult(songId);
+            return new UploadAudioAssetCommandResult(audioId);
         }
         catch
         {

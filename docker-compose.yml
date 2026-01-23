@@ -16,7 +16,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - music_data:/app/wwwroot/music
+      - audio_data:/app/wwwroot/audio
       - temp_data:/app/wwwroot/temp
 
   postgres:
@@ -38,5 +38,5 @@ services:
 
 volumes:
   postgres_data:
-  music_data:
+  audio_data:
   temp_data:

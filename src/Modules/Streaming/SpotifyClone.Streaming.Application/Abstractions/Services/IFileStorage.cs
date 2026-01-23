@@ -4,7 +4,7 @@ public interface IFileStorage
 {
     string GetFullPath(string relativePath);
 
-    string GetMusicRootPath();
+    string GetAudioRootPath();
 
     Task SaveFileAsync(Stream stream, string relativePath);
 

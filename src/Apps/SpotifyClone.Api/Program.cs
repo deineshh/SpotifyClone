@@ -109,6 +109,16 @@ else
 
 WebApplication app = builder.Build();
 
+var provider = new FileExtensionContentTypeProvider();
+provider.Mappings[".m3u8"] = "application/vnd.apple.mpegurl";
+provider.Mappings[".mpd"] = "application/dash+xml";
+provider.Mappings[".m4s"] = "video/iso.segment";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = provider
+});
+
 app.MapStaticAssets();
 
 app.UseRouting();
@@ -123,16 +133,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/health");
-
-var provider = new FileExtensionContentTypeProvider();
-provider.Mappings[".m3u8"] = "application/vnd.apple.mpegurl";
-provider.Mappings[".mpd"] = "application/dash+xml";
-provider.Mappings[".m4s"] = "video/iso.segment";
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    ContentTypeProvider = provider
-});
 
 app.MapControllers();
 

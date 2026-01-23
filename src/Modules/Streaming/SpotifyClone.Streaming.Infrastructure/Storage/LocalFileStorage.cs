@@ -8,8 +8,8 @@ public class LocalFileStorage(IWebHostEnvironment env) : IFileStorage
     public string GetFullPath(string relativePath) =>
         Path.Combine(env.WebRootPath, relativePath);
 
-    public string GetMusicRootPath() =>
-        Path.Combine(env.WebRootPath, "music");
+    public string GetAudioRootPath() =>
+        Path.Combine(env.WebRootPath, "audio");
 
     public async Task SaveFileAsync(Stream stream, string relativePath)
     {

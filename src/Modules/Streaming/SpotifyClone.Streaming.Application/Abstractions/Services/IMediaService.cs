@@ -7,5 +7,5 @@ public interface IMediaService
     Task<Result> ConvertToHlsAsync(
         string sourceFilePath,
         string outputFolder,
-        Guid songId);
+        Guid audioId);
 }

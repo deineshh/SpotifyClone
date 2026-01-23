@@ -13,15 +13,15 @@ public class AudioConversionJob(
     private readonly IFileStorage _storage = storage;
     private readonly ILogger<AudioConversionJob> _logger = logger;
 
-    public async Task ProcessAsync(string tempRelativePath, Guid songId, string outputFolder)
+    public async Task ProcessAsync(string tempRelativePath, Guid audioId, string outputFolder)
     {
         string sourcePath = _storage.GetFullPath(tempRelativePath);
 
         try
         {
-            _logger.LogInformation("Starting background conversion for {SongId}", songId);
+            _logger.LogInformation("Starting background conversion for {AudioId}", audioId);
 
-            Result result = await _mediaService.ConvertToHlsAsync(sourcePath, outputFolder, songId);
+            Result result = await _mediaService.ConvertToHlsAsync(sourcePath, outputFolder, audioId);
 
             if (result.IsFailure)
             {
@@ -29,7 +29,7 @@ public class AudioConversionJob(
                 throw new Exception($"Conversion failed: {result.Errors[0].Description}");
             }
 
-            _logger.LogInformation("Job finished successfully for {SongId}", songId);
+            _logger.LogInformation("Job finished successfully for {AudioId}", audioId);
         }
         catch (Exception ex)
         {

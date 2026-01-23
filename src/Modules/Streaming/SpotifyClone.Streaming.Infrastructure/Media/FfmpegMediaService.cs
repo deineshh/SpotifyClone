@@ -10,36 +10,35 @@ public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaServ
 {
     private readonly ILogger<FfmpegMediaService> _logger = logger;
 
-    public async Task<Result> ConvertToHlsAsync(string sourceFilePath, string outputFolder, Guid songId)
+    public async Task<Result> ConvertToHlsAsync(string sourceFilePath, string outputFolder, Guid audioId)
     {
         if (!File.Exists(sourceFilePath))
         {
             return Result.Failure(MediaErrors.SourceFileNotFound);
         }
 
-        string songIdStr = songId.ToString();
-        string specificSongFolder = Path.Combine(outputFolder, songIdStr);
+        string specificAudioFolder = Path.Combine(outputFolder, audioId.ToString());
 
         try
         {
             // 1. Створюємо головну папку
-            if (!Directory.Exists(specificSongFolder))
+            if (!Directory.Exists(specificAudioFolder))
             {
-                Directory.CreateDirectory(specificSongFolder);
+                Directory.CreateDirectory(specificAudioFolder);
             }
 
             // 2. Створюємо папки 0 та 1 вручну (FFmpeg буде використовувати їх як Representation ID)
             string[] representationIds = ["0", "1"];
             foreach (string id in representationIds)
             {
-                string subFolder = Path.Combine(specificSongFolder, id);
+                string subFolder = Path.Combine(specificAudioFolder, id);
                 if (!Directory.Exists(subFolder))
                 {
                     Directory.CreateDirectory(subFolder);
                 }
             }
 
-            string outputPath = Path.Combine(specificSongFolder, "manifest.mpd");
+            string outputPath = Path.Combine(specificAudioFolder, "manifest.mpd");
 
             IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(sourceFilePath);
             IAudioStream? audioStream = mediaInfo.AudioStreams.FirstOrDefault();
@@ -49,7 +48,7 @@ public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaServ
                 return Result.Failure(MediaErrors.AudioStreamNotFound);
             }
 
-            _logger.LogInformation("Starting Multi-Bitrate CMAF conversion for {SongId}...", songId);
+            _logger.LogInformation("Starting Multi-Bitrate CMAF conversion for {SongId}...", audioId);
 
             // Формуємо команду
             IConversion conversion = FFmpeg.Conversions.New()
@@ -80,16 +79,16 @@ public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaServ
 
             await conversion.Start();
 
-            _logger.LogInformation("Multi-Bitrate conversion finished for {SongId}", songId);
+            _logger.LogInformation("Multi-Bitrate conversion finished for {AudioId}", audioId);
             return Result.Success();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error converting song. Cleaning up...");
 
-            if (Directory.Exists(specificSongFolder))
+            if (Directory.Exists(specificAudioFolder))
             {
-                Directory.Delete(specificSongFolder, true);
+                Directory.Delete(specificAudioFolder, true);
             }
 
             return Result.Failure(MediaErrors.ConversionFailed);
