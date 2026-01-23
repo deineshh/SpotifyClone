@@ -166,14 +166,14 @@ Responsible for media assets (audio & image), playback sessions, playback histor
 - Duration: TimeSpan
 - Format: AudioFormat (Smart Enum):
     - Value: String ("MP3")
+- FileSizeInBytes: long
+- IsActive: bool
+- CreatedAt: DateTime
 - BitrateKbps: int
 - SampleRateHz: int
 - Channels: int
-- FileSizeBytes: long
 - Checksum: string
 - StorageKey: string
-- IsActive: bool
-- CreatedAt: DateTime
 
 ### ImageAsset
 
