@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
 
 namespace SpotifyClone.Streaming.Infrastructure.Storage;
@@ -11,7 +11,10 @@ public class LocalFileStorage(IWebHostEnvironment env) : IFileStorage
     public string GetAudioRootPath() =>
         Path.Combine(env.WebRootPath, "audio");
 
-    public async Task SaveFileAsync(Stream stream, string relativePath)
+    public string GetLocalConversionRootPath() =>
+        GetAudioRootPath();
+
+    public async Task SaveAudioFileAsync(Stream stream, string relativePath)
     {
         string fullPath = GetFullPath(relativePath);
         string? directory = Path.GetDirectoryName(fullPath);
@@ -24,12 +27,19 @@ public class LocalFileStorage(IWebHostEnvironment env) : IFileStorage
         await stream.CopyToAsync(fileStream);
     }
 
-    public async Task DeleteFileAsync(string relativePath)
+    public async Task DeleteAudioFileAsync(string relativePath)
     {
         string fullPath = GetFullPath(relativePath);
         if (File.Exists(fullPath))
         {
             File.Delete(fullPath);
         }
+    }
+
+    public Task DownloadAudioToLocalFileAsync(string objectName, string localPath)
+    {
+        string sourcePath = GetFullPath(objectName);
+        File.Copy(sourcePath, localPath, true);
+        return Task.CompletedTask;
     }
 }

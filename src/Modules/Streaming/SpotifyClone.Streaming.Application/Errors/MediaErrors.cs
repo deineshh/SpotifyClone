@@ -12,9 +12,9 @@ public static class MediaErrors
         "Media.AudioStreamNotFound",
         "No audio stream found in file.");
 
-    public static readonly Error AudioFileNotFound = new(
-        "Media.AudioFileNotFound",
-        "The audio file was not found or the upload is not yet complete.");
+    public static readonly Error MediaFileNotFound = CommonErrors.NotFound(
+        "Media",
+        "Media file");
 
     public static readonly Error ConversionFailed = new(
         "Media.ConversionFailed",
@@ -23,4 +23,16 @@ public static class MediaErrors
     public static readonly Error UploadFailed = new(
         "Media.UploadFailed",
         "Audio file upload failed.");
+
+    public static readonly Error InvalidFileSize = new(
+        "Media.InvalidFileSize",
+        "The size of the media file is invalid.");
+
+    public static readonly Error InvalidFormat = new(
+        "Media.InvalidMediaFormat",
+        "The format of the media file is invalid.");
+
+    public static readonly Error InvalidDuration = new(
+        "Media.InvalidAudioDuration",
+        "The duration of the audio file is invalid.");
 }

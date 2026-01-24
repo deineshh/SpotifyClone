@@ -4,8 +4,8 @@ namespace SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
 
 public interface IAudioAssetRepository
 {
-    Task<AudioAsset?> GetByUserIdAsync(
-        AudioAssetId audioAssetId,
+    Task<AudioAsset?> GetByIdAsync(
+        AudioAssetId id,
         CancellationToken cancellationToken = default);
 
     Task AddAsync(

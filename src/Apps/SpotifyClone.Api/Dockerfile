@@ -44,7 +44,7 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 USER root
-RUN mkdir -p /app/wwwroot/music /app/wwwroot/temp && \
+RUN mkdir -p /app/wwwroot/audio /app/wwwroot/temp /app/wwwroot/temp/conversion && \
     chmod -R 777 /app/wwwroot
 USER $APP_UID
 

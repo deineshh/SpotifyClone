@@ -3,4 +3,4 @@
 public sealed record GetAudioAssetResponse(
     Guid AudioId,
     string HlsUrl,
-    string HashUrl);
+    string DashUrl);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
+using SpotifyClone.Streaming.Application.Abstractions.Services.Models;
 using SpotifyClone.Streaming.Application.Errors;
 using Xabe.FFmpeg;
 
@@ -9,6 +10,20 @@ namespace SpotifyClone.Streaming.Infrastructure.Media;
 public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaService
 {
     private readonly ILogger<FfmpegMediaService> _logger = logger;
+
+    public async Task<AudioMetadata> GetAudioMetadataAsync(string filePath)
+    {
+        IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(filePath);
+        IAudioStream? audioStream = mediaInfo.AudioStreams.FirstOrDefault();
+        var fileInfo = new FileInfo(filePath);
+
+        return new AudioMetadata(
+            audioStream?.Duration ?? TimeSpan.Zero,
+            Path.GetExtension(filePath).Replace(".", ""),
+            fileInfo.Length,
+            audioStream?.Bitrate ?? 0
+        );
+    }
 
     public async Task<Result> ConvertToHlsAsync(string sourceFilePath, string outputFolder, Guid audioId)
     {
@@ -38,8 +53,6 @@ public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaServ
                 }
             }
 
-            string outputPath = Path.Combine(specificAudioFolder, "manifest.mpd");
-
             IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(sourceFilePath);
             IAudioStream? audioStream = mediaInfo.AudioStreams.FirstOrDefault();
 
@@ -48,38 +61,42 @@ public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaServ
                 return Result.Failure(MediaErrors.AudioStreamNotFound);
             }
 
-            _logger.LogInformation("Starting Multi-Bitrate CMAF conversion for {SongId}...", audioId);
+            _logger.LogInformation("Starting Multi-Bitrate HLS conversion for {AudioId}...", audioId);
 
-            // Формуємо команду
+            // Використовуємо прямі слеші для FFmpeg
+            string normalizedPath = specificAudioFolder.Replace("\\", "/");
+
             IConversion conversion = FFmpeg.Conversions.New()
-                .AddStream(audioStream) // Це додає перший потік (index 0)
-                .SetOutput(outputPath)
-                // Додаємо ДРУГИЙ потік вручну через map
-                .AddParameter("-map 0:a:0")
+                .AddStream(audioStream) // Це автоматично створює перший потік (a:0)
+                .AddParameter("-map 0:a:0") // Створюємо ДРУГИЙ потік (a:1) вручну
 
-                // Налаштування для потоку 0 (128k)
-                .AddParameter("-c:a:0 aac")
-                .AddParameter("-b:a:0 128k")
-
-                // Налаштування для потоку 1 (192k)
-                .AddParameter("-c:a:1 aac")
-                .AddParameter("-b:a:1 192k")
-
+                // ТУТ ВАЖЛИВО: тільки два потоки!
+                .AddParameter("-c:a:0 aac -b:a:0 128k")
+                .AddParameter("-c:a:1 aac -b:a:1 192k")
                 .AddParameter("-vn")
-                .AddParameter("-f dash")
-                .AddParameter("-hls_playlist 1")
-                .AddParameter("-hls_master_name master.m3u8")
-                .AddParameter("-seg_duration 10")
-                .AddParameter("-use_template 1")
-                .AddParameter("-use_timeline 1")
-                .AddParameter("-adaptation_sets \"id=0,streams=a\"")
-                // FFmpeg сам підставить 0 та 1 замість $RepresentationID$
-                .AddParameter("-init_seg_name \"$RepresentationID$/init.m4s\"")
-                .AddParameter("-media_seg_name \"$RepresentationID$/chunk_$Number$.m4s\"");
+
+                .AddParameter("-f hls")
+                .AddParameter("-hls_segment_type fmp4")
+                .AddParameter("-hls_time 10")
+                .AddParameter("-hls_list_size 0")
+
+                // Мапимо два потоки на дві папки: 0 та 1
+                .AddParameter("-var_stream_map \"a:0,name:0 a:1,name:1\"")
+
+                .AddParameter("-hls_playlist_type vod")
+                .AddParameter("-master_pl_name master.m3u8")
+
+                // Використовуємо шаблони для імен файлів
+                .AddParameter($"-hls_segment_filename \"{normalizedPath}/%v/chunk_%03d.m4s\"")
+
+                // ВАЖЛИВО: SetOutput має бути таким, щоб FFmpeg міг підставити %v
+                // Не використовувати Path.Combine для частини з %v, бо він може додати зайві слеші
+                .SetOutput($"{normalizedPath}/%v/index.m3u8");
 
             await conversion.Start();
 
             _logger.LogInformation("Multi-Bitrate conversion finished for {AudioId}", audioId);
+
             return Result.Success();
         }
         catch (Exception ex)

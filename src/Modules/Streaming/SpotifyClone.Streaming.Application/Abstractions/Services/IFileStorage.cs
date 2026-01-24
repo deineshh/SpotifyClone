@@ -1,4 +1,4 @@
-﻿namespace SpotifyClone.Streaming.Application.Abstractions.Services;
+namespace SpotifyClone.Streaming.Application.Abstractions.Services;
 
 public interface IFileStorage
 {
@@ -6,7 +6,11 @@ public interface IFileStorage
 
     string GetAudioRootPath();
 
-    Task SaveFileAsync(Stream stream, string relativePath);
+    string GetLocalConversionRootPath();
 
-    Task DeleteFileAsync(string relativePath);
+    Task SaveAudioFileAsync(Stream stream, string relativePath);
+
+    Task DeleteAudioFileAsync(string relativePath);
+
+    Task DownloadAudioToLocalFileAsync(string objectName, string localPath);
 }

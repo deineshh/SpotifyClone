@@ -1,13 +1,15 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
 using SpotifyClone.Streaming.Application;
 using SpotifyClone.Streaming.Application.Abstractions;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
+using SpotifyClone.Streaming.Application.Errors;
 using SpotifyClone.Streaming.Application.Jobs;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
 using SpotifyClone.Streaming.Infrastructure.Media;
@@ -45,9 +47,12 @@ public static class StreamingModule
         services.AddScoped<IStreamingUnitOfWork, StreamingEfCoreUnitOfWork>();
         services.AddScoped<IAudioAssetRepository, AudioAssetEfCoreRepository>();
         services.AddScoped<IMediaService, FfmpegMediaService>();
-        services.AddScoped<IFileStorage, LocalFileStorage>();
+        services.AddScoped<IFileStorage, MinioFileStorage>();
+        services.AddScoped<IDomainExceptionMapper, StreamingDomainExceptionMapper>();
 
         services.AddTransient<AudioConversionJob>();
+
+        services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.SectionName));
 
         return services;
     }

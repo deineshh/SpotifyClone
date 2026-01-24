@@ -55,4 +55,16 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
 
         return new AudioAsset(id, duration, format, fileSizeInBytes, isReady, DateTimeOffset.UtcNow);
     }
+
+    public void MarkAsReady()
+    {
+        if (IsReady)
+        {
+            return;
+        }
+
+        IsReady = true;
+
+        // Raise domain events if needed
+    }
 }

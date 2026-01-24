@@ -61,8 +61,8 @@ public static class AccountsModule
         services.AddScoped<IUserProfileRepository, UserProfileEfCoreRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenEfCoreRepository>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
 
-        services.AddTransient<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
         services.AddTransient<ITokenHasher, Sha256TokenHasher>();
         services.AddTransient<ITokenService, JwtTokenService>();
         services.AddTransient<ICurrentUser, CurrentUser>();

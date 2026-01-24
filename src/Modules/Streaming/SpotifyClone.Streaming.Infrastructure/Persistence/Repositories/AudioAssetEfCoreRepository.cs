@@ -16,8 +16,8 @@ internal sealed class AudioAssetEfCoreRepository(
         CancellationToken cancellationToken = default)
         => await _audioAssets.AddAsync(audioAsset, cancellationToken);
 
-    public async Task<AudioAsset?> GetByUserIdAsync(
-        AudioAssetId audioAssetId,
+    public async Task<AudioAsset?> GetByIdAsync(
+        AudioAssetId id,
         CancellationToken cancellationToken = default)
-        => await _audioAssets.FirstOrDefaultAsync(a => a.Id == audioAssetId, cancellationToken);
+        => await _audioAssets.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 }
