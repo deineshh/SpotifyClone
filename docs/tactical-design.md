@@ -22,7 +22,8 @@ Even if the property name is differ per bounded context (e.g. OwnerId, Collabora
 
 - Width: Integer
 - Height: Integer
-- FileType: String
+- FileType: ImageFileType:
+    - Value: String ("jpg", "jpeg", "png", "webp")
 
 ## Accounts BC
 
@@ -165,10 +166,12 @@ Responsible for media assets (audio & image), playback sessions, playback histor
     - Value: Guid
 - Duration: TimeSpan
 - Format: AudioFormat (Smart Enum):
-    - Value: String ("MP3")
+    - Value: String ("mp3")
 - FileSizeInBytes: long
-- IsActive: bool
+- IsReady: bool
 - CreatedAt: DateTime
+
+Additional (maybe will be added in the future):
 - BitrateKbps: int
 - SampleRateHz: int
 - Channels: int
@@ -178,12 +181,12 @@ Responsible for media assets (audio & image), playback sessions, playback histor
 ### ImageAsset
 
 - Id: ImageId (Value Object - [SharedKernel](#shared-kernel))
-- Width: Integer
-- Height: Integer
-- MimeType: String
-- StorageKey: String
-- IsActive: Boolean
+- Metadata: ImageMetadata (Value Object - [SharedKernel](#shared-kernel))
+- IsReady: Boolean
 - CreatedAt: DateTime
+
+Additional (maybe will be added in the future):
+- StorageKey: String
 
 ### PlaybackSession
 

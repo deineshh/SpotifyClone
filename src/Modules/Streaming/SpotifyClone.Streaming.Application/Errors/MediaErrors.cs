@@ -35,4 +35,8 @@ public static class MediaErrors
     public static readonly Error InvalidDuration = new(
         "Media.InvalidAudioDuration",
         "The duration of the audio file is invalid.");
+
+    public static readonly Error InvalidImageMetadata = new(
+        "Media.InvalidImageMetadata",
+        "Image metadata is invalid.");
 }

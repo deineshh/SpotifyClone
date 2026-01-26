@@ -6,7 +6,7 @@ using SpotifyClone.Shared.Kernel.ValueObjects;
 
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Configurations;
 
-internal static class ImageMetadataEfcoreConfiguration
+internal static class ImageMetadataEfCoreConfiguration
 {
     public static OwnedNavigationBuilder<AvatarImage, ImageMetadata> Configure(
         this OwnedNavigationBuilder<AvatarImage, ImageMetadata> builder)
@@ -25,6 +25,10 @@ internal static class ImageMetadataEfcoreConfiguration
             .HasConversion(AccountsEfCoreValueConverters.ImageFileTypeConverter)
             .HasColumnName("avatar_file_type")
             .HasMaxLength(10)
+            .IsRequired();
+
+        builder.Property(m => m.SizeInBytes)
+            .HasColumnName("avatar_size_in_bytes")
             .IsRequired();
 
         return builder;

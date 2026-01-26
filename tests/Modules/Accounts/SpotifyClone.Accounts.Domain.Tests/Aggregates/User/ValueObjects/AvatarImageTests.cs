@@ -16,9 +16,10 @@ public sealed class AvatarImageTests
         int width = 512;
         int height = 512;
         ImageFileType fileType = ImageFileType.Png;
+        long sizeInBytes = 150000;
 
         // Act
-        var avatarImage = new AvatarImage(imageId, width, height, fileType);
+        var avatarImage = new AvatarImage(imageId, width, height, fileType, sizeInBytes);
 
         // Assert
         avatarImage.ImageId.Should().Be(imageId);
@@ -35,9 +36,10 @@ public sealed class AvatarImageTests
         int width = 512;
         int height = 512;
         ImageFileType fileType = ImageFileType.Png;
+        long sizeInBytes = 150000;
 
         // Act
-        Action act = () => new AvatarImage(imageId, width, height, fileType);
+        Action act = () => new AvatarImage(imageId, width, height, fileType, sizeInBytes);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -51,9 +53,10 @@ public sealed class AvatarImageTests
         int width = 512;
         int height = 512;
         ImageFileType fileType = null!;
+        long sizeInBytes = 150000;
 
         // Act
-        Action act = () => new AvatarImage(imageId, width, height, fileType);
+        Action act = () => new AvatarImage(imageId, width, height, fileType, sizeInBytes);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -67,9 +70,10 @@ public sealed class AvatarImageTests
         int width = 512;
         int height = 256;
         ImageFileType fileType = ImageFileType.Png;
+        long sizeInBytes = 150000;
 
         // Act
-        Action act = () => new AvatarImage(imageId, width, height, fileType);
+        Action act = () => new AvatarImage(imageId, width, height, fileType, sizeInBytes);
 
         // Assert
         act.Should().Throw<InvalidAvatarImageDomainException>();
@@ -83,9 +87,10 @@ public sealed class AvatarImageTests
         int width = 512;
         int height = 512;
         ImageFileType fileType = ImageFileType.Jpeg;
+        long sizeInBytes = 150000;
 
         // Act
-        Action act = () => new AvatarImage(imageId, width, height, fileType);
+        Action act = () => new AvatarImage(imageId, width, height, fileType, sizeInBytes);
 
         // Assert
         act.Should().Throw<InvalidAvatarImageDomainException>();

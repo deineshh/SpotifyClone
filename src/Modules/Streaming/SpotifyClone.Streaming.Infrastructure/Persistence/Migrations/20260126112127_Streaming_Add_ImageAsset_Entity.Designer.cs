@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
@@ -11,9 +12,11 @@ using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
 namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(StreamingAppDbContext))]
-    partial class StreamingAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260126112127_Streaming_Add_ImageAsset_Entity")]
+    partial class Streaming_Add_ImageAsset_Entity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

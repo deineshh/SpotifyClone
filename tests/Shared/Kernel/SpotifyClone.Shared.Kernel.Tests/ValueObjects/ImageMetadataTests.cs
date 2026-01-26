@@ -16,9 +16,10 @@ public sealed class ImageMetadataTests
         int maxWidth = 1920;
         int maxHeight = 1080;
         ImageFileType fileType = ImageFileType.Jpg;
+        long sizeInBytes = 150000;
 
         // Act
-        var imageMetadata = new ImageMetadata(width, height, maxWidth, maxHeight, fileType);
+        var imageMetadata = new ImageMetadata(width, height, maxWidth, maxHeight, fileType, sizeInBytes);
 
         // Assert
         imageMetadata.Width.Should().Be(width);
@@ -36,10 +37,11 @@ public sealed class ImageMetadataTests
         int maxWidth = 1920;
         int maxHeight = 1080;
         ImageFileType fileType = ImageFileType.Jpg;
+        long sizeInBytes = 150000;
 
         // Act
         Func<ImageMetadata> result = ()
-            => new ImageMetadata(invalidWidth, height, maxWidth, maxHeight, fileType);
+            => new ImageMetadata(invalidWidth, height, maxWidth, maxHeight, fileType, sizeInBytes);
 
         // Assert
         result.Should().Throw<ArgumentOutOfRangeException>();
@@ -55,10 +57,11 @@ public sealed class ImageMetadataTests
         int maxWidth = 1920;
         int maxHeight = 1080;
         ImageFileType fileType = ImageFileType.Jpg;
+        long sizeInBytes = 150000;
 
         // Act
         Func<ImageMetadata> result = ()
-            => new ImageMetadata(width, invalidHeight, maxWidth, maxHeight, fileType);
+            => new ImageMetadata(width, invalidHeight, maxWidth, maxHeight, fileType, sizeInBytes);
 
         // Assert
         result.Should().Throw<ArgumentOutOfRangeException>();
@@ -73,10 +76,11 @@ public sealed class ImageMetadataTests
         int maxWidth = 1920;
         int maxHeight = 1080;
         ImageFileType fileType = ImageFileType.Jpg;
+        long sizeInBytes = 150000;
 
         // Act
         Func<ImageMetadata> result = ()
-            => new ImageMetadata(width, height, maxWidth, maxHeight, fileType);
+            => new ImageMetadata(width, height, maxWidth, maxHeight, fileType, sizeInBytes);
 
         // Assert
         result.Should().Throw<InvalidImageMetadataDomainException>();
@@ -91,10 +95,11 @@ public sealed class ImageMetadataTests
         int maxWidth = 1920;
         int maxHeight = 1080;
         ImageFileType fileType = ImageFileType.Jpg;
+        long sizeInBytes = 150000;
 
         // Act
         Func<ImageMetadata> result = ()
-            => new ImageMetadata(width, height, maxWidth, maxHeight, fileType);
+            => new ImageMetadata(width, height, maxWidth, maxHeight, fileType, sizeInBytes);
 
         // Assert
         result.Should().Throw<InvalidImageMetadataDomainException>();
@@ -110,10 +115,11 @@ public sealed class ImageMetadataTests
         int height = 600;
         int maxHeight = 1920;
         ImageFileType fileType = ImageFileType.Jpg;
+        long sizeInBytes = 150000;
 
         // Act
         Func<ImageMetadata> result = ()
-            => new ImageMetadata(width, height, invalidMaxWidth, maxHeight, fileType);
+            => new ImageMetadata(width, height, invalidMaxWidth, maxHeight, fileType, sizeInBytes);
 
         // Assert
         result.Should().Throw<ArgumentOutOfRangeException>();
@@ -129,10 +135,11 @@ public sealed class ImageMetadataTests
         int height = 600;
         int maxWidth = 1920;
         ImageFileType fileType = ImageFileType.Jpg;
+        long sizeInBytes = 150000;
 
         // Act
         Func<ImageMetadata> result = ()
-            => new ImageMetadata(width, height, maxWidth, invalidMaxHeight, fileType);
+            => new ImageMetadata(width, height, maxWidth, invalidMaxHeight, fileType, sizeInBytes);
 
         // Assert
         result.Should().Throw<ArgumentOutOfRangeException>();
@@ -146,12 +153,33 @@ public sealed class ImageMetadataTests
         int height = 600;
         int maxWidth = 1920;
         int maxHeight = 1080;
+        long sizeInBytes = 150000;
 
         // Act
         Func<ImageMetadata> result = ()
-            => new ImageMetadata(width, height, maxWidth, maxHeight, null!);
+            => new ImageMetadata(width, height, maxWidth, maxHeight, null!, sizeInBytes);
 
         // Assert
         result.Should().Throw<ArgumentNullException>();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Constructor_Should_ThrowException_When_SizeInBytesIsInvalid(int invalidSizeInBytes)
+    {
+        // Arrange
+        int width = 600;
+        int height = 600;
+        int maxWidth = 1920;
+        int maxHeight = 1920;
+        ImageFileType fileType = ImageFileType.Jpg;
+
+        // Act
+        Func<ImageMetadata> result = ()
+            => new ImageMetadata(width, height, maxWidth, maxHeight, fileType, invalidSizeInBytes);
+
+        // Assert
+        result.Should().Throw<ArgumentOutOfRangeException>();
     }
 }

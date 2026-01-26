@@ -28,8 +28,8 @@ internal sealed class AudioAssetEfCoreConfiguration : IEntityTypeConfiguration<A
             .HasMaxLength(16)
             .IsRequired();
 
-        builder.Property(x => x.FileSizeInBytes)
-            .HasColumnName("file_size_in_bytes")
+        builder.Property(x => x.SizeInBytes)
+            .HasColumnName("size_in_bytes")
             .IsRequired();
 
         builder.Property(x => x.IsReady)
