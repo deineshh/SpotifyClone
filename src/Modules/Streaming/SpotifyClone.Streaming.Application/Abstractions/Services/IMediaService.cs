@@ -5,11 +5,17 @@ namespace SpotifyClone.Streaming.Application.Abstractions.Services;
 
 public interface IMediaService
 {
-    Task<AudioMetadata> GetAudioMetadataAsync(
-        string filePath);
+    Task<AudioMetadata> GetAudioMetadataAsync(string filePath);
 
-    Task<Result> ConvertToHlsAsync(
+    Task<ImageMetadata> GetImageMetadataAsync(string filePath);
+
+    Task<Result> ConvertToHlsDashAsync(
         string sourceFilePath,
         string outputFolder,
         Guid audioId);
+
+    Task<Result> ConvertToWebpAsync(
+        string sourceFilePath,
+        string outputFolder,
+        Guid imageId);
 }

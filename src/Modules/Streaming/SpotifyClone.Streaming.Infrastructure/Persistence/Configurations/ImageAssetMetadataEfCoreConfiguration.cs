@@ -12,22 +12,21 @@ internal static class ImageAssetMetadataEfCoreConfiguration
         this OwnedNavigationBuilder<ImageAsset, ImageMetadata> builder)
     {
         builder.Property(m => m.Width)
-            .HasColumnName("metadata_width")
-            .IsRequired();
+            .HasColumnName("metadata_width");
 
         builder.Property(m => m.Height)
-            .HasColumnName("metadata_height")
-            .IsRequired();
+            .HasColumnName("metadata_height");
 
         builder.Property(m => m.FileType)
             .HasConversion(StreamingEfCoreValueConverters.ImageFileTypeConverter)
             .HasColumnName("metadata_file_type")
-            .HasMaxLength(10)
-            .IsRequired();
+            .HasMaxLength(10);
 
         builder.Property(m => m.SizeInBytes)
-            .HasColumnName("metadata_size_in_bytes")
-            .IsRequired();
+            .HasColumnName("metadata_size_in_bytes");
+
+        builder.Ignore(m => m.MaxWidth);
+        builder.Ignore(m => m.MaxHeight);
 
         return builder;
     }

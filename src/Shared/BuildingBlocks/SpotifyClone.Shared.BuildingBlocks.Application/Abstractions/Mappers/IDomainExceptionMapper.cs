@@ -5,6 +5,5 @@ namespace SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
 
 public interface IDomainExceptionMapper
 {
-    bool CanMap(DomainExceptionBase domainException);
     Error MapToError(DomainExceptionBase domainException);
 }

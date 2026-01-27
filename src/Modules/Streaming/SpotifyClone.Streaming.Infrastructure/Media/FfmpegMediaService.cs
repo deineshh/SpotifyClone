@@ -13,19 +13,45 @@ public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaServ
 
     public async Task<AudioMetadata> GetAudioMetadataAsync(string filePath)
     {
+        // 1. Отримуємо інфо про файл з диска
+        var fileInfo = new FileInfo(filePath);
+        if (!fileInfo.Exists)
+        {
+            throw new FileNotFoundException("Local file not found", filePath);
+        }
+
+        // 2. Аналізуємо через FFmpeg
         IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(filePath);
         IAudioStream? audioStream = mediaInfo.AudioStreams.FirstOrDefault();
-        var fileInfo = new FileInfo(filePath);
 
         return new AudioMetadata(
             audioStream?.Duration ?? TimeSpan.Zero,
-            Path.GetExtension(filePath).Replace(".", ""),
-            fileInfo.Length,
+            Path.GetExtension(filePath).TrimStart('.'),
+            fileInfo.Length, // Локальний розмір
             audioStream?.Bitrate ?? 0
         );
     }
 
-    public async Task<Result> ConvertToHlsAsync(string sourceFilePath, string outputFolder, Guid audioId)
+    public async Task<ImageMetadata> GetImageMetadataAsync(string filePath)
+    {
+        var fileInfo = new FileInfo(filePath);
+        if (!fileInfo.Exists)
+        {
+            throw new FileNotFoundException("Local file not found", filePath);
+        }
+
+        IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(filePath);
+        IVideoStream? videoStream = mediaInfo.VideoStreams.FirstOrDefault();
+
+        return new ImageMetadata(
+            videoStream?.Width ?? 0,
+            videoStream?.Height ?? 0,
+            Path.GetExtension(filePath).TrimStart('.'),
+            fileInfo.Length
+        );
+    }
+
+    public async Task<Result> ConvertToHlsDashAsync(string sourceFilePath, string outputFolder, Guid audioId)
     {
         if (!File.Exists(sourceFilePath))
         {
@@ -58,10 +84,10 @@ public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaServ
 
             if (audioStream == null)
             {
-                return Result.Failure(MediaErrors.AudioStreamNotFound);
+                return Result.Failure(MediaErrors.MediaStreamNotFound);
             }
 
-            _logger.LogInformation("Starting Multi-Bitrate HLS conversion for {AudioId}...", audioId);
+            _logger.LogInformation("Starting Multi-Bitrate HLS/DASH conversion for {AudioId}...", audioId);
 
             // Використовуємо прямі слеші для FFmpeg
             string normalizedPath = specificAudioFolder.Replace("\\", "/");
@@ -95,17 +121,87 @@ public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaServ
 
             await conversion.Start();
 
-            _logger.LogInformation("Multi-Bitrate conversion finished for {AudioId}", audioId);
+            _logger.LogInformation("Multi-Bitrate HLS/DASH conversion finished for {AudioId}", audioId);
 
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error converting song. Cleaning up...");
+            _logger.LogError(ex, "Error while converting song. Cleaning up...");
 
             if (Directory.Exists(specificAudioFolder))
             {
                 Directory.Delete(specificAudioFolder, true);
+            }
+
+            return Result.Failure(MediaErrors.ConversionFailed);
+        }
+    }
+
+    public async Task<Result> ConvertToWebpAsync(string sourceFilePath, string outputFolder, Guid imageId)
+    {
+        if (!File.Exists(sourceFilePath))
+        {
+            return Result.Failure(MediaErrors.SourceFileNotFound);
+        }
+
+        string specificImageFolder = Path.Combine(outputFolder, imageId.ToString());
+        string outputFilePath = Path.Combine(specificImageFolder, "image.webp");
+
+        try
+        {
+            // 1. Створюємо папку
+            if (!Directory.Exists(specificImageFolder))
+            {
+                Directory.CreateDirectory(specificImageFolder);
+            }
+
+            // 2. Отримуємо інфо про файл (FFmpeg бачить картинки як VideoStream)
+            IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(sourceFilePath);
+            IVideoStream? videoStream = mediaInfo.VideoStreams.FirstOrDefault();
+            if (videoStream == null)
+            {
+                return Result.Failure(MediaErrors.MediaStreamNotFound);
+            }
+
+            _logger.LogInformation("Starting WebP conversion for {ImageId}...", imageId);
+
+            // 3. Налаштовуємо конвертацію
+            IConversion conversion = FFmpeg.Conversions.New()
+                .AddStream(videoStream)
+                .SetOutput(outputFilePath)
+
+                // Вказуємо кодек WebP
+                .AddParameter("-c:v libwebp")
+
+                // Якість (Compression Factor): від 0 до 100.
+                // 75-80 — це "золотий стандарт" Google (баланс між розміром і якістю).
+                // 100 — максимальна якість (але не lossless).
+                .AddParameter("-q:v 80")
+
+                // Прибираємо аудіо (на випадок, якщо хтось завантажив відео замість картинки)
+                .AddParameter("-an")
+
+                // Оптимізація: Preset 'picture' підказує кодеку, що це фото, а не графіка/текст
+                .AddParameter("-preset picture")
+
+                // Loop 0 потрібен, якщо раптом завантажать GIF, щоб він не крутився вічно (для статики)
+                // або навпаки, якщо хочеш підтримку анімованих WebP, прибери це.
+                .AddParameter("-frames:v 1");
+
+            await conversion.Start();
+
+            _logger.LogInformation("WebP conversion finished for {ImageId}", imageId);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error converting image {ImageId}. Cleaning up...", imageId);
+
+            if (Directory.Exists(specificImageFolder))
+            {
+                Directory.Delete(specificImageFolder, true);
             }
 
             return Result.Failure(MediaErrors.ConversionFailed);

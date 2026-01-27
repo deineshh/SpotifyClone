@@ -12,14 +12,14 @@ internal static class StreamingEfCoreValueConverters
     public static readonly StronglyTypedIdEfCoreConverter<AudioAssetId, Guid> AudioAssetIdConverter = new(
         v => AudioAssetId.From(v));
 
-    public static readonly ValueConverter<AudioFormat, string> AudioFormatConverter = new(
-        f => f.Value,
+    public static readonly ValueConverter<AudioFormat?, string> AudioFormatConverter = new(
+        f => f == null ? string.Empty : f.Value,
         v => AudioFormat.From(v));
 
     public static readonly StronglyTypedIdEfCoreConverter<ImageId, Guid> ImageIdConverter = new(
         v => ImageId.From(v));
 
-    public static readonly ValueConverter<ImageFileType, string> ImageFileTypeConverter = new(
-        t => t.Value,
+    public static readonly ValueConverter<ImageFileType?, string> ImageFileTypeConverter = new(
+        t => t == null ? string.Empty : t.Value,
         v => ImageFileType.From(v));
 }

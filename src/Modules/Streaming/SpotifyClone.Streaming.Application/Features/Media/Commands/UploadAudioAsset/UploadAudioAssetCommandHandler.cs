@@ -3,16 +3,14 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Streaming.Application.Abstractions;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
-using SpotifyClone.Streaming.Application.Abstractions.Services.Models;
 using SpotifyClone.Streaming.Application.Errors;
 using SpotifyClone.Streaming.Application.Jobs;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
-using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Enums;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.ValueObjects;
 
 namespace SpotifyClone.Streaming.Application.Features.Media.Commands.UploadAudioAsset;
 
-public sealed class UploadAudioAssetCommandHandler(
+internal sealed class UploadAudioAssetCommandHandler(
     IStreamingUnitOfWork unit,
     IMediaService mediaService,
     IFileStorage storage,
@@ -43,41 +41,19 @@ public sealed class UploadAudioAssetCommandHandler(
                 Directory.CreateDirectory(scratchRoot);
             }
 
-            string localMetaPath = Path.Combine(scratchRoot, $"{audioAssetId.Value}-meta{extension}");
-            await _storage.DownloadAudioToLocalFileAsync(tempFileName, localMetaPath);
-
-            AudioMetadata metadata;
-            try
-            {
-                metadata = await _mediaService.GetAudioMetadataAsync(localMetaPath);
-            }
-            finally
-            {
-                if (File.Exists(localMetaPath))
-                {
-                    File.Delete(localMetaPath);
-                }
-            }
-
             _jobService.Enqueue<AudioConversionJob>(job
                 => job.ProcessAsync(tempFileName, audioAssetId.Value, scratchRoot));
-
-            var audioAsset = AudioAsset.Create(
-                audioAssetId,
-                metadata.Duration,
-                AudioFormat.From(metadata.Format),
-                metadata.SizeInBytes,
-                false);
-
-            await _unit.AudioAssets.AddAsync(audioAsset, cancellationToken);
-
-            return new UploadAudioAssetCommandResult(audioAssetId.Value);
         }
         catch
         {
             await _storage.DeleteAudioFileAsync(tempFileName);
 
-            return Result.Failure<UploadAudioAssetCommandResult>(MediaErrors.UploadFailed);
+            return Result.Failure<UploadAudioAssetCommandResult>(MediaErrors.AudioUploadFailed);
         }
+
+        var audioAsset = AudioAsset.Create(audioAssetId, false, null, null, null);
+        await _unit.AudioAssets.AddAsync(audioAsset, cancellationToken);
+
+        return new UploadAudioAssetCommandResult(audioAssetId.Value);
     }
 }

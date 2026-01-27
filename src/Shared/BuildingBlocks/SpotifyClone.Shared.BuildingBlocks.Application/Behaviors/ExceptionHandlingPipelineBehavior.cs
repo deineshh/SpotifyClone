@@ -33,10 +33,8 @@ public sealed class ExceptionHandlingPipelineBehavior<TRequest, TResponse>(
 
             if (ex is DomainExceptionBase domainEx)
             {
-                IDomainExceptionMapper? mapper =
-                    _mappers.FirstOrDefault(m => m.CanMap(domainEx));
-
-                error = mapper?.MapToError(domainEx) ?? CommonErrors.Unknown;
+                error = _mappers.Select(m => m.MapToError(domainEx))
+                    .FirstOrDefault(e => e != CommonErrors.Unknown) ?? CommonErrors.Unknown;
 
                 if (error == CommonErrors.Unknown)
                 {

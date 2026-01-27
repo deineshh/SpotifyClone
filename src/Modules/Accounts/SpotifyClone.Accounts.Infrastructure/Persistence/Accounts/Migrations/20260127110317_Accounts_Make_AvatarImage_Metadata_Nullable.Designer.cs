@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
@@ -11,9 +12,11 @@ using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
 {
     [DbContext(typeof(AccountsAppDbContext))]
-    partial class AccountsAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260127110317_Accounts_Make_AvatarImage_Metadata_Nullable")]
+    partial class Accounts_Make_AvatarImage_Metadata_Nullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

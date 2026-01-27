@@ -5,11 +5,16 @@ namespace SpotifyClone.Streaming.Infrastructure.Storage;
 
 public class LocalFileStorage(IWebHostEnvironment env) : IFileStorage
 {
+    private readonly IWebHostEnvironment _env = env;
+
     public string GetFullPath(string relativePath) =>
-        Path.Combine(env.WebRootPath, relativePath);
+        Path.Combine(_env.WebRootPath, relativePath);
 
     public string GetAudioRootPath() =>
-        Path.Combine(env.WebRootPath, "audio");
+        Path.Combine(_env.WebRootPath, "audio");
+
+    public string GetImageRootPath() =>
+        Path.Combine(_env.WebRootPath, "images");
 
     public string GetLocalConversionRootPath() =>
         GetAudioRootPath();
@@ -27,6 +32,9 @@ public class LocalFileStorage(IWebHostEnvironment env) : IFileStorage
         await stream.CopyToAsync(fileStream);
     }
 
+    public async Task SaveImageFileAsync(Stream stream, string relativePath)
+        => await SaveAudioFileAsync(stream, relativePath);
+
     public async Task DeleteAudioFileAsync(string relativePath)
     {
         string fullPath = GetFullPath(relativePath);
@@ -36,10 +44,16 @@ public class LocalFileStorage(IWebHostEnvironment env) : IFileStorage
         }
     }
 
+    public async Task DeleteImageFileAsync(string relativePath)
+        => await DeleteAudioFileAsync(relativePath);
+
     public Task DownloadAudioToLocalFileAsync(string objectName, string localPath)
     {
         string sourcePath = GetFullPath(objectName);
         File.Copy(sourcePath, localPath, true);
         return Task.CompletedTask;
     }
+
+    public Task DownloadImageToLocalFileAsync(string objectName, string localPath)
+        => DownloadAudioToLocalFileAsync(objectName, localPath);
 }

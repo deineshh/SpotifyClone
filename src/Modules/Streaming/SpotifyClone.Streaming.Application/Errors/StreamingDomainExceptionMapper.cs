@@ -8,9 +8,6 @@ namespace SpotifyClone.Streaming.Application.Errors;
 
 public sealed class StreamingDomainExceptionMapper : IDomainExceptionMapper
 {
-    public bool CanMap(DomainExceptionBase domainException)
-        => domainException is StreamingDomainExceptionBase;
-
     public Error MapToError(DomainExceptionBase domainException)
         => domainException switch
         {

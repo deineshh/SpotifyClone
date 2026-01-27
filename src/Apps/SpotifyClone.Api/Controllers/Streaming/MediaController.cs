@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Streaming.Media.GetAudioAsset;
 using SpotifyClone.Api.Contracts.v1.Streaming.Media.UploadAudioAsset;
+using SpotifyClone.Api.Contracts.v1.Streaming.Media.UploadImageAsset;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Streaming.Application.Features.Media.Commands.UploadAudioAsset;
+using SpotifyClone.Streaming.Application.Features.Media.Commands.UploadImageAsset;
 using SpotifyClone.Streaming.Application.Features.Media.Queries.GetAudioAsset;
 
 namespace SpotifyClone.Api.Controllers.Streaming;
@@ -39,7 +41,7 @@ public sealed class MediaController(IMediator mediator)
         UploadAudioAssetCommandResult resultData = result.Value;
 
         return new UploadAudioAssetResponse(
-            resultData.MediaId);
+            resultData.AudioId);
     }
 
     //[Authorize]
@@ -66,5 +68,33 @@ public sealed class MediaController(IMediator mediator)
             resultData.AudioId,
             resultData.HlsUrl,
             resultData.DashUrl);
+    }
+
+    [HttpPost("images")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<UploadImageAssetResponse>> UploadImageAsset(
+        [FromForm] UploadImageAssetRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using Stream stream = request.File.OpenReadStream();
+
+        Result<UploadImageAssetCommandResult> result = await Mediator.Send(
+            new UploadImageAssetCommand(
+                request.File.FileName,
+                stream),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        UploadImageAssetCommandResult resultData = result.Value;
+
+        return new UploadImageAssetResponse(
+            resultData.ImageId);
     }
 }

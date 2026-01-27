@@ -9,4 +9,6 @@ public sealed record MinioOptions
     public required string SecretKey { get; init; }
     public required string StorageUrl { get; init; }
     public required string LocalScratchPath { get; init; }
+    public required string AudioBucketName { get; init; }
+    public required string ImageBucketName { get; init; }
 }

@@ -7,9 +7,6 @@ namespace SpotifyClone.Accounts.Application.Errors;
 
 public sealed class AccountsDomainExceptionMapper : IDomainExceptionMapper
 {
-    public bool CanMap(DomainExceptionBase domainException)
-        => domainException is AccountsDomainExceptionBase;
-
     public Error MapToError(DomainExceptionBase domainException)
         => domainException switch
         {

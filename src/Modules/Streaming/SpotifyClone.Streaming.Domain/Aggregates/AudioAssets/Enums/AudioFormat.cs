@@ -15,7 +15,8 @@ public sealed record AudioFormat : ValueObject
         "mp3",
         "wav",
         "flac",
-        "aac"
+        "aac",
+        "m3u8"
     ];
 
     public string Value { get; }

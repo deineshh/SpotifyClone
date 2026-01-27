@@ -2,12 +2,14 @@ using Microsoft.Extensions.Logging;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Streaming.Application.Abstractions;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
+using SpotifyClone.Streaming.Application.Abstractions.Services.Models;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
+using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Enums;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.ValueObjects;
 
 namespace SpotifyClone.Streaming.Application.Jobs;
 
-public class AudioConversionJob(
+public sealed class AudioConversionJob(
     IStreamingUnitOfWork unit,
     IMediaService mediaService,
     IFileStorage storage,
@@ -25,17 +27,20 @@ public class AudioConversionJob(
         string extension = Path.GetExtension(tempRelativePath);
         string workDir = Path.Combine(outputFolder, audioId.ToString());
         string sourcePath = Path.Combine(workDir, "source" + extension);
+        string relativePath;
+        long totalSizeInBytes = 0;
+        AudioMetadata? metadata = null;
+
+        if (!Directory.Exists(workDir))
+        {
+            Directory.CreateDirectory(workDir);
+        }
 
         try
         {
-            if (!Directory.Exists(workDir))
-            {
-                Directory.CreateDirectory(workDir);
-            }
-
             await _storage.DownloadAudioToLocalFileAsync(tempRelativePath, sourcePath);
 
-            Result result = await _mediaService.ConvertToHlsAsync(sourcePath, outputFolder, audioId);
+            Result result = await _mediaService.ConvertToHlsDashAsync(sourcePath, outputFolder, audioId);
             if (result.IsFailure)
             {
                 _logger.LogError("Conversion failed: {Error}", result.Errors[0].Description);
@@ -51,15 +56,20 @@ public class AudioConversionJob(
                     continue;
                 }
 
+                var fileInfo = new FileInfo(fullPath);
+                totalSizeInBytes += fileInfo.Length;
+
                 string relative = Path.GetRelativePath(specificAudioFolder, fullPath);
-                string relativeKey = $"{audioId}/{relative.Replace(Path.DirectorySeparatorChar, '/')}";
+                relativePath = $"{audioId}/{relative.Replace(Path.DirectorySeparatorChar, '/')}";
                 await using FileStream fs = File.OpenRead(fullPath);
-                await _storage.SaveAudioFileAsync(fs, relativeKey);
+                await _storage.SaveAudioFileAsync(fs, relativePath);
             }
+
+            metadata = await _mediaService.GetAudioMetadataAsync(sourcePath);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Critical error in background job");
+            _logger.LogError(ex, "Critical error in background job while converting");
             throw;
         }
         finally
@@ -72,6 +82,13 @@ public class AudioConversionJob(
             await _storage.DeleteAudioFileAsync(tempRelativePath);
         }
 
+        AudioMetadata finalMetadata = metadata with { SizeInBytes = totalSizeInBytes };
+        if (finalMetadata is null)
+        {
+            _logger.LogError("Failed to get metadata from {AudioId}", audioId);
+            throw new Exception($"Failed to get metadata from {audioId}");
+        }
+
         AudioAsset? audioAsset = await _unit.AudioAssets.GetByIdAsync(AudioAssetId.From(audioId));
         if (audioAsset is null)
         {
@@ -79,7 +96,10 @@ public class AudioConversionJob(
             throw new Exception($"Audio asset not found for {audioId}");
         }
 
-        audioAsset.MarkAsReady();
+        audioAsset.MarkAsReady(
+            finalMetadata.Duration,
+            AudioFormat.From(finalMetadata.Format),
+            finalMetadata.SizeInBytes);
 
         await _unit.Commit();
 

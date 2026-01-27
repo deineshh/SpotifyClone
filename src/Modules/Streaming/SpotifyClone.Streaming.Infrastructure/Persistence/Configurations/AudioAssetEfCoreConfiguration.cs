@@ -19,18 +19,15 @@ internal sealed class AudioAssetEfCoreConfiguration : IEntityTypeConfiguration<A
             .ValueGeneratedNever();
 
         builder.Property(x => x.Duration)
-            .HasColumnName("duration")
-            .IsRequired();
+            .HasColumnName("duration");
 
         builder.Property(x => x.Format)
             .HasColumnName("format")
             .HasConversion(StreamingEfCoreValueConverters.AudioFormatConverter)
-            .HasMaxLength(16)
-            .IsRequired();
+            .HasMaxLength(16);
 
         builder.Property(x => x.SizeInBytes)
-            .HasColumnName("size_in_bytes")
-            .IsRequired();
+            .HasColumnName("size_in_bytes");
 
         builder.Property(x => x.IsReady)
             .HasColumnName("is_ready")
