@@ -19,44 +19,44 @@ public sealed class ImageConversionJob(
     private readonly IFileStorage _storage = storage;
     private readonly ILogger<ImageConversionJob> _logger = logger;
 
-    public async Task ProcessAsync(string tempRelativePath, Guid imageId, string outputFolder)
+    public async Task ProcessAsync(string fileName, Guid imageId)
     {
         _logger.LogInformation("Starting background conversion for {ImageId}", imageId);
 
-        string extension = Path.GetExtension(tempRelativePath);
-        string workDir = Path.Combine(outputFolder, imageId.ToString());
-        string sourcePath = Path.Combine(workDir, "source" + extension);
+        string extension = Path.GetExtension(fileName);
+        string workDir = imageId.ToString();
+        string localTempDir = Path.Combine(_storage.GetLocalConversionRootPath(), workDir);
+        string srcPath = Path.Combine(
+            _storage.GetLocalConversionRootPath(),
+            $"{imageId}/source{extension}");
         string relativePath;
         string localConvertedFilePath = string.Empty;
         Abstractions.Services.Models.ImageMetadata? metadata = null;
 
-        if (!Directory.Exists(workDir))
+        if (!Directory.Exists(localTempDir))
         {
-            Directory.CreateDirectory(workDir);
+            Directory.CreateDirectory(localTempDir);
         }
 
         try
         {
-            await _storage.DownloadImageToLocalFileAsync(tempRelativePath, sourcePath);
-
-            Result result = await _mediaService.ConvertToWebpAsync(sourcePath, outputFolder, imageId);
-            if (result.IsFailure)
+            Result convertResult = await _mediaService.ConvertToWebpAsync(srcPath, imageId);
+            if (convertResult.IsFailure)
             {
-                _logger.LogError("Conversion failed: {Error}", result.Errors[0].Description);
-                throw new Exception($"Conversion failed: {result.Errors[0].Description}");
+                _logger.LogError("Conversion failed: {Error}", convertResult.Errors[0].Description);
+                throw new Exception($"Conversion failed: {convertResult.Errors[0].Description}");
             }
 
-            string specificImageFolder = Path.Combine(outputFolder, imageId.ToString());
-            string[] files = Directory.GetFiles(specificImageFolder, "*", SearchOption.AllDirectories);
+            string[] files = Directory.GetFiles(localTempDir, "*", SearchOption.AllDirectories);
             foreach (string fullPath in files)
             {
-                if (string.Equals(fullPath, sourcePath, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(fullPath, srcPath, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
                 localConvertedFilePath = fullPath;
-                string relative = Path.GetRelativePath(specificImageFolder, fullPath);
+                string relative = Path.GetRelativePath(localTempDir, fullPath);
                 relativePath = $"{imageId}/{relative.Replace(Path.DirectorySeparatorChar, '/')}";
                 await using FileStream fs = File.OpenRead(fullPath);
                 await _storage.SaveImageFileAsync(fs, relativePath);
@@ -71,12 +71,7 @@ public sealed class ImageConversionJob(
         }
         finally
         {
-            if (Directory.Exists(workDir))
-            {
-                Directory.Delete(workDir, true);
-            }
-
-            await _storage.DeleteImageFileAsync(tempRelativePath);
+            await _storage.DeleteTempDirectoryFromLocal(workDir);
         }
 
         if (metadata is null)

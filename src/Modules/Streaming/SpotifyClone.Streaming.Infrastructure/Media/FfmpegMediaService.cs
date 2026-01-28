@@ -7,9 +7,12 @@ using Xabe.FFmpeg;
 
 namespace SpotifyClone.Streaming.Infrastructure.Media;
 
-public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaService
+public class FfmpegMediaService(
+    ILogger<FfmpegMediaService> logger,
+    IFileStorage storage) : IMediaService
 {
     private readonly ILogger<FfmpegMediaService> _logger = logger;
+    private readonly IFileStorage _storage = storage;
 
     public async Task<AudioMetadata> GetAudioMetadataAsync(string filePath)
     {
@@ -51,14 +54,14 @@ public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaServ
         );
     }
 
-    public async Task<Result> ConvertToHlsDashAsync(string sourceFilePath, string outputFolder, Guid audioId)
+    public async Task<Result> ConvertToHlsDashAsync(string sourceFilePath, Guid audioId)
     {
         if (!File.Exists(sourceFilePath))
         {
             return Result.Failure(MediaErrors.SourceFileNotFound);
         }
 
-        string specificAudioFolder = Path.Combine(outputFolder, audioId.ToString());
+        string specificAudioFolder = Path.Combine(_storage.GetLocalConversionRootPath(), audioId.ToString());
 
         try
         {
@@ -138,14 +141,14 @@ public class FfmpegMediaService(ILogger<FfmpegMediaService> logger) : IMediaServ
         }
     }
 
-    public async Task<Result> ConvertToWebpAsync(string sourceFilePath, string outputFolder, Guid imageId)
+    public async Task<Result> ConvertToWebpAsync(string sourceFilePath, Guid imageId)
     {
         if (!File.Exists(sourceFilePath))
         {
             return Result.Failure(MediaErrors.SourceFileNotFound);
         }
 
-        string specificImageFolder = Path.Combine(outputFolder, imageId.ToString());
+        string specificImageFolder = Path.Combine(_storage.GetLocalConversionRootPath(), imageId.ToString());
         string outputFilePath = Path.Combine(specificImageFolder, "image.webp");
 
         try

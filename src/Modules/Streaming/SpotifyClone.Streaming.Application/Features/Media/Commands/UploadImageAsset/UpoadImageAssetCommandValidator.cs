@@ -6,12 +6,6 @@ public sealed class UpoadImageAssetCommandValidator
     : AbstractValidator<UploadImageAssetCommand>
 {
     public UpoadImageAssetCommandValidator()
-    {
-        RuleFor(x => x.FileName)
-            .NotNull().WithMessage("File name is requried.")
-            .NotEmpty().WithMessage("File name is requried.");
-
-        RuleFor(x => x.FileStream)
+        => RuleFor(x => x.FileStream)
             .NotNull().WithMessage("File stream is requried.");
-    }
 }

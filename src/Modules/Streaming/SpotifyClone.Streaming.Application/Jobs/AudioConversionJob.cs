@@ -20,38 +20,37 @@ public sealed class AudioConversionJob(
     private readonly IFileStorage _storage = storage;
     private readonly ILogger<AudioConversionJob> _logger = logger;
 
-    public async Task ProcessAsync(string tempRelativePath, Guid audioId, string outputFolder)
+    public async Task ProcessAsync(string fileName, Guid audioId)
     {
         _logger.LogInformation("Starting background conversion for {AudioId}", audioId);
 
-        string extension = Path.GetExtension(tempRelativePath);
-        string workDir = Path.Combine(outputFolder, audioId.ToString());
-        string sourcePath = Path.Combine(workDir, "source" + extension);
-        string relativePath;
+        string extension = Path.GetExtension(fileName);
+        string workDir = audioId.ToString();
+        string localTempDir = Path.Combine(_storage.GetLocalConversionRootPath(), workDir);
+        string srcPath = Path.Combine(
+            _storage.GetLocalConversionRootPath(),
+            $"{audioId}/source{extension}");
         long totalSizeInBytes = 0;
         AudioMetadata? metadata = null;
 
-        if (!Directory.Exists(workDir))
+        if (!Directory.Exists(localTempDir))
         {
-            Directory.CreateDirectory(workDir);
+            Directory.CreateDirectory(localTempDir);
         }
 
         try
         {
-            await _storage.DownloadAudioToLocalFileAsync(tempRelativePath, sourcePath);
-
-            Result result = await _mediaService.ConvertToHlsDashAsync(sourcePath, outputFolder, audioId);
+            Result result = await _mediaService.ConvertToHlsDashAsync(srcPath, audioId);
             if (result.IsFailure)
             {
                 _logger.LogError("Conversion failed: {Error}", result.Errors[0].Description);
                 throw new Exception($"Conversion failed: {result.Errors[0].Description}");
             }
 
-            string specificAudioFolder = Path.Combine(outputFolder, audioId.ToString());
-            string[] files = Directory.GetFiles(specificAudioFolder, "*", SearchOption.AllDirectories);
+            string[] files = Directory.GetFiles(localTempDir, "*", SearchOption.AllDirectories);
             foreach (string fullPath in files)
             {
-                if (string.Equals(fullPath, sourcePath, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(fullPath, srcPath, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -59,27 +58,29 @@ public sealed class AudioConversionJob(
                 var fileInfo = new FileInfo(fullPath);
                 totalSizeInBytes += fileInfo.Length;
 
-                string relative = Path.GetRelativePath(specificAudioFolder, fullPath);
-                relativePath = $"{audioId}/{relative.Replace(Path.DirectorySeparatorChar, '/')}";
+                string relative = Path.GetRelativePath(localTempDir, fullPath);
+                string relativePath = $"{audioId}/{relative.Replace(Path.DirectorySeparatorChar, '/')}";
                 await using FileStream fs = File.OpenRead(fullPath);
                 await _storage.SaveAudioFileAsync(fs, relativePath);
             }
 
-            metadata = await _mediaService.GetAudioMetadataAsync(sourcePath);
+            metadata = await _mediaService.GetAudioMetadataAsync(srcPath);
         }
         catch (Exception ex)
         {
+            await _storage.DeleteAudioFileAsync(workDir);
             _logger.LogError(ex, "Critical error in background job while converting");
             throw;
         }
         finally
         {
-            if (Directory.Exists(workDir))
-            {
-                Directory.Delete(workDir, true);
-            }
+            await _storage.DeleteTempDirectoryFromLocal(workDir);
+        }
 
-            await _storage.DeleteAudioFileAsync(tempRelativePath);
+        if (metadata is null)
+        {
+            _logger.LogError("Failed to get metadata from {AudioId}", audioId);
+            throw new Exception($"Failed to get metadata from {audioId}");
         }
 
         AudioMetadata finalMetadata = metadata with { SizeInBytes = totalSizeInBytes };
@@ -97,9 +98,9 @@ public sealed class AudioConversionJob(
         }
 
         audioAsset.MarkAsReady(
-            finalMetadata.Duration,
-            AudioFormat.From(finalMetadata.Format),
-            finalMetadata.SizeInBytes);
+            metadata.Duration,
+            AudioFormat.From(metadata.Format),
+            metadata.SizeInBytes);
 
         await _unit.Commit();
 

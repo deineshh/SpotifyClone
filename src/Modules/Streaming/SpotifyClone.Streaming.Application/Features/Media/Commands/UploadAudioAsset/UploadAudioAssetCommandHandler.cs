@@ -1,6 +1,7 @@
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
+using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 using SpotifyClone.Streaming.Application.Abstractions;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
 using SpotifyClone.Streaming.Application.Errors;
@@ -12,13 +13,11 @@ namespace SpotifyClone.Streaming.Application.Features.Media.Commands.UploadAudio
 
 internal sealed class UploadAudioAssetCommandHandler(
     IStreamingUnitOfWork unit,
-    IMediaService mediaService,
     IFileStorage storage,
     IBackgroundJobService jobService)
     : ICommandHandler<UploadAudioAssetCommand, UploadAudioAssetCommandResult>
 {
     private readonly IStreamingUnitOfWork _unit = unit;
-    private readonly IMediaService _mediaService = mediaService;
     private readonly IFileStorage _storage = storage;
     private readonly IBackgroundJobService _jobService = jobService;
 
@@ -26,34 +25,29 @@ internal sealed class UploadAudioAssetCommandHandler(
         UploadAudioAssetCommand request,
         CancellationToken cancellationToken)
     {
-        var audioAssetId = AudioAssetId.From(Guid.NewGuid());
+        var audioId = Guid.NewGuid();
         string extension = Path.GetExtension(request.FileName);
-        string tempFileName = $"temp/{audioAssetId.Value}{extension}";
+        string relativeSrcPath = $"{audioId}/source{extension}";
 
         try
         {
-            using Stream stream = request.FileStream;
-            await _storage.SaveAudioFileAsync(stream, tempFileName);
-
-            string scratchRoot = _storage.GetLocalConversionRootPath();
-            if (!Directory.Exists(scratchRoot))
-            {
-                Directory.CreateDirectory(scratchRoot);
-            }
+            await _storage.SaveTempFileToLocal(request.FileStream, relativeSrcPath);
 
             _jobService.Enqueue<AudioConversionJob>(job
-                => job.ProcessAsync(tempFileName, audioAssetId.Value, scratchRoot));
+                => job.ProcessAsync(request.FileName, audioId));
+        }
+        catch (DomainExceptionBase)
+        {
+            throw;
         }
         catch
         {
-            await _storage.DeleteAudioFileAsync(tempFileName);
-
             return Result.Failure<UploadAudioAssetCommandResult>(MediaErrors.AudioUploadFailed);
         }
 
-        var audioAsset = AudioAsset.Create(audioAssetId, false, null, null, null);
+        var audioAsset = AudioAsset.Create(AudioAssetId.From(audioId), false, null, null, null);
         await _unit.AudioAssets.AddAsync(audioAsset, cancellationToken);
 
-        return new UploadAudioAssetCommandResult(audioAssetId.Value);
+        return new UploadAudioAssetCommandResult(audioId);
     }
 }

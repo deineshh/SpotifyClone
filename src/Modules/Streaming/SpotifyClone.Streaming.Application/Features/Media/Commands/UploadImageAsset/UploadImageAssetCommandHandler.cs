@@ -1,6 +1,7 @@
 ﻿using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
+using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 using SpotifyClone.Shared.Kernel.IDs;
 using SpotifyClone.Streaming.Application.Abstractions;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
@@ -24,34 +25,29 @@ internal sealed class UploadImageAssetCommandHandler(
         UploadImageAssetCommand request,
         CancellationToken cancellationToken)
     {
-        var imageId = ImageId.From(Guid.NewGuid());
+        var imageId = Guid.NewGuid();
         string extension = Path.GetExtension(request.FileName);
-        string tempFileName = $"temp/{imageId.Value}{extension}";
+        string relativeSrcPath = $"{imageId}/source{extension}";
         
         try
         {
-            using Stream stream = request.FileStream;
-            await _storage.SaveImageFileAsync(stream, tempFileName);
-            
-            string scratchRoot = _storage.GetLocalConversionRootPath();
-            if (!Directory.Exists(scratchRoot))
-            {
-                Directory.CreateDirectory(scratchRoot);
-            }
-            
+            await _storage.SaveTempFileToLocal(request.FileStream, relativeSrcPath);
+
             _jobService.Enqueue<ImageConversionJob>(job
-                => job.ProcessAsync(tempFileName, imageId.Value, scratchRoot));
+                => job.ProcessAsync(request.FileName, imageId));
+        }
+        catch (DomainExceptionBase)
+        {
+            throw;
         }
         catch
         {
-            await _storage.DeleteImageFileAsync(tempFileName);
-            
             return Result.Failure<UploadImageAssetCommandResult>(MediaErrors.ImageUploadFailed);
         }
         
-        var audioAsset = ImageAsset.Create(imageId, false, null);
-        await _unit.ImageAssets.AddAsync(audioAsset, cancellationToken);
+        var imageAsset = ImageAsset.Create(ImageId.From(imageId), false, null);
+        await _unit.ImageAssets.AddAsync(imageAsset, cancellationToken);
         
-        return new UploadImageAssetCommandResult(imageId.Value);
+        return new UploadImageAssetCommandResult(imageId);
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using Minio;
 using Minio.DataModel.Args;
+using Minio.Exceptions;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
 
 namespace SpotifyClone.Streaming.Infrastructure.Storage;
@@ -24,9 +25,6 @@ public class MinioFileStorage : IFileStorage
         InitializeImagesBucket().GetAwaiter().GetResult();
     }
 
-    public string GetFullPath(string relativePath)
-        => relativePath;
-
     public string GetImageRootPath()
     {
         string baseUrl = _options.StorageUrl.TrimEnd('/');
@@ -40,7 +38,45 @@ public class MinioFileStorage : IFileStorage
     }
 
     public string GetLocalConversionRootPath()
-        => _options.LocalScratchPath;
+    {
+        if (string.IsNullOrEmpty(_options.LocalScratchPath))
+        {
+            throw new InvalidOperationException("Local conversion path is not configured.");
+        }
+
+        if (!Directory.Exists(_options.LocalScratchPath))
+        {
+            Directory.CreateDirectory(_options.LocalScratchPath);
+        }
+
+        return _options.LocalScratchPath;
+    }
+
+    public async Task SaveTempFileToLocal(Stream stream, string relativePath)
+    {
+        string fullPath = Path.Combine(GetLocalConversionRootPath(), relativePath);
+        string directory = Path.GetDirectoryName(fullPath)!;
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        using var fileStream = new FileStream(
+            Path.Combine(fullPath),
+            FileMode.Create);
+
+        await stream.CopyToAsync(fileStream);
+    }
+
+    public async Task DeleteTempDirectoryFromLocal(string relativePath)
+    {
+        string fullPath = Path.Combine(GetLocalConversionRootPath(), relativePath);
+
+        if (Directory.Exists(fullPath))
+        {
+            Directory.Delete(fullPath, true);
+        }
+    }
 
     public async Task SaveAudioFileAsync(Stream stream, string relativePath)
     {
@@ -135,6 +171,38 @@ public class MinioFileStorage : IFileStorage
             .WithBucket(_options.ImageBucketName)
             .WithObject(relativePath);
         await _minioClient.RemoveObjectAsync(args);
+    }
+
+    public async Task<bool> AudioExists(string relativePath)
+    {
+        StatObjectArgs args = new StatObjectArgs()
+            .WithBucket(_options.AudioBucketName)
+            .WithObject(relativePath);
+        try
+        {
+            await _minioClient.StatObjectAsync(args);
+            return true;
+        }
+        catch (ObjectNotFoundException)
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> ImageExists(string relativePath)
+    {
+        StatObjectArgs args = new StatObjectArgs()
+            .WithBucket(_options.ImageBucketName)
+            .WithObject(relativePath);
+        try
+        {
+            await _minioClient.StatObjectAsync(args);
+            return true;
+        }
+        catch (ObjectNotFoundException)
+        {
+            return false;
+        }
     }
 
     public async Task DownloadAudioToLocalFileAsync(string objectName, string localPath)
