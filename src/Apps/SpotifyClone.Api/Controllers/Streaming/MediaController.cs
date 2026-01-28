@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Streaming.Media.GetAudioAsset;
+using SpotifyClone.Api.Contracts.v1.Streaming.Media.GetImageAsset;
 using SpotifyClone.Api.Contracts.v1.Streaming.Media.UploadAudioAsset;
 using SpotifyClone.Api.Contracts.v1.Streaming.Media.UploadImageAsset;
 using SpotifyClone.Api.Mappers;
@@ -9,6 +10,7 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Streaming.Application.Features.Media.Commands.UploadAudioAsset;
 using SpotifyClone.Streaming.Application.Features.Media.Commands.UploadImageAsset;
 using SpotifyClone.Streaming.Application.Features.Media.Queries.GetAudioAsset;
+using SpotifyClone.Streaming.Application.Features.Media.Queries.GetImageAsset;
 
 namespace SpotifyClone.Api.Controllers.Streaming;
 
@@ -96,5 +98,30 @@ public sealed class MediaController(IMediator mediator)
 
         return new UploadImageAssetResponse(
             resultData.ImageId);
+    }
+
+    //[Authorize]
+    [HttpGet("images")]
+    public async Task<ActionResult<GetImageAssetResponse>> GetImageAsset(
+        [FromQuery] GetImageAssetRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<GetImageAssetQueryResult> result = await Mediator.Send(
+            new GetImageAssetQuery(
+                request.ImageId),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        GetImageAssetQueryResult resultData = result.Value;
+
+        return new GetImageAssetResponse(
+            resultData.ImageId,
+            resultData.WebpUrl);
     }
 }

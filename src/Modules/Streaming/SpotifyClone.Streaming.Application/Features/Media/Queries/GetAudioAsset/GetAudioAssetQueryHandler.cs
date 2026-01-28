@@ -4,7 +4,8 @@ using SpotifyClone.Streaming.Application.Abstractions.Services;
 
 namespace SpotifyClone.Streaming.Application.Features.Media.Queries.GetAudioAsset;
 
-internal sealed class GetAudioAssetQueryHandler(IFileStorage storage)
+internal sealed class GetAudioAssetQueryHandler(
+    IFileStorage storage)
     : IQueryHandler<GetAudioAssetQuery, GetAudioAssetQueryResult>
 {
     private readonly IFileStorage _storage = storage;
