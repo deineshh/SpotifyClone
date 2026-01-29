@@ -1,6 +1,7 @@
 using System.Text;
 using System.Threading.RateLimiting;
 using Hangfire;
+using Hangfire.Redis.StackExchange;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.StaticFiles;
@@ -29,6 +30,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHangfire(config => config.UseRedisStorage(
+    builder.Configuration.GetConnectionString("Redis")));
 
 builder.Services
     .AddAuthentication(options =>

@@ -10,11 +10,17 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+      redis:
+        condition: service_started
     environment:
       DOTNET_RUNNING_IN_CONTAINER: true
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
+      Jwt__SecretKey: some-fairly-super-super-long-secret-key-for-validating-JWTs
+      Minio__AccessKey: admin
+      Minio__SecretKey: password123
       ConnectionStrings__MainDb: Host=postgres;Port=5432;Database=spotifyclone_dev;Username=postgres;Password=postgres
+      ConnectionStrings__Redis: redis:6379
     ports:
       - "8080:8080"
     volumes:
@@ -50,9 +56,20 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
+  
+  redis:
+    image: redis:alpine
+    container_name: spotifyclone-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    restart: always
+    volumes:
+      - redis_data:/data
 
 volumes:
   audio_data:
   temp_data:
   postgres_data:
   minio_data:
+  redis_data:
