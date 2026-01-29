@@ -1,7 +1,10 @@
 using System.Text;
 using System.Threading.RateLimiting;
+using Hangfire;
+using Hangfire.Redis.StackExchange;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -10,19 +13,26 @@ using SpotifyClone.Accounts.Infrastructure.DependencyInjection;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.DependencyInjection;
+using SpotifyClone.Streaming.Infrastructure.DependencyInjection;
+using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
+using Xabe.FFmpeg;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddBuildingBlocks(builder.Configuration);
+builder.Services.AddAccountsModule(builder.Configuration);
+builder.Services.AddStreamingModule(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
-builder.Services.AddBuildingBlocks(builder.Configuration);
-builder.Services.AddAccountsModule(builder.Configuration);
-
 builder.Services.AddProblemDetails();
 
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHangfire(config => config.UseRedisStorage(
+    builder.Configuration.GetConnectionString("Redis")));
 
 builder.Services
     .AddAuthentication(options =>
@@ -89,7 +99,30 @@ options.AddPolicy(name: "DevCors",
         .AllowAnyMethod()
         .AllowCredentials()));
 
+if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
+{
+    FFmpeg.SetExecutablesPath("/usr/bin");
+}
+else
+{
+    string? ffmpegPath = builder.Configuration["FFmpegConfig:ExecutablesPath"];
+    if (!string.IsNullOrEmpty(ffmpegPath))
+    {
+        FFmpeg.SetExecutablesPath(ffmpegPath);
+    }
+}
+
 WebApplication app = builder.Build();
+
+var provider = new FileExtensionContentTypeProvider();
+provider.Mappings[".m3u8"] = "application/vnd.apple.mpegurl";
+provider.Mappings[".mpd"] = "application/dash+xml";
+provider.Mappings[".m4s"] = "video/iso.segment";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = provider
+});
 
 app.MapStaticAssets();
 
@@ -121,14 +154,17 @@ if (app.Environment.IsDevelopment())
 
         IdentityAppDbContext identityDb = services.GetRequiredService<IdentityAppDbContext>();
         await identityDb.Database.MigrateAsync();
+
+        StreamingAppDbContext streamingDb = services.GetRequiredService<StreamingAppDbContext>();
+        await streamingDb.Database.MigrateAsync();
     }
 
     app.UseHttpsRedirection();
-
     app.UseDeveloperExceptionPage();
 
-    app.MapOpenApi();
+    app.MapHangfireDashboardWithNoAuthorizationFilters();
 
+    app.MapOpenApi();
     app.MapScalarApiReference(options
         => options
             .WithTitle("SpotifyClone API")

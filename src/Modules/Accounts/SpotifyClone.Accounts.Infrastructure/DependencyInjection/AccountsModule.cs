@@ -3,12 +3,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using SpotifyClone.Accounts.Application;
 using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Repositories;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
-using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
 using SpotifyClone.Accounts.Infrastructure.Auth;
@@ -57,22 +55,19 @@ public static class AccountsModule
             .AddDefaultTokenProviders();
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
-        services.Configure<AuthOptions>(configuration.GetSection(AuthOptions.SectionName));
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<IAccountsUnitOfWork>());
         services.AddScoped<IAccountsUnitOfWork, AccountsEfCoreUnitOfWork>();
         services.AddScoped<IUserProfileRepository, UserProfileEfCoreRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenEfCoreRepository>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
 
-        services.AddTransient<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
         services.AddTransient<ITokenHasher, Sha256TokenHasher>();
         services.AddTransient<ITokenService, JwtTokenService>();
         services.AddTransient<ICurrentUser, CurrentUser>();
         services.AddTransient<IAccountVerificationService, IdentityAccountVerificationService>();
         services.AddTransient<ISmsSender, LoggerSmsSender>();
-
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<AuthOptions>>().Value);
 
         return services;
     }

@@ -6,6 +6,7 @@
     <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Hangfire.Redis.StackExchange" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
@@ -19,10 +20,13 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Accounts\SpotifyClone.Accounts.Application\SpotifyClone.Accounts.Application.csproj" />
     <ProjectReference Include="..\..\Modules\Accounts\SpotifyClone.Accounts.Infrastructure\SpotifyClone.Accounts.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Streaming\SpotifyClone.Streaming.Application\SpotifyClone.Streaming.Application.csproj" />
+    <ProjectReference Include="..\..\Modules\Streaming\SpotifyClone.Streaming.Infrastructure\SpotifyClone.Streaming.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Shared\BuildingBlocks\SpotifyClone.Shared.BuildingBlocks.Application\SpotifyClone.Shared.BuildingBlocks.Application.csproj" />
     <ProjectReference Include="..\..\Shared\BuildingBlocks\SpotifyClone.Shared.BuildingBlocks.Infrastructure\SpotifyClone.Shared.BuildingBlocks.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Contracts\v1\Accounts\Profile\" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 </Project>

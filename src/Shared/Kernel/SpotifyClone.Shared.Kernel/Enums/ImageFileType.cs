@@ -20,6 +20,9 @@ public sealed record ImageFileType : ValueObject
 
     public string Value { get; }
 
+    public bool SupportsTransparency =>
+        Value is "png" or "webp";
+
     private ImageFileType(string value)
         => Value = value;
 
@@ -36,7 +39,4 @@ public sealed record ImageFileType : ValueObject
 
         return new ImageFileType(normalized);
     }
-
-    public bool SupportsTransparency =>
-        Value is "png" or "webp";
 }

@@ -18,7 +18,7 @@ internal static class AccountsEfCoreValueConverters
     public static readonly StronglyTypedIdEfCoreConverter<ImageId, Guid> ImageIdConverter = new(
         v => ImageId.From(v));
 
-    public static readonly ValueConverter<ImageFileType, string> ImageFileTypeConverter = new(
-        ft => ft.Value,
+    public static readonly ValueConverter<ImageFileType?, string> ImageFileTypeConverter = new(
+        t => t == null ? string.Empty : t.Value,
         v => ImageFileType.From(v));
 }

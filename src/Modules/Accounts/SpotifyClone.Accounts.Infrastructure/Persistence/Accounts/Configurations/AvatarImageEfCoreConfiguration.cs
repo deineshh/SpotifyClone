@@ -15,8 +15,7 @@ internal static class AvatarImageEfCoreConfiguration
 
         builder.Property(a => a.ImageId)
             .HasConversion(AccountsEfCoreValueConverters.ImageIdConverter)
-            .HasColumnName("avatar_image_id")
-            .IsRequired();
+            .HasColumnName("avatar_image_id");
 
         builder.OwnsOne(a => a.Metadata, metadata => metadata.Configure());
 

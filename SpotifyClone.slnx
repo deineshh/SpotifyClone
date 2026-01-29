@@ -15,6 +15,11 @@
     <Project Path="src/Modules/Accounts/SpotifyClone.Accounts.Domain/SpotifyClone.Accounts.Domain.csproj" Id="44b6d0a5-3ac9-4943-9116-4c5242fc68b1" />
     <Project Path="src/Modules/Accounts/SpotifyClone.Accounts.Infrastructure/SpotifyClone.Accounts.Infrastructure.csproj" Id="546dd04c-4395-4792-bb5b-103c8a27c107" />
   </Folder>
+  <Folder Name="/src/Modules/Streaming/">
+    <Project Path="src/Modules/Streaming/SpotifyClone.Streaming.Application/SpotifyClone.Streaming.Application.csproj" Id="ad2a4d82-0d24-4d95-8cc2-780644f0faac" />
+    <Project Path="src/Modules/Streaming/SpotifyClone.Streaming.Domain/SpotifyClone.Streaming.Domain.csproj" Id="6f2658bf-1f5d-4393-a9bd-ee6a6c8b916f" />
+    <Project Path="src/Modules/Streaming/SpotifyClone.Streaming.Infrastructure/SpotifyClone.Streaming.Infrastructure.csproj" Id="46e8e49e-6b3c-4cc2-bd66-2be7ed6fff87" />
+  </Folder>
   <Folder Name="/src/Shared/" />
   <Folder Name="/src/Shared/BuildingBlocks/">
     <Project Path="src/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Application/SpotifyClone.Shared.BuildingBlocks.Application.csproj" />

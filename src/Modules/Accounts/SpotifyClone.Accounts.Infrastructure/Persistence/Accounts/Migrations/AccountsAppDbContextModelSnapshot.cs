@@ -18,7 +18,7 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("accounts")
-                .HasAnnotation("ProductVersion", "10.0.1")
+                .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -117,17 +117,20 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
                                         .HasColumnType("uuid");
 
                                     b2.Property<string>("FileType")
-                                        .IsRequired()
                                         .HasMaxLength(10)
                                         .HasColumnType("character varying(10)")
                                         .HasColumnName("avatar_file_type");
 
-                                    b2.Property<int>("Height")
+                                    b2.Property<int?>("Height")
                                         .HasMaxLength(1024)
                                         .HasColumnType("integer")
                                         .HasColumnName("avatar_height");
 
-                                    b2.Property<int>("Width")
+                                    b2.Property<long?>("SizeInBytes")
+                                        .HasColumnType("bigint")
+                                        .HasColumnName("avatar_size_in_bytes");
+
+                                    b2.Property<int?>("Width")
                                         .HasMaxLength(1024)
                                         .HasColumnType("integer")
                                         .HasColumnName("avatar_width");

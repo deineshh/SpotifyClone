@@ -235,7 +235,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     }
 
     [HttpPost("phone/verify")]
-    //[EnableRateLimiting("verification-limits")]
+    [EnableRateLimiting("verification-limits")]
     public async Task<ActionResult> VerifyPhoneNumber(
         VerifyPhoneNumberRequest request,
         CancellationToken cancellationToken = default)

@@ -20,7 +20,12 @@ public sealed record AvatarImage : ValueObject
         ImageId = null!;
     }
 
-    public AvatarImage(ImageId imageId, int width, int height, ImageFileType fileType)
+    public AvatarImage(
+        ImageId imageId,
+        int width,
+        int height,
+        ImageFileType fileType,
+        long sizeInBytes)
     {
         ArgumentNullException.ThrowIfNull(imageId);
         ArgumentNullException.ThrowIfNull(fileType);
@@ -36,6 +41,6 @@ public sealed record AvatarImage : ValueObject
         }
 
         ImageId = imageId;
-        Metadata = new ImageMetadata(width, height, MaxWidth, MaxHeight, fileType);
+        Metadata = new ImageMetadata(width, height, MaxWidth, MaxHeight, fileType, sizeInBytes);
     }
 }

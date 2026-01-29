@@ -47,10 +47,6 @@ public sealed class ExceptionHandlingPipelineBehaviorTests
         _mappers.Add(_mapperMock.Object);
 
         _mapperMock
-            .Setup(m => m.CanMap(It.IsAny<DomainExceptionBase>()))
-            .Returns(true);
-
-        _mapperMock
             .Setup(m => m.MapToError(It.IsAny<DomainExceptionBase>()))
             .Returns(CommonErrors.NotFound(
                 "Test.NotFound",
@@ -80,10 +76,6 @@ public sealed class ExceptionHandlingPipelineBehaviorTests
         var request = new TestCommand();
         var testDomainEx = new TestDomainException("Test domain exception");
         RequestHandlerDelegate<Result> next = _ => throw testDomainEx;
-
-        _mapperMock
-            .Setup(m => m.CanMap(It.IsAny<DomainExceptionBase>()))
-            .Returns(true);
 
         _mapperMock
             .Setup(m => m.MapToError(It.IsAny<DomainExceptionBase>()))
