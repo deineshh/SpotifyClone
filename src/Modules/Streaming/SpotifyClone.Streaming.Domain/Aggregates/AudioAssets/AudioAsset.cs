@@ -13,26 +13,6 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
     public bool IsReady { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
 
-    private AudioAsset()
-    {
-    }
-
-    private AudioAsset(
-        AudioAssetId id,
-        TimeSpan? duration,
-        AudioFormat? format,
-        long? sizeInBytes,
-        bool isReady,
-        DateTimeOffset createdAt)
-        : base(id)
-    {
-        Duration = duration;
-        Format = format;
-        SizeInBytes = sizeInBytes;
-        IsReady = isReady;
-        CreatedAt = createdAt;
-    }
-
     public static AudioAsset Create(
         AudioAssetId id,
         bool isReady,
@@ -66,5 +46,25 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
         IsReady = true;
 
         // Raise domain events if needed
+    }
+
+    private AudioAsset(
+        AudioAssetId id,
+        TimeSpan? duration,
+        AudioFormat? format,
+        long? sizeInBytes,
+        bool isReady,
+        DateTimeOffset createdAt)
+        : base(id)
+    {
+        Duration = duration;
+        Format = format;
+        SizeInBytes = sizeInBytes;
+        IsReady = isReady;
+        CreatedAt = createdAt;
+    }
+
+    private AudioAsset()
+    {
     }
 }

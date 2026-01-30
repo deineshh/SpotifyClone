@@ -93,7 +93,7 @@ internal sealed class RegisterUserCommandHandler(
         UserId userId,
         CancellationToken cancellationToken)
     {
-        UserProfile? existingUserProfile = await _unit.UserProfiles.GetByUserIdAsync(userId, cancellationToken);
+        UserProfile? existingUserProfile = await _unit.UserProfiles.GetByIdAsync(userId, cancellationToken);
         if (existingUserProfile is not null)
         {
             return Result.Failure<UserProfile>(UserProfileErrors.AlreadyExists);

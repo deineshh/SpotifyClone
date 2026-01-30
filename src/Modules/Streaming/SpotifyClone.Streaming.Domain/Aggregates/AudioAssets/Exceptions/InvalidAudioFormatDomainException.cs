@@ -1,9 +1,6 @@
-﻿namespace SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Exceptions;
+﻿using SpotifyClone.Streaming.Domain.Exceptions;
 
-public sealed class InvalidAudioFormatDomainException : StreamingDomainExceptionBase
-{
-    public InvalidAudioFormatDomainException(string message)
-        : base(message)
-    {
-    }
-}
+namespace SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Exceptions;
+
+public sealed class InvalidAudioFormatDomainException(string message)
+    : StreamingDomainExceptionBase(message);

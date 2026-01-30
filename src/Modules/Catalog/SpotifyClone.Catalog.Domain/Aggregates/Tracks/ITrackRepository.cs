@@ -1,14 +1,14 @@
 ﻿using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Accounts.Domain.Aggregates.Users;
+namespace SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 
-public interface IUserProfileRepository
+public interface ITrackRepository
 {
-    Task<UserProfile?> GetByIdAsync(
+    Task<Track?> GetByIdAsync(
         UserId id,
         CancellationToken cancellationToken = default);
 
     Task AddAsync(
-        UserProfile user,
+        Track track,
         CancellationToken cancellationToken = default);
 }

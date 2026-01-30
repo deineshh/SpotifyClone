@@ -10,18 +10,6 @@ public sealed class ImageAsset : AggregateRoot<ImageId, Guid>
     public bool IsReady { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
 
-    private ImageAsset()
-    {
-    }
-
-    private ImageAsset(ImageId id, ImageMetadata? metadata, bool isReady, DateTimeOffset createdAt)
-        : base(id)
-    {
-        Metadata = metadata;
-        IsReady = isReady;
-        CreatedAt = createdAt;
-    }
-
     public static ImageAsset Create(ImageId id, bool isReady, ImageMetadata? metadata)
     {
         ArgumentNullException.ThrowIfNull(id);
@@ -42,5 +30,17 @@ public sealed class ImageAsset : AggregateRoot<ImageId, Guid>
         IsReady = true;
 
         // Raise domain events if needed
+    }
+
+    private ImageAsset(ImageId id, ImageMetadata? metadata, bool isReady, DateTimeOffset createdAt)
+        : base(id)
+    {
+        Metadata = metadata;
+        IsReady = isReady;
+        CreatedAt = createdAt;
+    }
+
+    private ImageAsset()
+    {
     }
 }

@@ -75,10 +75,9 @@ Individual audio recording.
 
 - Id: TrackId (Value Object - [SharedKernel](#shared-kernel))
 - Title: String
-- Description: String?
-- Duration: TimeSpan (AudioResource.Duration)
-- ReleaseDate: DateOnly
-- ExplicitContent: Boolean
+- Duration: TimeSpan?
+- ReleaseDate: DateTime
+- Explicit: Boolean
 - TrackNumber: Integer
 - IsPublished: Boolean
 - AudioFileId: AudioFileId (Value Object):
@@ -87,6 +86,24 @@ Individual audio recording.
 - MainArtists: List<ArtistId> (Value Object [Artist](#artist))
 - FeaturedArtists: List<ArtistId> (Value Object [Artist](#artist))
 - Genres: List<GenreId> (Aggregate Root [Genre](#genre))
+
+Invariants:
+- Ідентифікатор треку (TrackId) не може бути порожнім (null).
+- Номер треку в альбомі (TrackNumber) повинен бути строго більшим за нуль.
+- Ідентифікатор альбому (AlbumId) є обов'язковим для створення треку.
+- Трек повинен мати принаймні одного основного виконавця (MainArtists не може бути порожнім).
+- Трек повинен мати принаймні один жанр (Genres не може бути порожнім).
+- Назва треку не може бути порожньою, null або складатися лише з пробілів.
+- Назва треку не може перевищувати 128 символів.
+- Назва треку може містити лише обмежений набір символів: літери, цифри, пробіли та пунктуацію .,?!-_.
+- Для публікації треку ідентифікатор аудіофайлу (AudioFileId) є обов'язковим.
+- Тривалість треку (Duration) повинна бути більшою за нуль.
+- Максимальна тривалість треку обмежена 24 годинами.
+- Після того, як трек опубліковано (IsPublished = true), неможливо додавати або видаляти основних виконавців (MainArtists).
+- Після публікації треку неможливо додавати або видаляти запрошених виконавців (FeaturedArtists).
+- Після публікації треку неможливо змінювати список жанрів (Genres).
+- Списки виконавців та жанрів не можуть містити дублікатів (використано HashSet).
+- Дата релізу встановлюється автоматично лише в момент першої публікації.
 
 ### Album
 
@@ -98,6 +115,7 @@ Collection of tracks.
 - Description: String?
 - ReleaseDate: DateOnly
 - Type: AlbumType (Smart Enum):
+
     - Value: String("Single", "EP", "Album")
 - Cover: AlbumCoverImage (Value Object):
     - Metadata: ImageMetadata (Value Object [SharedKernel](#shared-kernel))
