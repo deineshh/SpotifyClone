@@ -1,27 +1,27 @@
-﻿using SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
+﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.Exceptions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 using SpotifyClone.Shared.Kernel.Enums;
 using SpotifyClone.Shared.Kernel.IDs;
 using SpotifyClone.Shared.Kernel.ValueObjects;
 
-namespace SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
+namespace SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 
-public sealed record AvatarImage : ValueObject
+public sealed record AlbumCoverImage : ValueObject
 {
-    public const int MaxWidth = 750;
-    public const int MaxHeight = 750;
+    public const int MaxWidth = 3000;
+    public const int MaxHeight = 3000;
     public const long MaxSizeInBytes = 4_000_000;
 
     public ImageMetadata Metadata { get; init; }
     public ImageId ImageId { get; init; }
 
-    private AvatarImage()
+    private AlbumCoverImage()
     {
         Metadata = null!;
         ImageId = null!;
     }
 
-    public AvatarImage(
+    public AlbumCoverImage(
         ImageId imageId,
         int width,
         int height,
@@ -33,19 +33,19 @@ public sealed record AvatarImage : ValueObject
 
         if (width != height)
         {
-            throw new InvalidAvatarImageDomainException("Avatar image must be square.");
+            throw new InvalidAlbumCoverImageDomainException("Cover image must be square.");
         }
 
         if (width > MaxWidth || height > MaxHeight)
         {
-            throw new InvalidAvatarImageDomainException(
-                $"Avatar image dimensions exceed maximum allowed size of {MaxWidth}x{MaxHeight} pixels.");
+            throw new InvalidAlbumCoverImageDomainException(
+                $"Cover image dimensions exceed maximum allowed size of {MaxWidth}x{MaxHeight} pixels.");
         }
 
         if (sizeInBytes > MaxSizeInBytes)
         {
-            throw new InvalidAvatarImageDomainException(
-                $"Avatar image size exceeds maximum allowed size of {MaxSizeInBytes} bytes.");
+            throw new InvalidAlbumCoverImageDomainException(
+                $"Cover image size exceeds maximum allowed size of {MaxSizeInBytes} bytes.");
         }
 
         ImageId = imageId;

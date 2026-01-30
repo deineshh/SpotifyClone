@@ -7,6 +7,8 @@ namespace SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
 
 public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
 {
+    public static readonly TimeSpan MaxDuration = TimeSpan.FromHours(24);
+
     public TimeSpan? Duration { get; private set; }
     public AudioFormat? Format { get; private set; }
     public long? SizeInBytes { get; private set; }
@@ -21,6 +23,11 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
         long? sizeInBytes)
     {
         ArgumentNullException.ThrowIfNull(id);
+
+        if (duration > MaxDuration)
+        {
+            throw new InvalidDurationDomainException($"Duration cannot exceed {MaxDuration.TotalHours} hours.");
+        }
 
         return new AudioAsset(id, duration, format, sizeInBytes, isReady, DateTimeOffset.UtcNow);
     }

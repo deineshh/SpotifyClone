@@ -25,9 +25,6 @@ internal static class ImageAssetMetadataEfCoreConfiguration
         builder.Property(m => m.SizeInBytes)
             .HasColumnName("metadata_size_in_bytes");
 
-        builder.Ignore(m => m.MaxWidth);
-        builder.Ignore(m => m.MaxHeight);
-
         return builder;
     }
 }

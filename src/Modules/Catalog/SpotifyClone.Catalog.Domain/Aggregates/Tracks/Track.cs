@@ -63,30 +63,21 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             mainArtists, featuredArtists, genres);
     }
 
-    public void Publish(AudioFileId audioFileId, TimeSpan duration)
+    public void Publish(AudioFileId audioFileId, TimeSpan duration, DateTimeOffset releaseDate)
     {
         ArgumentNullException.ThrowIfNull(audioFileId);
-
-        if (duration <= TimeSpan.Zero)
-        {
-            throw new InvalidTrackDurationDomainException("Duration must be greater that zero.");
-        }
-        else if (duration.Days != 0)
-        {
-            throw new InvalidTrackDurationDomainException("Duration hours must be less than 24.");
-        }
 
         if (IsPublished)
         {
             return;
         }
 
+        TrackDurationRules.Validate(duration);
+
         AudioFileId = audioFileId;
         Duration = duration;
-        ReleaseDate = DateTimeOffset.UtcNow;
+        ReleaseDate = releaseDate;
         IsPublished = true;
-
-        // Raise domain event if needed
     }
 
     public void AddMainArtist(ArtistId artistId)
@@ -182,6 +173,40 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         ArgumentNullException.ThrowIfNull(genreId);
         return _genres.Contains(genreId);
+    }
+
+    public void ChangeTitle(string newTitle)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(newTitle);
+        TrackTitleRules.Validate(newTitle);
+        Title = newTitle;
+    }
+
+    public void ChangeReleaseDate(DateTimeOffset newReleaseDate)
+        => ReleaseDate = newReleaseDate;
+
+    public void ChangeExplicitContentFlag(bool containsExplicitContent)
+        => ContainsExplicitContent = containsExplicitContent;
+
+    public void ChangeTrackNumber(int newTrackNumber)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(newTrackNumber);
+        TrackNumber = newTrackNumber;
+    }
+
+    public void ChangeAudioFile(AudioFileId newAudioFileId, TimeSpan newDuration)
+    {
+        ArgumentNullException.ThrowIfNull(newAudioFileId);
+        if (IsPublished)
+        {
+            throw new TrackAlreadyPublishedDomainException(
+                "Cannot change audio file of a published track.");
+        }
+
+        TrackDurationRules.Validate(newDuration);
+
+        AudioFileId = newAudioFileId;
+        Duration = newDuration;
     }
 
     private Track(
