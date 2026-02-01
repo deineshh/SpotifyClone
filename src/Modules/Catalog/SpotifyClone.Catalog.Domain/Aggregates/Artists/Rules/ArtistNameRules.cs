@@ -5,7 +5,7 @@ namespace SpotifyClone.Catalog.Domain.Aggregates.Artists.Rules;
 
 public static class ArtistNameRules
 {
-    public const short MaxLength = 18;
+    public const short MaxLength = 30;
 
     public static void Validate(string name)
     {

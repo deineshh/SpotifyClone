@@ -47,6 +47,12 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             return;
         }
 
+        if (_tracks.Count <= 0)
+        {
+            throw new InvalidAlbumTracksDomainException(
+                "Album must contain at least one track before publishing.");
+        }
+
         ReleaseDate = releaseDate;
         IsPublished = true;
         Type = AlbumType.From(_tracks.Count);
