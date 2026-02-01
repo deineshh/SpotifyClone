@@ -4,7 +4,8 @@ namespace SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
 
 public sealed record GenreId : StronglyTypedId<Guid>
 {
-    private GenreId(Guid value) : base(value)
+    private GenreId(Guid value)
+        : base(value)
     {
     }
 

@@ -100,7 +100,7 @@ Collection of tracks.
     - Value: String("Single", "EP", "Album")
 - Cover: AlbumCoverImage (Value Object):
     - Metadata: ImageMetadata (Value Object [SharedKernel](#shared-kernel))
-    - ImageId: ImageId (Value Object [SharedKernel](#shared-kernel))
+    - ImageId: ImageId? (Value Object [SharedKernel](#shared-kernel))
 - MainArtists: List<ArtistId> (Value Object [Artist](#artist))
 
 ### Artist
@@ -114,17 +114,17 @@ Creator of tracks and albums.
 - IsVerified: Boolean
 - Avatar: ArtistAvatarImage? (Value Object):
     - Metadata: ImageMetadata (Value Object [SharedKernel](#shared-kernel))
-    - ImageId: ImageId (Value Object [SharedKernel](#shared-kernel))
+    - ImageId: ImageId? (Value Object [SharedKernel](#shared-kernel))
 - Banner: ArtistBannerImage? (Value Object):
     - Metadata: ImageMetadata (Value Object [SharedKernel](#shared-kernel))
-    - ImageId: ImageId (Value Object [SharedKernel](#shared-kernel))
+    - ImageId?: ImageId (Value Object [SharedKernel](#shared-kernel))
 - Gallery: List<ArtistGalleryImage> (Value Object):
     - Metadata: ImageMetadata (Value Object [SharedKernel](#shared-kernel))
-    - ImageId: ImageId (Value Object [SharedKernel](#shared-kernel))
+    - ImageId?: ImageId (Value Object [SharedKernel](#shared-kernel))
 
 ### Genre
 
-Category or style of music.
+Category of music.
 
 - Id (GenreId) (Value Object):
     - Value: Guid
@@ -132,7 +132,18 @@ Category or style of music.
 - Description: String?
 - Cover: GenreCoverImage (Value Object):
     - Metadata: ImageMetadata (Value Object [SharedKernel](#shared-kernel))
-    - ImageFileId: ImageFileId (Value Object [SharedKernel](#shared-kernel))
+    - ImageId?: ImageId (Value Object [SharedKernel](#shared-kernel))
+
+### Mood
+
+Emotional mood of music.
+
+- Id (GenreId) (Value Object):
+    - Value: Guid
+- Name: String
+- Cover: GenreCoverImage (Value Object):
+    - Metadata: ImageMetadata (Value Object [SharedKernel](#shared-kernel))
+    - ImageId: ImageId (Value Object [SharedKernel](#shared-kernel))
 
 ## Playlists BC
 

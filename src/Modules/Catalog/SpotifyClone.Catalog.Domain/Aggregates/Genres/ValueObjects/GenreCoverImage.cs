@@ -1,12 +1,12 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.Exceptions;
+﻿using SpotifyClone.Catalog.Domain.Aggregates.Genres.Exceptions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 using SpotifyClone.Shared.Kernel.Enums;
 using SpotifyClone.Shared.Kernel.IDs;
 using SpotifyClone.Shared.Kernel.ValueObjects;
 
-namespace SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
+namespace SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
 
-public sealed record AlbumCoverImage : ValueObject
+public sealed record GenreCoverImage : ValueObject
 {
     public const int MaxWidth = 3000;
     public const int MaxHeight = 3000;
@@ -15,11 +15,7 @@ public sealed record AlbumCoverImage : ValueObject
     public ImageMetadata Metadata { get; init; } = null!;
     public ImageId? ImageId { get; init; }
 
-    private AlbumCoverImage()
-    {
-    }
-
-    public AlbumCoverImage(
+    public GenreCoverImage(
         int width,
         int height,
         ImageFileType fileType,
@@ -30,22 +26,26 @@ public sealed record AlbumCoverImage : ValueObject
 
         if (width != height)
         {
-            throw new InvalidAlbumCoverImageDomainException("Cover image must be square.");
+            throw new InvalidGenreCoverImageDomainException("Genre cover image must be square.");
         }
 
         if (width > MaxWidth || height > MaxHeight)
         {
-            throw new InvalidAlbumCoverImageDomainException(
-                $"Cover image dimensions exceed maximum allowed size of {MaxWidth}x{MaxHeight} pixels.");
+            throw new InvalidGenreCoverImageDomainException(
+                $"Genre cover image dimensions exceed maximum allowed size of {MaxWidth}x{MaxHeight} pixels.");
         }
 
         if (sizeInBytes > MaxSizeInBytes)
         {
-            throw new InvalidAlbumCoverImageDomainException(
-                $"Cover image size exceeds maximum allowed size of {MaxSizeInBytes} bytes.");
+            throw new InvalidGenreCoverImageDomainException(
+                $"Genre cover image size exceeds maximum allowed size of {MaxSizeInBytes} bytes.");
         }
 
         Metadata = new ImageMetadata(width, height, fileType, sizeInBytes);
         ImageId = imageId;
+    }
+
+    private GenreCoverImage()
+    {
     }
 }

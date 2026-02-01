@@ -1,21 +1,21 @@
-﻿using SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
+﻿using SpotifyClone.Catalog.Domain.Aggregates.Artists.Exceptions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 using SpotifyClone.Shared.Kernel.Enums;
 using SpotifyClone.Shared.Kernel.IDs;
 using SpotifyClone.Shared.Kernel.ValueObjects;
 
-namespace SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
+namespace SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 
-public sealed record AvatarImage : ValueObject
+public sealed record ArtistAvatarImage : ValueObject
 {
     public const int MaxWidth = 750;
     public const int MaxHeight = 750;
-    public const long MaxSizeInBytes = 4_000_000;
+    public const long MaxSizeInBytes = 20_000_000;
 
     public ImageMetadata Metadata { get; init; } = null!;
     public ImageId? ImageId { get; init; }
 
-    public AvatarImage(
+    public ArtistAvatarImage(
         int width,
         int height,
         ImageFileType fileType,
@@ -26,18 +26,18 @@ public sealed record AvatarImage : ValueObject
 
         if (width != height)
         {
-            throw new InvalidAvatarImageDomainException("Avatar image must be square.");
+            throw new InvalidArtistAvatarImageDomainException("Avatar image must be square.");
         }
 
         if (width > MaxWidth || height > MaxHeight)
         {
-            throw new InvalidAvatarImageDomainException(
+            throw new InvalidArtistAvatarImageDomainException(
                 $"Avatar image dimensions exceed maximum allowed size of {MaxWidth}x{MaxHeight} pixels.");
         }
 
         if (sizeInBytes > MaxSizeInBytes)
         {
-            throw new InvalidAvatarImageDomainException(
+            throw new InvalidArtistAvatarImageDomainException(
                 $"Avatar image size exceeds maximum allowed size of {MaxSizeInBytes} bytes.");
         }
 
@@ -45,7 +45,7 @@ public sealed record AvatarImage : ValueObject
         ImageId = imageId;
     }
 
-    private AvatarImage()
+    private ArtistAvatarImage()
     {
     }
 }
