@@ -5,7 +5,7 @@ namespace SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 public interface ITrackRepository
 {
     Task<Track?> GetByIdAsync(
-        UserId id,
+        TrackId id,
         CancellationToken cancellationToken = default);
 
     Task AddAsync(

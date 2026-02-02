@@ -18,8 +18,4 @@
     <ProjectReference Include="..\SpotifyClone.Catalog.Domain\SpotifyClone.Catalog.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Persistence\Repositories\" />
-  </ItemGroup>
-
 </Project>
