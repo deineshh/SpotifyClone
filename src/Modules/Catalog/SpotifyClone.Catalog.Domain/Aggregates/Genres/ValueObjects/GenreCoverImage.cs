@@ -13,14 +13,14 @@ public sealed record GenreCoverImage : ValueObject
     public const long MaxSizeInBytes = 4_000_000;
 
     public ImageMetadata Metadata { get; init; } = null!;
-    public ImageId? ImageId { get; init; }
+    public ImageId ImageId { get; init; } = null!;
 
     public GenreCoverImage(
+        ImageId imageId,
         int width,
         int height,
         ImageFileType fileType,
-        long sizeInBytes,
-        ImageId? imageId = null)
+        long sizeInBytes)
     {
         ArgumentNullException.ThrowIfNull(fileType);
 

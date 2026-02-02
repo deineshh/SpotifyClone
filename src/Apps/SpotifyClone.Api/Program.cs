@@ -12,6 +12,8 @@ using Serilog;
 using SpotifyClone.Accounts.Infrastructure.DependencyInjection;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
+using SpotifyClone.Catalog.Infrastructure.DependencyInjection;
+using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.DependencyInjection;
 using SpotifyClone.Streaming.Infrastructure.DependencyInjection;
 using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
@@ -22,6 +24,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddBuildingBlocks(builder.Configuration);
 builder.Services.AddAccountsModule(builder.Configuration);
 builder.Services.AddStreamingModule(builder.Configuration);
+builder.Services.AddCatalogModule(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -157,6 +160,9 @@ if (app.Environment.IsDevelopment())
 
         StreamingAppDbContext streamingDb = services.GetRequiredService<StreamingAppDbContext>();
         await streamingDb.Database.MigrateAsync();
+
+        CatalogAppDbContext catalogDb = services.GetRequiredService<CatalogAppDbContext>();
+        await catalogDb.Database.MigrateAsync();
     }
 
     app.UseHttpsRedirection();

@@ -90,8 +90,6 @@ public sealed class ImageConversionJob(
         imageAsset.MarkAsReady(new(
             metadata.Width,
             metadata.Height,
-            2048,
-            2048,
             ImageFileType.From(metadata.FileType),
             metadata.SizeInBytes));
 

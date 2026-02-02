@@ -38,4 +38,15 @@ public sealed record AlbumType : ValueObject
                 $"Track count must be between 1 and {MaxTracksForLongPlay}.");
         }
     }
+
+    public static AlbumType? From(string value)
+        => value.ToLowerInvariant() switch
+    {
+        "single" => Single,
+        "extendedplay" => ExtendedPlay,
+        "ep" => ExtendedPlay,
+        "longplay" => LongPlay,
+        "lp" => LongPlay,
+        _ => null,
+    };
 }

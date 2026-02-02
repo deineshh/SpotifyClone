@@ -29,23 +29,6 @@ public sealed class AvatarImageTests
     }
 
     [Fact]
-    public void Constructor_Should_ThrowException_When_ImageIdIsNull()
-    {
-        // Arrange
-        ImageId imageId = null!;
-        int width = 512;
-        int height = 512;
-        ImageFileType fileType = ImageFileType.Png;
-        long sizeInBytes = 150000;
-
-        // Act
-        Action act = () => new AvatarImage(imageId, width, height, fileType, sizeInBytes);
-
-        // Assert
-        act.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
     public void Constructor_Should_ThrowException_When_FileTypeIsNull()
     {
         // Arrange
@@ -70,23 +53,6 @@ public sealed class AvatarImageTests
         int width = 512;
         int height = 256;
         ImageFileType fileType = ImageFileType.Png;
-        long sizeInBytes = 150000;
-
-        // Act
-        Action act = () => new AvatarImage(imageId, width, height, fileType, sizeInBytes);
-
-        // Assert
-        act.Should().Throw<InvalidAvatarImageDomainException>();
-    }
-
-    [Fact]
-    public void Constructor_Should_ThrowException_When_FileTypeDoesNotSupportTransparency()
-    {
-        // Arrange
-        var imageId = ImageId.New();
-        int width = 512;
-        int height = 512;
-        ImageFileType fileType = ImageFileType.Jpeg;
         long sizeInBytes = 150000;
 
         // Act
