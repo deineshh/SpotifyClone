@@ -43,4 +43,8 @@ public static class MediaErrors
     public static readonly Error InvalidImageMetadata = new(
         "Media.InvalidImageMetadata",
         "Image metadata is invalid.");
+
+    public static readonly Error AudioAlreadyLinkedToTrack = new(
+        "Media.AudioAlreadyLinkedToTrack",
+        "The specified audio is already linked to a track.");
 }

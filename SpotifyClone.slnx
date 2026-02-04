@@ -31,6 +31,9 @@
     <Project Path="src/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Domain/SpotifyClone.Shared.BuildingBlocks.Domain.csproj" />
     <Project Path="src/Shared/BuildingBlocks/SpotifyClone.Shared.BuildingBlocks.Infrastructure/SpotifyClone.Shared.BuildingBlocks.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Shared/IntegrationEvents/">
+    <Project Path="src/Shared/IntegrationEvents/SpotifyClone.Shared.IntegrationEvents/SpotifyClone.Shared.IntegrationEvents.csproj" Id="26ff93b3-aab9-4450-a5db-1d8d04cb0686" />
+  </Folder>
   <Folder Name="/src/Shared/Kernel/">
     <Project Path="src/Shared/Kernel/SpotifyClone.Shared.Kernel/SpotifyClone.Shared.Kernel.csproj" />
   </Folder>

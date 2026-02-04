@@ -37,6 +37,10 @@ internal sealed class AudioAssetEfCoreConfiguration : IEntityTypeConfiguration<A
             .HasColumnName("created_at")
             .IsRequired();
 
+        builder.Property(x => x.TrackId)
+            .HasColumnName("track_id")
+            .HasConversion(StreamingEfCoreValueConverters.TrackIdConverter);
+
         builder.Ignore(x => x.DomainEvents);
     }
 }

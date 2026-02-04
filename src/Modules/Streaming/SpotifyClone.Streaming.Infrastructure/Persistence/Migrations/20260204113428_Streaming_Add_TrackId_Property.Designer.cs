@@ -12,8 +12,8 @@ using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
 namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(StreamingAppDbContext))]
-    [Migration("20260126112127_Streaming_Add_ImageAsset_Entity")]
-    partial class Streaming_Add_ImageAsset_Entity
+    [Migration("20260204113428_Streaming_Add_TrackId_Property")]
+    partial class Streaming_Add_TrackId_Property
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,12 +36,11 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<TimeSpan>("Duration")
+                    b.Property<TimeSpan?>("Duration")
                         .HasColumnType("interval")
                         .HasColumnName("duration");
 
                     b.Property<string>("Format")
-                        .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)")
                         .HasColumnName("format");
@@ -50,9 +49,13 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_ready");
 
-                    b.Property<long>("SizeInBytes")
+                    b.Property<long?>("SizeInBytes")
                         .HasColumnType("bigint")
                         .HasColumnName("size_in_bytes");
+
+                    b.Property<Guid?>("TrackId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("track_id");
 
                     b.HasKey("Id");
 
@@ -86,20 +89,19 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                                 .HasColumnType("uuid");
 
                             b1.Property<string>("FileType")
-                                .IsRequired()
                                 .HasMaxLength(10)
                                 .HasColumnType("character varying(10)")
                                 .HasColumnName("metadata_file_type");
 
-                            b1.Property<int>("Height")
+                            b1.Property<int?>("Height")
                                 .HasColumnType("integer")
                                 .HasColumnName("metadata_height");
 
-                            b1.Property<long>("SizeInBytes")
+                            b1.Property<long?>("SizeInBytes")
                                 .HasColumnType("bigint")
                                 .HasColumnName("metadata_size_in_bytes");
 
-                            b1.Property<int>("Width")
+                            b1.Property<int?>("Width")
                                 .HasColumnType("integer")
                                 .HasColumnName("metadata_width");
 

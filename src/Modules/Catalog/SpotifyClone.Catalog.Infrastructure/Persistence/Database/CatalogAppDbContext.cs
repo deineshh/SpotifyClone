@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres;
@@ -19,7 +20,9 @@ public sealed class CatalogAppDbContext(DbContextOptions<CatalogAppDbContext> op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogAppDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogAppDbContext).Assembly);
+        modelBuilder.AddTransactionalOutboxEntities();
     }
 }

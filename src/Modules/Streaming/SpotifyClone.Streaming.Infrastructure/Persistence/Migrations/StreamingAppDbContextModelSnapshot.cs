@@ -50,6 +50,10 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("size_in_bytes");
 
+                    b.Property<Guid?>("TrackId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("track_id");
+
                     b.HasKey("Id");
 
                     b.ToTable("audio_assets", "streaming");

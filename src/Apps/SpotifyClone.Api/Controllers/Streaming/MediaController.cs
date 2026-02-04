@@ -18,6 +18,7 @@ namespace SpotifyClone.Api.Controllers.Streaming;
 public sealed class MediaController(IMediator mediator)
     : ApiController(mediator)
 {
+    //[Authorize]
     [HttpPost("audio")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UploadAudioAssetResponse>> UploadAudioAsset(

@@ -2,6 +2,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="MassTransit.EntityFrameworkCore" />
+    <PackageReference Include="MassTransit.RabbitMQ" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
@@ -16,6 +18,10 @@
     <ProjectReference Include="..\..\..\Shared\Kernel\SpotifyClone.Shared.Kernel\SpotifyClone.Shared.Kernel.csproj" />
     <ProjectReference Include="..\SpotifyClone.Catalog.Application\SpotifyClone.Catalog.Application.csproj" />
     <ProjectReference Include="..\SpotifyClone.Catalog.Domain\SpotifyClone.Catalog.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Persistence\Migrations\" />
   </ItemGroup>
 
 </Project>

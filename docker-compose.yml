@@ -22,7 +22,7 @@ services:
       ConnectionStrings__MainDb: Host=postgres;Port=5432;Database=spotifyclone_dev;Username=postgres;Password=postgres
       ConnectionStrings__Redis: redis:6379
     ports:
-      - "8080:8080"
+      - "5000:8080"
     volumes:
       - audio_data:/app/wwwroot/audio
       - temp_data:/app/wwwroot/temp
@@ -66,6 +66,20 @@ services:
     restart: always
     volumes:
       - redis_data:/data
+  
+  rabbitmq:
+    image: masstransit/rabbitmq:latest
+    container_name: spotifyclone-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+      - rabbitmq_log:/var/log/rabbitmq/
 
 volumes:
   audio_data:
@@ -73,3 +87,5 @@ volumes:
   postgres_data:
   minio_data:
   redis_data:
+  rabbitmq_data:
+  rabbitmq_log:

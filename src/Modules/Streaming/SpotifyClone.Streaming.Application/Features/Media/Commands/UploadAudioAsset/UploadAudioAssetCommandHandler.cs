@@ -26,15 +26,15 @@ internal sealed class UploadAudioAssetCommandHandler(
         CancellationToken cancellationToken)
     {
         var audioId = Guid.NewGuid();
-        string extension = Path.GetExtension(request.FileName);
-        string relativeSrcPath = $"{audioId}/source{extension}";
+        //string extension = Path.GetExtension(request.FileName);
+        //string relativeSrcPath = $"{audioId}/source{extension}";
 
         try
         {
-            await _storage.SaveTempFileToLocal(request.FileStream, relativeSrcPath);
+            //await _storage.SaveTempFileToLocal(request.FileStream, relativeSrcPath);
 
-            _jobService.Enqueue<AudioConversionJob>(job
-                => job.ProcessAsync(request.FileName, audioId));
+            //_jobService.Enqueue<AudioConversionJob>(job
+            //    => job.ProcessAsync(request.FileName, audioId));
         }
         catch (DomainExceptionBase)
         {

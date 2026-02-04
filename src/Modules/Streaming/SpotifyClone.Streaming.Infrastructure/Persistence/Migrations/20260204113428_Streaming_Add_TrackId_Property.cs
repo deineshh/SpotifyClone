@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations;
 
 /// <inheritdoc />
-public partial class Streaming_Add_ImageAsset_Entity : Migration
+public partial class Streaming_Add_TrackId_Property : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,11 +20,12 @@ public partial class Streaming_Add_ImageAsset_Entity : Migration
             columns: table => new
             {
                 id = table.Column<Guid>(type: "uuid", nullable: false),
-                duration = table.Column<TimeSpan>(type: "interval", nullable: false),
-                format = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
-                size_in_bytes = table.Column<long>(type: "bigint", nullable: false),
+                duration = table.Column<TimeSpan>(type: "interval", nullable: true),
+                format = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: true),
+                size_in_bytes = table.Column<long>(type: "bigint", nullable: true),
                 is_ready = table.Column<bool>(type: "boolean", nullable: false),
-                created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                track_id = table.Column<Guid>(type: "uuid", nullable: true)
             },
             constraints: table => table.PrimaryKey("PK_audio_assets", x => x.id));
 
