@@ -25,7 +25,6 @@ public static class BuildingBlocksModule
             cfg.AddOpenBehavior(typeof(ExceptionHandlingPipelineBehavior<,>));
             cfg.AddOpenBehavior(typeof(RequestLoggingPipelineBehavior<,>));
             cfg.AddOpenBehavior(typeof(ValidationPipelineBehavior<,>));
-            cfg.AddOpenBehavior(typeof(TransactionalPipelineBehavior<,>));
         });
 
         services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));

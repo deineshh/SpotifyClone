@@ -1,4 +1,4 @@
-﻿using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+﻿using SpotifyClone.Accounts.Application.Abstractions;
 
 namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
 
@@ -8,4 +8,4 @@ public sealed record RegisterUserCommand(
     string DisplayName,
     DateTimeOffset BirthDate,
     string Gender)
-    : IPersistentCommand<RegisterUserCommandResult>;
+    : IAccountsPersistentCommand<RegisterUserCommandResult>;

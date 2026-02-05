@@ -6,23 +6,27 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Application.Behaviors;
 
-public sealed class TransactionalPipelineBehavior<TRequest, TResponse>(
-    IUnitOfWork unitOfWork,
-    ILogger<TransactionalPipelineBehavior<TRequest, TResponse>> logger)
+public abstract class TransactionalPipelineBehaviorBase<TRequest, TResponse>(
+    IUnitOfWork unit,
+    Type nonGenericPersistentCommandType,
+    Type genericPersistentCommandType,
+    ILogger<TransactionalPipelineBehaviorBase<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
     where TResponse : IResult
 {
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    private readonly ILogger<TransactionalPipelineBehavior<TRequest, TResponse>> _logger = logger;
+    private readonly IUnitOfWork _unit = unit;
+    private readonly Type _nonGenericPersistentCommandInterface = nonGenericPersistentCommandType;
+    private readonly Type _genericPersistentCommandType = genericPersistentCommandType;
+    private readonly ILogger<TransactionalPipelineBehaviorBase<TRequest, TResponse>> _logger = logger;
 
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        if (!typeof(IPersistentCommand).IsAssignableFrom(typeof(TRequest)) &&
-            !ImplementsGenericInterface(typeof(TRequest), typeof(IPersistentCommand<>)))
+        if (!_nonGenericPersistentCommandInterface.IsAssignableFrom(typeof(TRequest)) &&
+            !ImplementsGenericInterface(typeof(TRequest), _genericPersistentCommandType))
         {
             return await next(cancellationToken);
         }
@@ -36,7 +40,7 @@ public sealed class TransactionalPipelineBehavior<TRequest, TResponse>(
             return response;
         }
 
-        await _unitOfWork.Commit(cancellationToken);
+        await _unit.Commit(cancellationToken);
 
         _logger.LogInformation("Committed transaction for {RequestType}", typeof(TRequest).Name);
 

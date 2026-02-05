@@ -1,4 +1,4 @@
-﻿using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+﻿using SpotifyClone.Catalog.Application.Abstractions;
 
 namespace SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;
 
@@ -11,4 +11,4 @@ public sealed record CreateTrackCommand(
     IEnumerable<Guid> FeaturedArtists,
     IEnumerable<Guid> Genres,
     Guid AudioFileId)
-    : IPersistentCommand<CreateTrackCommandResult>;
+    : ICatalogPersistentCommand<CreateTrackCommandResult>;

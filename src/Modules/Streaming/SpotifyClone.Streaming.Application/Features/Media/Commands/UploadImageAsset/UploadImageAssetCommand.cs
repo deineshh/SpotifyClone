@@ -1,8 +1,8 @@
-﻿using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+﻿using SpotifyClone.Streaming.Application.Abstractions;
 
 namespace SpotifyClone.Streaming.Application.Features.Media.Commands.UploadImageAsset;
 
 public sealed record UploadImageAssetCommand(
     string FileName,
     Stream FileStream)
-    : IPersistentCommand<UploadImageAssetCommandResult>;
+    : IStreamingPersistentCommand<UploadImageAssetCommandResult>;

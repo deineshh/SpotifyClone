@@ -110,36 +110,6 @@ public partial class Catalog_Add_MassTransit_Outbox : Migration
             constraints: table => table.PrimaryKey("PK_moods", x => x.id));
 
         migrationBuilder.CreateTable(
-            name: "OutboxMessage",
-            schema: "catalog",
-            columns: table => new
-            {
-                SequenceNumber = table.Column<long>(type: "bigint", nullable: false)
-                    .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                EnqueueTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                SentTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                Headers = table.Column<string>(type: "text", nullable: true),
-                Properties = table.Column<string>(type: "text", nullable: true),
-                InboxMessageId = table.Column<Guid>(type: "uuid", nullable: true),
-                InboxConsumerId = table.Column<Guid>(type: "uuid", nullable: true),
-                OutboxId = table.Column<Guid>(type: "uuid", nullable: true),
-                MessageId = table.Column<Guid>(type: "uuid", nullable: false),
-                ContentType = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                MessageType = table.Column<string>(type: "text", nullable: false),
-                Body = table.Column<string>(type: "text", nullable: false),
-                ConversationId = table.Column<Guid>(type: "uuid", nullable: true),
-                CorrelationId = table.Column<Guid>(type: "uuid", nullable: true),
-                InitiatorId = table.Column<Guid>(type: "uuid", nullable: true),
-                RequestId = table.Column<Guid>(type: "uuid", nullable: true),
-                SourceAddress = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                DestinationAddress = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                ResponseAddress = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                FaultAddress = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                ExpirationTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-            },
-            constraints: table => table.PrimaryKey("PK_OutboxMessage", x => x.SequenceNumber));
-
-        migrationBuilder.CreateTable(
             name: "OutboxState",
             schema: "catalog",
             columns: table => new
@@ -234,6 +204,51 @@ public partial class Catalog_Add_MassTransit_Outbox : Migration
                     principalTable: "artists",
                     principalColumn: "id",
                     onDelete: ReferentialAction.Cascade);
+            });
+
+        migrationBuilder.CreateTable(
+            name: "OutboxMessage",
+            schema: "catalog",
+            columns: table => new
+            {
+                SequenceNumber = table.Column<long>(type: "bigint", nullable: false)
+                    .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                EnqueueTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                SentTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                Headers = table.Column<string>(type: "text", nullable: true),
+                Properties = table.Column<string>(type: "text", nullable: true),
+                InboxMessageId = table.Column<Guid>(type: "uuid", nullable: true),
+                InboxConsumerId = table.Column<Guid>(type: "uuid", nullable: true),
+                OutboxId = table.Column<Guid>(type: "uuid", nullable: true),
+                MessageId = table.Column<Guid>(type: "uuid", nullable: false),
+                ContentType = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                MessageType = table.Column<string>(type: "text", nullable: false),
+                Body = table.Column<string>(type: "text", nullable: false),
+                ConversationId = table.Column<Guid>(type: "uuid", nullable: true),
+                CorrelationId = table.Column<Guid>(type: "uuid", nullable: true),
+                InitiatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                RequestId = table.Column<Guid>(type: "uuid", nullable: true),
+                SourceAddress = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                DestinationAddress = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                ResponseAddress = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                FaultAddress = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                ExpirationTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_OutboxMessage", x => x.SequenceNumber);
+                table.ForeignKey(
+                    name: "FK_OutboxMessage_InboxState_InboxMessageId_InboxConsumerId",
+                    columns: x => new { x.InboxMessageId, x.InboxConsumerId },
+                    principalSchema: "catalog",
+                    principalTable: "InboxState",
+                    principalColumns: new[] { "MessageId", "ConsumerId" });
+                table.ForeignKey(
+                    name: "FK_OutboxMessage_OutboxState_OutboxId",
+                    column: x => x.OutboxId,
+                    principalSchema: "catalog",
+                    principalTable: "OutboxState",
+                    principalColumn: "OutboxId");
             });
 
         migrationBuilder.CreateTable(
@@ -374,19 +389,11 @@ public partial class Catalog_Add_MassTransit_Outbox : Migration
             schema: "catalog");
 
         migrationBuilder.DropTable(
-            name: "InboxState",
-            schema: "catalog");
-
-        migrationBuilder.DropTable(
             name: "moods",
             schema: "catalog");
 
         migrationBuilder.DropTable(
             name: "OutboxMessage",
-            schema: "catalog");
-
-        migrationBuilder.DropTable(
-            name: "OutboxState",
             schema: "catalog");
 
         migrationBuilder.DropTable(
@@ -407,6 +414,14 @@ public partial class Catalog_Add_MassTransit_Outbox : Migration
 
         migrationBuilder.DropTable(
             name: "artists",
+            schema: "catalog");
+
+        migrationBuilder.DropTable(
+            name: "InboxState",
+            schema: "catalog");
+
+        migrationBuilder.DropTable(
+            name: "OutboxState",
             schema: "catalog");
 
         migrationBuilder.DropTable(

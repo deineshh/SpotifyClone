@@ -11,7 +11,7 @@ public static class AlbumTitleRules
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
-        if (!Regex.IsMatch(@"^[a-zA-Z0-9\s.,?!-_]*$", title))
+        if (!Regex.IsMatch(title, @"^[a-zA-Z0-9\s.,?!-_]*$"))
         {
             throw new InvalidAlbumTitleDomainException("Title contains invalid characters.");
         }

@@ -4,7 +4,6 @@ using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
-using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.IntegrationEvents.Catalog.Tracks;
 using SpotifyClone.Shared.Kernel.IDs;
@@ -12,12 +11,10 @@ using SpotifyClone.Shared.Kernel.IDs;
 namespace SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;
 
 internal sealed class CreateTrackCommandHandler(
-    ICatalogUnitOfWork unit,
-    IIntegrationEventPublisher eventPublisher)
+    ICatalogUnitOfWork unit)
     : ICommandHandler<CreateTrackCommand, CreateTrackCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
-    private readonly IIntegrationEventPublisher _eventPublisher = eventPublisher;
 
     public async Task<Result<CreateTrackCommandResult>> Handle(
         CreateTrackCommand request,
@@ -36,9 +33,6 @@ internal sealed class CreateTrackCommandHandler(
             request.Genres.Select(g => GenreId.From(g)));
 
         await _unit.Tracks.AddAsync(track, cancellationToken);
-
-        var integrationEvent = new TrackCreatedIntegrationEvent(trackId, request.AudioFileId);
-        await _eventPublisher.PublishAsync(integrationEvent);
 
         return new CreateTrackCommandResult(trackId);
     }

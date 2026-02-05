@@ -11,7 +11,7 @@ public static class TrackTitleRules
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
-        if (!Regex.IsMatch(@"^[a-zA-Z0-9\s.,?!-_]*$", title))
+        if (!Regex.IsMatch(title, @"^[a-zA-Z0-9\s.,?! _-]*$"))
         {
             throw new InvalidTrackTitleDomainException("Title contains invalid characters.");
         }

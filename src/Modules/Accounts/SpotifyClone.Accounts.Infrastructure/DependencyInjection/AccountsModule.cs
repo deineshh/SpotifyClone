@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +8,7 @@ using SpotifyClone.Accounts.Application;
 using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Repositories;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
+using SpotifyClone.Accounts.Application.Behaviors;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
 using SpotifyClone.Accounts.Infrastructure.Auth;
@@ -56,18 +58,19 @@ public static class AccountsModule
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AccountsTransactionalPipelineBehavior<,>));
+        services.AddTransient<ITokenHasher, Sha256TokenHasher>();
+        services.AddTransient<ITokenService, JwtTokenService>();
+        services.AddTransient<ICurrentUser, CurrentUser>();
+        services.AddTransient<IAccountVerificationService, IdentityAccountVerificationService>();
+        services.AddTransient<ISmsSender, LoggerSmsSender>();
+
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<IAccountsUnitOfWork>());
         services.AddScoped<IAccountsUnitOfWork, AccountsEfCoreUnitOfWork>();
         services.AddScoped<IUserProfileRepository, UserProfileEfCoreRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenEfCoreRepository>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
-
-        services.AddTransient<ITokenHasher, Sha256TokenHasher>();
-        services.AddTransient<ITokenService, JwtTokenService>();
-        services.AddTransient<ICurrentUser, CurrentUser>();
-        services.AddTransient<IAccountVerificationService, IdentityAccountVerificationService>();
-        services.AddTransient<ISmsSender, LoggerSmsSender>();
 
         return services;
     }

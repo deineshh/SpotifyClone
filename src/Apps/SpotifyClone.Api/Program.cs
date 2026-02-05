@@ -2,7 +2,6 @@ using System.Text;
 using System.Threading.RateLimiting;
 using Hangfire;
 using Hangfire.Redis.StackExchange;
-using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.StaticFiles;
@@ -37,29 +36,6 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddHangfire(config => config.UseRedisStorage(
     builder.Configuration.GetConnectionString("Redis")));
-
-builder.Services.AddMassTransit(x =>
-{
-    // Enable the Transactional Outbox (Crucial for reliability)
-    // This ensures the event is NOT sent if the DB transaction fails.
-    x.AddEntityFrameworkOutbox<CatalogAppDbContext>(o =>
-    {
-        o.QueryDelay = TimeSpan.FromSeconds(1);
-        o.UsePostgres();
-        o.UseBusOutbox();
-    });
-
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.Host(builder.Configuration["RabbitMQ:Host"], "/", h =>
-        {
-            h.Username(builder.Configuration["RabbitMQ:User"]!);
-            h.Password(builder.Configuration["RabbitMQ:Password"]!);
-        });
-
-        cfg.ConfigureEndpoints(context);
-    });
-});
 
 builder.Services
     .AddAuthentication(options =>

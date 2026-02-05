@@ -4,7 +4,6 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Hangfire.AspNetCore" />
     <PackageReference Include="Hangfire.MemoryStorage" />
-    <PackageReference Include="MassTransit.RabbitMQ" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />

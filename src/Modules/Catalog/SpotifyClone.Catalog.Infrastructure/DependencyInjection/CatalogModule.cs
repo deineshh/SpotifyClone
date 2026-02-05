@@ -1,9 +1,11 @@
 ﻿using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpotifyClone.Catalog.Application;
 using SpotifyClone.Catalog.Application.Abstractions;
+using SpotifyClone.Catalog.Application.Behaviors;
 using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists;
@@ -13,10 +15,8 @@ using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 using SpotifyClone.Catalog.Infrastructure.Persistence;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Repositories;
-using SpotifyClone.Catalog.Infrastructure.Persistence.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
-using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Services;
 
 namespace SpotifyClone.Catalog.Infrastructure.DependencyInjection;
 
@@ -35,6 +35,8 @@ public static class CatalogModule
             configuration.GetConnectionString("MainDb"),
             b => b.MigrationsAssembly(typeof(CatalogAppDbContext).Assembly.FullName)));
 
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CatalogTransactionalPipelineBehavior<,>));
+
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ICatalogUnitOfWork>());
         services.AddScoped<ICatalogUnitOfWork, CatalogEfCoreUnitOfWork>();
         services.AddScoped<ITrackRepository, TrackEfCoreRepository>();
@@ -43,7 +45,6 @@ public static class CatalogModule
         services.AddScoped<IGenreRepository, GenreEfCoreRepository>();
         services.AddScoped<IMoodRepository, MoodEfCoreRepository>();
         services.AddScoped<IDomainExceptionMapper, CatalogDomainExceptionMapper>();
-        services.AddScoped<IIntegrationEventPublisher, MassTransitIntegrationEventPublisher>();
 
         return services;
     }

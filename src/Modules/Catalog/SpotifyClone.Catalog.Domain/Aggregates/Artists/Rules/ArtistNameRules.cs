@@ -11,7 +11,7 @@ public static class ArtistNameRules
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
-        if (!Regex.IsMatch(@"^[a-zA-Z0-9\s.,?!-_]*$", name))
+        if (!Regex.IsMatch(name, @"^[a-zA-Z0-9\s.,?!-_]*$"))
         {
             throw new InvalidArtistNameDomainException("Name contains invalid characters.");
         }
