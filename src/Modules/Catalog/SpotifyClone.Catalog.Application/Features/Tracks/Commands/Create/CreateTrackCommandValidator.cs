@@ -29,9 +29,5 @@ public sealed class CreateTrackCommandValidator
 
         RuleFor(x => x.Genres)
             .NotNull().WithMessage("Genre collection is required.");
-
-        RuleFor(x => x.AudioFileId)
-            .NotNull().WithMessage("Audio file ID is required.")
-            .NotEqual(Guid.Empty).WithMessage("Audio file ID is required.");
     }
 }

@@ -24,8 +24,7 @@ public sealed class MediaController(IMediator mediator)
                 request.AlbumId,
                 request.MainArtists,
                 request.FeaturedArtists,
-                request.Genres,
-                request.AudioFileId),
+                request.Genres),
             cancellationToken);
         if (createResult.IsFailure)
         {

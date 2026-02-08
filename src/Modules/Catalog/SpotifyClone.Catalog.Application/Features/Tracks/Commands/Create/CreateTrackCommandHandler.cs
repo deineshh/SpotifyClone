@@ -5,7 +5,6 @@ using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
-using SpotifyClone.Shared.IntegrationEvents.Catalog.Tracks;
 using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;

@@ -7,6 +7,7 @@ using SpotifyClone.Catalog.Application;
 using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Application.Behaviors;
 using SpotifyClone.Catalog.Application.Errors;
+using SpotifyClone.Catalog.Application.Jobs;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres;
@@ -35,8 +36,6 @@ public static class CatalogModule
             configuration.GetConnectionString("MainDb"),
             b => b.MigrationsAssembly(typeof(CatalogAppDbContext).Assembly.FullName)));
 
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CatalogTransactionalPipelineBehavior<,>));
-
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ICatalogUnitOfWork>());
         services.AddScoped<ICatalogUnitOfWork, CatalogEfCoreUnitOfWork>();
         services.AddScoped<ITrackRepository, TrackEfCoreRepository>();
@@ -45,6 +44,9 @@ public static class CatalogModule
         services.AddScoped<IGenreRepository, GenreEfCoreRepository>();
         services.AddScoped<IMoodRepository, MoodEfCoreRepository>();
         services.AddScoped<IDomainExceptionMapper, CatalogDomainExceptionMapper>();
+
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CatalogTransactionalPipelineBehavior<,>));
+        services.AddTransient<LinkTrackToAudioFileJob>();
 
         return services;
     }

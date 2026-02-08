@@ -39,8 +39,9 @@ internal sealed class TrackEfCoreConfiguration : IEntityTypeConfiguration<Track>
             .HasColumnName("track_number")
             .IsRequired();
 
-        builder.Property(x => x.IsPublished)
-            .HasColumnName("is_published")
+        builder.Property(x => x.Status)
+            .HasColumnName("status")
+            .HasConversion(CatalogEfCoreValueConverters.TrackStatusConverter)
             .IsRequired();
 
         builder.Property(x => x.AudioFileId)

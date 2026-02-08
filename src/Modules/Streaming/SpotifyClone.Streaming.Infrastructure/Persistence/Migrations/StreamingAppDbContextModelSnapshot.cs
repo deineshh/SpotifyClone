@@ -33,7 +33,7 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<TimeSpan?>("Duration")
+                    b.Property<TimeSpan>("Duration")
                         .HasColumnType("interval")
                         .HasColumnName("duration");
 

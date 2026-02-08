@@ -1,6 +1,7 @@
 ﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Exceptions;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Rules;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.ValueObjects;
@@ -20,8 +21,8 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     public DateTimeOffset? ReleaseDate { get; private set; }
     public bool ContainsExplicitContent { get; private set; }
     public int TrackNumber { get; private set; }
-    public bool IsPublished { get; private set; }
-    public AudioFileId? AudioFileId { get; private set; } = null!;
+    public TrackStatus Status { get; private set; } = null!;
+    public AudioFileId? AudioFileId { get; private set; }
     public AlbumId AlbumId { get; private set; } = null!;
     public IReadOnlySet<ArtistId> MainArtists => _mainArtists.AsReadOnly();
     public IReadOnlySet<ArtistId> FeaturedArtists => _featuredArtists.AsReadOnly();
@@ -58,16 +59,21 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
                 "A track must have at least one genre.");
         }
 
-        return new(
-            id, title, null, null, containsExplicitContent, trackNumber, false, null, albumId,
+        var track = new Track(
+            id, title, null, null, containsExplicitContent, trackNumber, TrackStatus.Draft, null, albumId,
             mainArtists, featuredArtists, genres);
+
+        return track;
     }
+
+    public void MarkAsReadyToPublish()
+        => Status = TrackStatus.ReadyToPublish;
 
     public void Publish(AudioFileId audioFileId, TimeSpan duration, DateTimeOffset releaseDate)
     {
         ArgumentNullException.ThrowIfNull(audioFileId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             return;
         }
@@ -77,14 +83,27 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         AudioFileId = audioFileId;
         Duration = duration;
         ReleaseDate = releaseDate;
-        IsPublished = true;
+        Status = TrackStatus.Published;
+    }
+
+    public void LinkAudioFile(AudioFileId audioFileId, TimeSpan duration)
+    {
+        ArgumentNullException.ThrowIfNull(audioFileId);
+
+        if (AudioFileId is not null)
+        {
+            throw new TrackAlreadyLinkedToAudioFileDomainException(
+                "Track is already linked to an audio file.");
+        }
+
+        ChangeAudioFile(audioFileId, duration);
     }
 
     public void AddMainArtist(ArtistId artistId)
     {
         ArgumentNullException.ThrowIfNull(artistId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException("Cannot add main artist to a published track.");
         }
@@ -96,7 +115,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         ArgumentNullException.ThrowIfNull(artistId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
                 "Cannot remove main artist from a published track.");
@@ -109,7 +128,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         ArgumentNullException.ThrowIfNull(artistId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
                 "Cannot add featured artist to a published track.");
@@ -122,7 +141,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         ArgumentNullException.ThrowIfNull(artistId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
                 "Cannot remove featured artist from a published track.");
@@ -135,7 +154,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         ArgumentNullException.ThrowIfNull(genreId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
                 "Cannot add genre to a published track.");
@@ -148,7 +167,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         ArgumentNullException.ThrowIfNull(genreId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
                 "Cannot remove genre from a published track.");
@@ -197,7 +216,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     public void ChangeAudioFile(AudioFileId newAudioFileId, TimeSpan newDuration)
     {
         ArgumentNullException.ThrowIfNull(newAudioFileId);
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
                 "Cannot change audio file of a published track.");
@@ -216,7 +235,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         DateTimeOffset? releaseDate,
         bool containsExplicitContent,
         int trackNumber,
-        bool isPublished,
+        TrackStatus status,
         AudioFileId? audioFileId,
         AlbumId albumId,
         IEnumerable<ArtistId> mainArtists,
@@ -229,7 +248,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         ReleaseDate = releaseDate;
         ContainsExplicitContent = containsExplicitContent;
         TrackNumber = trackNumber;
-        IsPublished = isPublished;
+        Status = status;
         AudioFileId = audioFileId;
         AlbumId = albumId;
         _mainArtists = mainArtists.ToHashSet();

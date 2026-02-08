@@ -6,7 +6,6 @@ public sealed record CreateTrackRequest
     public required bool ContainsExplicitContent { get; init; }
     public required int TrackNumber { get; init; }
     public required Guid AlbumId { get; init; }
-    public required Guid AudioFileId { get; init; }
     public required IEnumerable<Guid> MainArtists { get; init; }
     public IEnumerable<Guid> FeaturedArtists { get; init; } = [];
     public required IEnumerable<Guid> Genres { get; init; }

@@ -12,8 +12,8 @@ using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
 namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(StreamingAppDbContext))]
-    [Migration("20260204113428_Streaming_Add_TrackId_Property")]
-    partial class Streaming_Add_TrackId_Property
+    [Migration("20260206191316_Streaming_Make_TrackId_Nullable")]
+    partial class Streaming_Make_TrackId_Nullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,7 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<TimeSpan?>("Duration")
+                    b.Property<TimeSpan>("Duration")
                         .HasColumnType("interval")
                         .HasColumnName("duration");
 

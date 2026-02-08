@@ -54,8 +54,9 @@ public static class StreamingModule
         services.AddScoped<IFileStorage, MinioFileStorage>();
         services.AddScoped<IDomainExceptionMapper, StreamingDomainExceptionMapper>();
 
-        services.AddTransient<AudioConversionJob>();
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(StreamingTransactionalPipelineBehavior<,>));
+        services.AddTransient<AudioConversionJob>();
+        services.AddTransient<ImageConversionJob>();
 
         services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.SectionName));
 

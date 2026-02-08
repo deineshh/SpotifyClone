@@ -14,6 +14,7 @@ public sealed class StreamingDomainExceptionMapper : IDomainExceptionMapper
             InvalidAudioFormatDomainException => MediaErrors.InvalidFormat,
             InvalidDurationDomainException => MediaErrors.InvalidDuration,
             InvalidImageMetadataDomainException => MediaErrors.InvalidImageMetadata,
+            TrackNotLinkedDomainException => MediaErrors.TrackNotLinkedToAudio,
             _ => CommonErrors.Unknown
         };
 }

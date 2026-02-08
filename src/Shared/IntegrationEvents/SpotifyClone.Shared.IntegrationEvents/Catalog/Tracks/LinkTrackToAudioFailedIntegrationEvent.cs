@@ -2,7 +2,6 @@
 
 namespace SpotifyClone.Shared.IntegrationEvents.Catalog.Tracks;
 
-public sealed record TrackCreatedIntegrationEvent(
-    Guid TrackId,
-    Guid AudioFileId)
+public sealed record LinkTrackToAudioFailedIntegrationEvent(
+    Guid AudioId)
     : IntegrationEvent;

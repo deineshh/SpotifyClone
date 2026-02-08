@@ -25,7 +25,7 @@ public partial class Streaming_Add_TrackId_Property : Migration
                 size_in_bytes = table.Column<long>(type: "bigint", nullable: true),
                 is_ready = table.Column<bool>(type: "boolean", nullable: false),
                 created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                track_id = table.Column<Guid>(type: "uuid", nullable: true)
+                track_id = table.Column<Guid>(type: "uuid", nullable: false)
             },
             constraints: table => table.PrimaryKey("PK_audio_assets", x => x.id));
 

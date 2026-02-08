@@ -4,6 +4,7 @@ using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence.Converters;
 using SpotifyClone.Shared.Kernel.Enums;
@@ -42,4 +43,8 @@ internal static class CatalogEfCoreValueConverters
     public static readonly ValueConverter<ImageFileType?, string?> ImageFileTypeConverter = new(
         t => t == null ? null : t.Value,
         v => v == null ? null : ImageFileType.From(v));
+
+    public static readonly ValueConverter<TrackStatus, string> TrackStatusConverter = new(
+        s => s.Value,
+        v => TrackStatus.From(v));
 }

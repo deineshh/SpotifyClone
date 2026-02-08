@@ -19,7 +19,8 @@ internal sealed class AudioAssetEfCoreConfiguration : IEntityTypeConfiguration<A
             .ValueGeneratedNever();
 
         builder.Property(x => x.Duration)
-            .HasColumnName("duration");
+            .HasColumnName("duration")
+            .IsRequired();
 
         builder.Property(x => x.Format)
             .HasColumnName("format")

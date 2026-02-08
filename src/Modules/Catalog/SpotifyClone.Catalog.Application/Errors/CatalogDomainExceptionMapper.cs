@@ -22,6 +22,7 @@ public sealed class CatalogDomainExceptionMapper : IDomainExceptionMapper
             InvalidTrackMainArtistsDomainException => TrackErrors.InvalidMainArtists,
             InvalidTrackTitleDomainException => TrackErrors.InvalidTitle,
             TrackAlreadyPublishedDomainException => TrackErrors.AlreadyPublished,
+            TrackAlreadyLinkedToAudioFileDomainException => TrackErrors.AlreadyLinkedToAudioFile,
 
             // Album
             InvalidAlbumCoverImageDomainException => AlbumErrors.InvalidCoverImage,
@@ -29,6 +30,7 @@ public sealed class CatalogDomainExceptionMapper : IDomainExceptionMapper
             InvalidAlbumTitleDomainException => AlbumErrors.InvalidTitle,
             InvalidAlbumTracksDomainException => AlbumErrors.InvalidTracks,
             InvalidAlbumTypeDomainException => AlbumErrors.InvalidType,
+            AlbumAlreadyPublishedDomainException => AlbumErrors.AlreadyPublished,
 
             // Artist
             InvalidArtistAvatarImageDomainException => ArtistErrors.InvalidAvatarImage,
@@ -47,7 +49,6 @@ public sealed class CatalogDomainExceptionMapper : IDomainExceptionMapper
             InvalidMoodNameDomainException => MoodErrors.InvalidName,
 
             // Other
-            AlbumAlreadyPublishedDomainException => AlbumErrors.AlreadyPublished,
             _ => CommonErrors.Unknown
         };
 }

@@ -23,4 +23,15 @@ public static class TrackErrors
     public static readonly Error AlreadyPublished = new(
         "Track.AlreadyPublished",
         "The track has already been published.");
+
+    public static readonly Error AlreadyLinkedToAudioFile = new(
+        "Track.AlreadyLinkedToAudio",
+        "Track is already linked to an audio.");
+
+    public static readonly Error InvalidTrackStatus = new(
+        "Track.InvalidTrackStatus",
+        "Track status is invalid.");
+
+    public static readonly Error NotFound = CommonErrors.NotFound(
+        "Track", "Track");
 }

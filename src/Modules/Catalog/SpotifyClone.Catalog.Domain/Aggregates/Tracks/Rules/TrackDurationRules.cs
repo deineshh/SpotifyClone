@@ -12,7 +12,7 @@ public static class TrackDurationRules
         {
             throw new InvalidTrackDurationDomainException("Duration must be greater that zero.");
         }
-        else if (duration < MaxDuration)
+        else if (duration > MaxDuration)
         {
             throw new InvalidTrackDurationDomainException(
                 $"Duration hours must be less than {MaxDuration.TotalHours}.");

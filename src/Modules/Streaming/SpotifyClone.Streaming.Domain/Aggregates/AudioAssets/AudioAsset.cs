@@ -1,6 +1,7 @@
 ﻿using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 using SpotifyClone.Shared.Kernel.IDs;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Enums;
+using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Events;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Exceptions;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.ValueObjects;
 
@@ -10,7 +11,7 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
 {
     public static readonly TimeSpan MaxDuration = TimeSpan.FromHours(24);
 
-    public TimeSpan? Duration { get; private set; }
+    public TimeSpan Duration { get; private set; }
     public AudioFormat? Format { get; private set; }
     public long? SizeInBytes { get; private set; }
     public bool IsReady { get; private set; }
@@ -20,18 +21,25 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
     public static AudioAsset Create(
         AudioAssetId id,
         bool isReady,
-        TimeSpan? duration,
+        TimeSpan duration,
         AudioFormat? format,
-        long? sizeInBytes)
+        long? sizeInBytes,
+        TrackId trackId)
     {
         ArgumentNullException.ThrowIfNull(id);
+        ArgumentNullException.ThrowIfNull(trackId);
 
         if (duration > MaxDuration)
         {
             throw new InvalidDurationDomainException($"Duration cannot exceed {MaxDuration.TotalHours} hours.");
         }
 
-        return new AudioAsset(id, duration, format, sizeInBytes, isReady, DateTimeOffset.UtcNow, null);
+        var audioAsset = new AudioAsset(
+            id, duration, format, sizeInBytes, isReady, DateTimeOffset.UtcNow, trackId);
+
+        audioAsset.RaiseDomainEvent(new AudioAssetCreatedDomainEvent(id, trackId, duration));
+
+        return audioAsset;
     }
 
     public void MarkAsReady(TimeSpan duration, AudioFormat format, long sizeInBytes)
@@ -39,6 +47,12 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
         if (IsReady)
         {
             return;
+        }
+
+        if (TrackId is null)
+        {
+            throw new TrackNotLinkedDomainException(
+                "Audio Asset cannot be ready without a linked Track.");
         }
 
         if (duration <= TimeSpan.Zero)
@@ -54,25 +68,15 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
         SizeInBytes = sizeInBytes;
         IsReady = true;
 
-        // Raise domain events if needed
+        RaiseDomainEvent(new AudioAssetReadyDomainEvent(TrackId));
     }
 
-    public void LinkTrack(TrackId trackId)
-    {
-        ArgumentNullException.ThrowIfNull(trackId);
-
-        if (TrackId is not null)
-        {
-            throw new AudioAssetAlreadyLinkedToTrackDomainException(
-                "Audio asset is already linked to a track.");
-        }
-
-        TrackId = trackId;
-    }
+    public void UnlinkFromTrack()
+        => TrackId = null;
 
     private AudioAsset(
         AudioAssetId id,
-        TimeSpan? duration,
+        TimeSpan duration,
         AudioFormat? format,
         long? sizeInBytes,
         bool isReady,

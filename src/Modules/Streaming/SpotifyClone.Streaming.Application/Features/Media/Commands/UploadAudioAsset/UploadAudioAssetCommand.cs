@@ -4,5 +4,6 @@ namespace SpotifyClone.Streaming.Application.Features.Media.Commands.UploadAudio
 
 public sealed record UploadAudioAssetCommand(
     string FileName,
-    Stream FileStream)
+    Stream FileStream,
+    Guid TrackId)
     : IStreamingPersistentCommand<UploadAudioAssetCommandResult>;

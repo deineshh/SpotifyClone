@@ -136,13 +136,14 @@ namespace SpotifyClone.Catalog.Infrastructure.Persistence.Migrations
                         .HasColumnType("interval")
                         .HasColumnName("duration");
 
-                    b.Property<bool>("IsPublished")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_published");
-
                     b.Property<DateTimeOffset?>("ReleaseDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("release_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
 
                     b.Property<string>("Title")
                         .IsRequired()

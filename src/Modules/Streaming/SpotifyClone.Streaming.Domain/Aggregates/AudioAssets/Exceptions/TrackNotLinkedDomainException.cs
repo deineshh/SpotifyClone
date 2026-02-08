@@ -2,5 +2,5 @@
 
 namespace SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Exceptions;
 
-public sealed class AudioAssetAlreadyLinkedToTrackDomainException(string message)
+public sealed  class TrackNotLinkedDomainException(string message)
     : StreamingDomainExceptionBase(message);
