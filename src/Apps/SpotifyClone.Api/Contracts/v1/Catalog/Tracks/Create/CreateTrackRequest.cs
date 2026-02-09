@@ -9,4 +9,5 @@ public sealed record CreateTrackRequest
     public required IEnumerable<Guid> MainArtists { get; init; }
     public IEnumerable<Guid> FeaturedArtists { get; init; } = [];
     public required IEnumerable<Guid> Genres { get; init; }
+    public required IEnumerable<Guid> Moods { get; init; }
 }

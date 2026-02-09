@@ -1,6 +1,7 @@
 ﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Exceptions;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Rules;
@@ -15,6 +16,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     private readonly HashSet<ArtistId> _mainArtists = [];
     private readonly HashSet<ArtistId> _featuredArtists = [];
     private readonly HashSet<GenreId> _genres = [];
+    private readonly HashSet<MoodId> _moods = [];
 
     public string Title { get; private set; } = null!;
     public TimeSpan? Duration { get; private set; }
@@ -27,6 +29,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     public IReadOnlySet<ArtistId> MainArtists => _mainArtists.AsReadOnly();
     public IReadOnlySet<ArtistId> FeaturedArtists => _featuredArtists.AsReadOnly();
     public IReadOnlySet<GenreId> Genres => _genres.AsReadOnly();
+    public IReadOnlySet<MoodId> Moods => _moods.AsReadOnly();
 
     public static Track Create(
         TrackId id,
@@ -36,7 +39,8 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         AlbumId albumId,
         IEnumerable<ArtistId> mainArtists,
         IEnumerable<ArtistId> featuredArtists,
-        IEnumerable<GenreId> genres)
+        IEnumerable<GenreId> genres,
+        IEnumerable<MoodId> moods)
     {
         ArgumentNullException.ThrowIfNull(id);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(trackNumber);
@@ -44,6 +48,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         ArgumentNullException.ThrowIfNull(mainArtists);
         ArgumentNullException.ThrowIfNull(featuredArtists);
         ArgumentNullException.ThrowIfNull(genres);
+        ArgumentNullException.ThrowIfNull(moods);
 
         TrackTitleRules.Validate(title);
 
@@ -59,32 +64,21 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
                 "A track must have at least one genre.");
         }
 
+        if (!moods.Any())
+        {
+            throw new InvalidTrackMoodsDomainException(
+                "A track must have at least one mood.");
+        }
+
         var track = new Track(
             id, title, null, null, containsExplicitContent, trackNumber, TrackStatus.Draft, null, albumId,
-            mainArtists, featuredArtists, genres);
+            mainArtists, featuredArtists, genres, moods);
 
         return track;
     }
 
     public void MarkAsReadyToPublish()
         => Status = TrackStatus.ReadyToPublish;
-
-    public void Publish(AudioFileId audioFileId, TimeSpan duration, DateTimeOffset releaseDate)
-    {
-        ArgumentNullException.ThrowIfNull(audioFileId);
-
-        if (Status.IsPublished)
-        {
-            return;
-        }
-
-        TrackDurationRules.Validate(duration);
-
-        AudioFileId = audioFileId;
-        Duration = duration;
-        ReleaseDate = releaseDate;
-        Status = TrackStatus.Published;
-    }
 
     public void LinkAudioFile(AudioFileId audioFileId, TimeSpan duration)
     {
@@ -97,6 +91,38 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         }
 
         ChangeAudioFile(audioFileId, duration);
+    }
+
+    public void Publish(DateTimeOffset releaseDate)
+    {
+        if (Status.IsPublished)
+        {
+            throw new TrackAlreadyPublishedDomainException("This track has been already published.");
+        }
+
+        if (AudioFileId is null)
+        {
+            throw new CannotPublishTrackDomainException("Cannot publish track while audio file is not linked.");
+        }
+
+        if (releaseDate < DateTimeOffset.UtcNow.AddMinutes(-1))
+        {
+            throw new InvalidTrackReleaseDateDomainException("Track release date cannot be in the past.");
+        }
+
+        ReleaseDate = releaseDate.ToUniversalTime();
+        Status = TrackStatus.Published;
+    }
+
+    public void Unpublish()
+    {
+        if (!Status.IsPublished)
+        {
+            throw new TrackNotPublishedDomainException("Cannot unpublish track which is not published.");
+        }
+
+        ReleaseDate = null;
+        Status = TrackStatus.ReadyToPublish;
     }
 
     public void AddMainArtist(ArtistId artistId)
@@ -176,6 +202,32 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         _genres.Remove(genreId);
     }
 
+    public void AddMood(MoodId moodId)
+    {
+        ArgumentNullException.ThrowIfNull(moodId);
+
+        if (Status.IsPublished)
+        {
+            throw new TrackAlreadyPublishedDomainException(
+                "Cannot add mood to a published track.");
+        }
+
+        _moods.Add(moodId);
+    }
+
+    public void RemoveMood(MoodId moodId)
+    {
+        ArgumentNullException.ThrowIfNull(moodId);
+
+        if (Status.IsPublished)
+        {
+            throw new TrackAlreadyPublishedDomainException(
+                "Cannot remove mood from a published track.");
+        }
+
+        _moods.Remove(moodId);
+    }
+
     public bool MainArtistExists(ArtistId artistId)
     {
         ArgumentNullException.ThrowIfNull(artistId);
@@ -192,6 +244,12 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         ArgumentNullException.ThrowIfNull(genreId);
         return _genres.Contains(genreId);
+    }
+
+    public bool MoodExists(MoodId moodId)
+    {
+        ArgumentNullException.ThrowIfNull(moodId);
+        return _moods.Contains(moodId);
     }
 
     public void ChangeTitle(string newTitle)
@@ -240,7 +298,8 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         AlbumId albumId,
         IEnumerable<ArtistId> mainArtists,
         IEnumerable<ArtistId> featuredArtists,
-        IEnumerable<GenreId> genres)
+        IEnumerable<GenreId> genres,
+        IEnumerable<MoodId> moods)
         : base(id)
     {
         Title = title;
@@ -254,6 +313,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         _mainArtists = mainArtists.ToHashSet();
         _featuredArtists = featuredArtists.ToHashSet();
         _genres = genres.ToHashSet();
+        _moods = moods.ToHashSet();
     }
 
     private Track()

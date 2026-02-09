@@ -52,8 +52,10 @@ Base URL: `/api/v1`
 
 | Method   | Endpoint                                | Description                  | Request Body                        | Response                             |
 | :------- | :-------------------------------------- | :--------------------------- | :---------------------------------- | :----------------------------------- |
+| `POST`   | `/catalog/tracks`                       | Create a new track draft     | `CreateTrackRequest`                | `CreateTrackResponse`                |
+| `POST`   | `/catalog/tracks/publish`               | Publish a new track          | `PublishTrackRequest`               | `PublishTrackResponse`               |
+| `POST`   | `/catalog/tracks/unpublish`             | Unpublish a new track        | `UnpublishTrackRequest`             | `UnpublishTrackResponse`             |
 | `GET`    | `/catalog/tracks/{trackId}`             | Get track details            | -                                   | `GetTrackDetailsResponse`            |
-| `POST`   | `/catalog/tracks`                       | Publish a new track          | `PublishTrackRequest`               | `PublishTrackResponse`               |
 | `DELETE` | `/catalog/tracks/{trackId}`             | Unpublish/Delete a track     | -                                   | `UnpublishTrackResponse`             |
 | `PATCH`  | `/catalog/tracks/{trackId}/title`       | Rename track                 | `RenameTrackRequest`                | `RenameTrackResponse`                |
 | `PATCH`  | `/catalog/tracks/{trackId}/description` | Change track description     | `ChangeTrackDescriptionRequest`     | `ChangeTrackDescriptionResponse`     |

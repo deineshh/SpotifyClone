@@ -16,7 +16,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
 
     public string Title { get; private set; } = null!;
     public DateTimeOffset? ReleaseDate { get; private set; }
-    public bool IsPublished { get; private set; }
+    public AlbumStatus Status { get; private set; } = null!;
     public AlbumType? Type { get; private set; }
     public AlbumCoverImage Cover { get; private set; } = null!;
     public IReadOnlySet<ArtistId> MainArtists => _mainArtists.AsReadOnly();
@@ -37,14 +37,14 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
                 "An album must have at least one main artist.");
         }
 
-        return new Album(id, title, null, false, null, cover, mainArtists);
+        return new Album(id, title, null, AlbumStatus.Draft, null, cover, mainArtists);
     }
 
     public void Publish(DateTimeOffset releaseDate)
     {
-        if (IsPublished)
+        if (Status.IsPublished)
         {
-            return;
+            throw new AlbumAlreadyPublishedDomainException("This album has been already published.");
         }
 
         if (_tracks.Count <= 0)
@@ -54,7 +54,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         }
 
         ReleaseDate = releaseDate;
-        IsPublished = true;
+        Status = AlbumStatus.Published;
         Type = AlbumType.From(_tracks.Count);
 
         RaiseDomainEvent(new AlbumPublishedDomainEvent(Id, releaseDate));
@@ -64,7 +64,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     {
         ArgumentNullException.ThrowIfNull(artistId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new AlbumAlreadyPublishedDomainException("Cannot add main artist to a published album.");
         }
@@ -76,7 +76,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     {
         ArgumentNullException.ThrowIfNull(artistId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new AlbumAlreadyPublishedDomainException(
                 "Cannot remove main artist from a published album.");
@@ -101,7 +101,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     {
         ArgumentNullException.ThrowIfNull(trackId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new AlbumAlreadyPublishedDomainException("Cannot add track to a published album.");
         }
@@ -114,7 +114,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     {
         ArgumentNullException.ThrowIfNull(trackId);
 
-        if (IsPublished)
+        if (Status.IsPublished)
         {
             throw new AlbumAlreadyPublishedDomainException("Cannot remove track from a published album.");
         }
@@ -140,13 +140,13 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     }
 
     private Album(
-        AlbumId id, string title, DateTimeOffset? releaseDate, bool isPublished, AlbumType? type,
+        AlbumId id, string title, DateTimeOffset? releaseDate, AlbumStatus status, AlbumType? type,
         AlbumCoverImage cover, IEnumerable<ArtistId> mainArtists)
         : base(id)
     {
         Title = title;
         ReleaseDate = releaseDate;
-        IsPublished = isPublished;
+        Status = status;
         Type = type;
         Cover = cover;
         _mainArtists = mainArtists.ToHashSet();

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
@@ -11,9 +12,11 @@ using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
 namespace SpotifyClone.Catalog.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CatalogAppDbContext))]
-    partial class CatalogAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260208224317_Catalog_Add_Moods_Property_To_Track_Entity")]
+    partial class Catalog_Add_Moods_Property_To_Track_Entity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,14 +32,13 @@ namespace SpotifyClone.Catalog.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_published");
+
                     b.Property<DateTimeOffset?>("ReleaseDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("release_date");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
 
                     b.Property<string>("Title")
                         .IsRequired()

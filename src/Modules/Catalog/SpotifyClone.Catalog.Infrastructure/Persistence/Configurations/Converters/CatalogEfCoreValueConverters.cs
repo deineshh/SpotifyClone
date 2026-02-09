@@ -47,4 +47,8 @@ internal static class CatalogEfCoreValueConverters
     public static readonly ValueConverter<TrackStatus, string> TrackStatusConverter = new(
         s => s.Value,
         v => TrackStatus.From(v));
+
+    public static readonly ValueConverter<AlbumStatus, string> AlbumStatusConverter = new(
+        s => s.Value,
+        v => AlbumStatus.From(v));
 }

@@ -44,8 +44,8 @@ public sealed class MediaController(IMediator mediator)
 
         UploadAudioAssetCommandResult resultData = result.Value;
 
-        return new UploadAudioAssetResponse(
-            resultData.AudioId);
+        return Accepted(new UploadAudioAssetResponse(
+            resultData.AudioId));
     }
 
     //[Authorize]
@@ -98,8 +98,8 @@ public sealed class MediaController(IMediator mediator)
 
         UploadImageAssetCommandResult resultData = result.Value;
 
-        return new UploadImageAssetResponse(
-            resultData.ImageId);
+        return Accepted(new UploadImageAssetResponse(
+            resultData.ImageId));
     }
 
     //[Authorize]

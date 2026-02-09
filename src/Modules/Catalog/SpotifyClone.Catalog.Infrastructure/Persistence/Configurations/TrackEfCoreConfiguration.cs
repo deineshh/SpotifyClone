@@ -104,6 +104,22 @@ internal sealed class TrackEfCoreConfiguration : IEntityTypeConfiguration<Track>
             g.HasKey("TrackId", "Value");
         });
 
+        builder.OwnsMany(t => t.Moods, m =>
+        {
+            m.ToTable("track_moods");
+
+            m.Property<TrackId>("TrackId")
+                .HasColumnName("track_id");
+
+            m.WithOwner().HasForeignKey("TrackId");
+
+            m.Property(x => x.Value)
+                .HasColumnName("mood_id")
+                .IsRequired();
+
+            m.HasKey("TrackId", "Value");
+        });
+
         builder.Ignore(x => x.DomainEvents);
     }
 }

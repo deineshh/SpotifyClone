@@ -2,6 +2,7 @@
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -29,7 +30,8 @@ internal sealed class CreateTrackCommandHandler(
             AlbumId.From(request.AlbumId),
             request.MainArtists.Select(a => ArtistId.From(a)),
             request.FeaturedArtists.Select(a => ArtistId.From(a)),
-            request.Genres.Select(g => GenreId.From(g)));
+            request.Genres.Select(g => GenreId.From(g)),
+            request.Moods.Select(m => MoodId.From(m)));
 
         await _unit.Tracks.AddAsync(track, cancellationToken);
 

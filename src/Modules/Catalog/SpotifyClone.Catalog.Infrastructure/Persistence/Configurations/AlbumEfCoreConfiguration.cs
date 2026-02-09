@@ -29,8 +29,9 @@ internal sealed class AlbumEfCoreConfiguration : IEntityTypeConfiguration<Album>
             .HasColumnName("release_date");
         builder.HasIndex(x => x.ReleaseDate);
 
-        builder.Property(x => x.IsPublished)
-            .HasColumnName("is_published")
+        builder.Property(x => x.Status)
+            .HasColumnName("status")
+            .HasConversion(CatalogEfCoreValueConverters.AlbumStatusConverter)
             .IsRequired();
 
         builder.Property(x => x.Type)

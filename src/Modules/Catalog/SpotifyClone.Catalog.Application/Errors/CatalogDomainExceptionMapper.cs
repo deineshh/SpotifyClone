@@ -19,17 +19,22 @@ public sealed class CatalogDomainExceptionMapper : IDomainExceptionMapper
             InvalidImageMetadataDomainException => CommonCatalogErrors.InvalidImageMetadata,
             InvalidTrackDurationDomainException => TrackErrors.InvalidDuration,
             InvalidTrackGenresDomainException => TrackErrors.InvalidGenres,
+            InvalidTrackMoodsDomainException => TrackErrors.InvalidMoods,
             InvalidTrackMainArtistsDomainException => TrackErrors.InvalidMainArtists,
             InvalidTrackTitleDomainException => TrackErrors.InvalidTitle,
+            InvalidTrackReleaseDateDomainException => TrackErrors.InvalidReleaseDate,
             TrackAlreadyPublishedDomainException => TrackErrors.AlreadyPublished,
             TrackAlreadyLinkedToAudioFileDomainException => TrackErrors.AlreadyLinkedToAudioFile,
+            CannotPublishTrackDomainException => TrackErrors.CannotPublish,
+            TrackNotPublishedDomainException => TrackErrors.NotPublished,
 
             // Album
+            InvalidAlbumTitleDomainException => AlbumErrors.InvalidTitle,
+            InvalidAlbumTypeDomainException => AlbumErrors.InvalidType,
+            InvalidAlbumStatusDomainException => AlbumErrors.InvalidStatus,
             InvalidAlbumCoverImageDomainException => AlbumErrors.InvalidCoverImage,
             InvalidAlbumMainArtistsDomainException => AlbumErrors.InvalidMainArtists,
-            InvalidAlbumTitleDomainException => AlbumErrors.InvalidTitle,
             InvalidAlbumTracksDomainException => AlbumErrors.InvalidTracks,
-            InvalidAlbumTypeDomainException => AlbumErrors.InvalidType,
             AlbumAlreadyPublishedDomainException => AlbumErrors.AlreadyPublished,
 
             // Artist

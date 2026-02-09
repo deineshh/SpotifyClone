@@ -8,15 +8,15 @@ namespace SpotifyClone.Catalog.Infrastructure.Persistence.Repositories;
 internal sealed class TrackEfCoreRepository(CatalogAppDbContext context)
     : ITrackRepository
 {
-    private readonly DbSet<Track> _albums = context.Tracks;
+    private readonly DbSet<Track> _tracks = context.Tracks;
 
     public async Task AddAsync(
         Track track,
         CancellationToken cancellationToken = default)
-        => await _albums.AddAsync(track, cancellationToken);
+        => await _tracks.AddAsync(track, cancellationToken);
 
     public async Task<Track?> GetByIdAsync(
         TrackId id,
         CancellationToken cancellationToken = default)
-        => await _albums.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+        => await _tracks.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 }

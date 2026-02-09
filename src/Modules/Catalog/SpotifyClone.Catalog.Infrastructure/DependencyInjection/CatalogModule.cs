@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpotifyClone.Catalog.Application;
 using SpotifyClone.Catalog.Application.Abstractions;
+using SpotifyClone.Catalog.Application.Abstractions.Data;
 using SpotifyClone.Catalog.Application.Behaviors;
 using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Application.Jobs;
@@ -15,6 +16,7 @@ using SpotifyClone.Catalog.Domain.Aggregates.Moods;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 using SpotifyClone.Catalog.Infrastructure.Persistence;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
+using SpotifyClone.Catalog.Infrastructure.Persistence.Queries;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Repositories;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
@@ -43,6 +45,7 @@ public static class CatalogModule
         services.AddScoped<IArtistRepository, ArtistEfCoreRepository>();
         services.AddScoped<IGenreRepository, GenreEfCoreRepository>();
         services.AddScoped<IMoodRepository, MoodEfCoreRepository>();
+        services.AddScoped<ITrackReadService, TrackEfCoreReadService>();
         services.AddScoped<IDomainExceptionMapper, CatalogDomainExceptionMapper>();
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CatalogTransactionalPipelineBehavior<,>));

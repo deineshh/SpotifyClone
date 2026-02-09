@@ -9,5 +9,6 @@ public sealed record CreateTrackCommand(
     Guid AlbumId,
     IEnumerable<Guid> MainArtists,
     IEnumerable<Guid> FeaturedArtists,
-    IEnumerable<Guid> Genres)
+    IEnumerable<Guid> Genres,
+    IEnumerable<Guid> Moods)
     : ICatalogPersistentCommand<CreateTrackCommandResult>;
