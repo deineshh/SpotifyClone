@@ -11,4 +11,8 @@ public interface IAlbumRepository
     Task AddAsync(
         Album album,
         CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(
+        Album album,
+        CancellationToken cancellationToken = default);
 }

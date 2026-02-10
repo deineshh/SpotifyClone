@@ -4,11 +4,11 @@ using SpotifyClone.Catalog.Application.Models;
 
 namespace SpotifyClone.Catalog.Application.Features.Albums.Queries;
 
-public sealed record AlbumDetailsResult(
+public sealed record AlbumDetailsResponse(
     string Title,
     DateTimeOffset? ReleaseDate,
     string Status,
     string? Type,
     ImageMetadataDetailsResult Cover,
-    IEnumerable<ArtistSummaryResult> MainArtists,
-    IEnumerable<TrackSummaryResult> Tracks);
+    IEnumerable<ArtistSummaryResponse> MainArtists,
+    IEnumerable<TrackSummaryResponse> Tracks);

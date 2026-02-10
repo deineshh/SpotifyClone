@@ -31,7 +31,7 @@ internal sealed class TrackEfCoreReadService(
             t.AlbumId.Value,
             _context.Artists
                 .Where(a => t.MainArtists.Contains(a.Id))
-                .Select(a => new ArtistSummaryResult(
+                .Select(a => new ArtistSummaryResponse(
                     a.Name,
                     a.IsVerified,
                     a.Avatar == null ? null : new ImageMetadataDetailsResult(
@@ -43,7 +43,7 @@ internal sealed class TrackEfCoreReadService(
                 ).ToList(),
             _context.Artists
                 .Where(a => t.FeaturedArtists.Contains(a.Id))
-                .Select(a => new ArtistSummaryResult(
+                .Select(a => new ArtistSummaryResponse(
                     a.Name,
                     a.IsVerified,
                     a.Avatar == null ? null : new ImageMetadataDetailsResult(
@@ -55,9 +55,9 @@ internal sealed class TrackEfCoreReadService(
                 ).ToList(),
             _context.Genres
                 .Where(g => t.Genres.Contains(g.Id))
-                .Select(g => new GenreSummaryResult(g.Name)).ToList(),
+                .Select(g => new GenreSummaryResponse(g.Name)).ToList(),
             _context.Moods
                 .Where(m => t.Moods.Contains(m.Id))
-                .Select(m => new MoodSummaryResult(m.Name)).ToList()))
+                .Select(m => new MoodSummaryResponse(m.Name)).ToList()))
         .SingleOrDefaultAsync(cancellationToken);
 }

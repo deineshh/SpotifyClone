@@ -7,16 +7,16 @@ using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetDetails;
 
-internal sealed class GetTrackDetailsByIdQueryHandler(
+internal sealed class GetTrackDetailsQueryHandler(
     ITrackReadService trackReadService,
-    ILogger<GetTrackDetailsByIdQueryHandler> logger)
-    : IQueryHandler<GetTrackDetailsByIdQuery, TrackDetailsResponse>
+    ILogger<GetTrackDetailsQueryHandler> logger)
+    : IQueryHandler<GetTrackDetailsQuery, TrackDetailsResponse>
 {
     private readonly ITrackReadService _trackReadService = trackReadService;
-    private readonly ILogger<GetTrackDetailsByIdQueryHandler> _logger = logger;
+    private readonly ILogger<GetTrackDetailsQueryHandler> _logger = logger;
 
     public async Task<Result<TrackDetailsResponse>> Handle(
-        GetTrackDetailsByIdQuery request,
+        GetTrackDetailsQuery request,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(

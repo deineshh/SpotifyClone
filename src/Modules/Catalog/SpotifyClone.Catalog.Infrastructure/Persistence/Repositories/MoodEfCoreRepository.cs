@@ -19,4 +19,9 @@ internal sealed class MoodEfCoreRepository(CatalogAppDbContext context)
         MoodId id,
         CancellationToken cancellationToken = default)
         => await _moods.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+
+    public async Task DeleteAsync(
+        Mood mood,
+        CancellationToken cancellationToken = default)
+        => _moods.Remove(mood);
 }

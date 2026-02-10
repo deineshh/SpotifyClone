@@ -31,4 +31,7 @@ public static class AlbumErrors
     public static readonly Error AlreadyPublished = new(
         "Album.AlreadyPublished",
         "The album has already been published.");
+
+    public static readonly Error NotFound = CommonErrors.NotFound(
+        "Album", "Album");
 }

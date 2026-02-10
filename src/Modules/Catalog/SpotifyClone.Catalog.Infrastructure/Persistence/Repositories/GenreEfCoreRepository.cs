@@ -19,4 +19,9 @@ internal sealed class GenreEfCoreRepository(CatalogAppDbContext context)
         GenreId id,
         CancellationToken cancellationToken = default)
         => await _genres.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+
+    public async Task DeleteAsync(
+        Genre genre,
+        CancellationToken cancellationToken = default)
+        => _genres.Remove(genre);
 }

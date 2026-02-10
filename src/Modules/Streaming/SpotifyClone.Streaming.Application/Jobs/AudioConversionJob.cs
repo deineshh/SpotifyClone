@@ -100,7 +100,7 @@ public sealed class AudioConversionJob(
             throw new Exception($"Audio asset not found for {audioId}");
         }
 
-        audioAsset.MarkAsReady(
+        audioAsset.MarkAsUploaded(
             metadata.Duration,
             AudioFormat.From(metadata.Format),
             metadata.SizeInBytes);

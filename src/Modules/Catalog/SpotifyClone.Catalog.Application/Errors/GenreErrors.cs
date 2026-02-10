@@ -11,4 +11,7 @@ public static class GenreErrors
     public static readonly Error InvalidName = new(
         "Genre.InvalidName",
         "The specified name is invalid.");
+
+    public static readonly Error NotFound = CommonErrors.NotFound(
+        "Genre", "Genre");
 }

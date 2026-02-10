@@ -11,4 +11,8 @@ public interface IMoodRepository
     Task AddAsync(
         Mood mood,
         CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(
+        Mood mood,
+        CancellationToken cancellationToken = default);
 }

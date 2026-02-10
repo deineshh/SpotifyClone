@@ -30,7 +30,7 @@ internal sealed class UnlinkAudioAssetFromTrackCommandHandler(
         if (audioAsset is null)
         {
             _logger.LogWarning(
-                "Audio Asset {AudioAssetId} not found while unlinking Audio Asset from Track",
+                "Audio Asset {AudioAssetId} not found while unlinking from Track",
                 request.AudioAssetId);
 
             return Result.Failure<UnlinkAudioAssetFromTrackCommandResult>(MediaErrors.MediaAssetNotFound);

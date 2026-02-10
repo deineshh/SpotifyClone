@@ -5,6 +5,7 @@ using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.PublishTrack;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.UnpublishTrack;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Delete;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.PublishTrack;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnpublishTrack;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
@@ -98,7 +99,27 @@ public sealed class MediaController(IMediator mediator)
         CancellationToken cancellationToken = default)
     {
         Result<TrackDetailsResponse> result = await Mediator.Send(
-            new GetTrackDetailsByIdQuery(id),
+            new GetTrackDetailsQuery(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> DeleteTrack(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<DeleteTrackCommandResult> result = await Mediator.Send(
+            new DeleteTrackCommand(id),
             cancellationToken);
         if (result.IsFailure)
         {

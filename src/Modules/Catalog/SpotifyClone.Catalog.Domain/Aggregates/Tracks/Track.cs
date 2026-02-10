@@ -3,6 +3,7 @@ using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Enums;
+using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Events;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Exceptions;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Rules;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.ValueObjects;
@@ -123,6 +124,19 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
         ReleaseDate = null;
         Status = TrackStatus.ReadyToPublish;
+    }
+
+    public void PrepareForDeletion()
+    {
+        if (Status.IsPublished)
+        {
+            throw new TrackAlreadyPublishedDomainException("Track needs to be unpublished before deletion.");
+        }
+
+        if (AudioFileId is not null)
+        {
+            RaiseDomainEvent(new TrackDeletedDomainEvent(AudioFileId));
+        }
     }
 
     public void AddMainArtist(ArtistId artistId)

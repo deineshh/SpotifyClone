@@ -13,7 +13,7 @@ public sealed record TrackDetailsResponse(
     string Status,
     Guid? AudioFileId,
     Guid AlbumId,
-    IEnumerable<ArtistSummaryResult> MainArtists,
-    IEnumerable<ArtistSummaryResult> FeaturedArtists,
-    IEnumerable<GenreSummaryResult> Genres,
-    IEnumerable<MoodSummaryResult> Moods);
+    IEnumerable<ArtistSummaryResponse> MainArtists,
+    IEnumerable<ArtistSummaryResponse> FeaturedArtists,
+    IEnumerable<GenreSummaryResponse> Genres,
+    IEnumerable<MoodSummaryResponse> Moods);

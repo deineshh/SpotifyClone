@@ -14,13 +14,12 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
     public TimeSpan Duration { get; private set; }
     public AudioFormat? Format { get; private set; }
     public long? SizeInBytes { get; private set; }
-    public bool IsReady { get; private set; }
+    public AudioAssetStatus Status { get; private set; } = null!;
     public DateTimeOffset CreatedAt { get; private set; }
     public TrackId? TrackId { get; private set; }
 
     public static AudioAsset Create(
         AudioAssetId id,
-        bool isReady,
         TimeSpan duration,
         AudioFormat? format,
         long? sizeInBytes,
@@ -35,16 +34,16 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
         }
 
         var audioAsset = new AudioAsset(
-            id, duration, format, sizeInBytes, isReady, DateTimeOffset.UtcNow, trackId);
+            id, duration, format, sizeInBytes, AudioAssetStatus.Uploading, DateTimeOffset.UtcNow, trackId);
 
         audioAsset.RaiseDomainEvent(new AudioAssetCreatedDomainEvent(id, trackId, duration));
 
         return audioAsset;
     }
 
-    public void MarkAsReady(TimeSpan duration, AudioFormat format, long sizeInBytes)
+    public void MarkAsUploaded(TimeSpan duration, AudioFormat format, long sizeInBytes)
     {
-        if (IsReady)
+        if (Status.IsUploaded)
         {
             return;
         }
@@ -66,20 +65,26 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
         Duration = duration;
         Format = format;
         SizeInBytes = sizeInBytes;
-        IsReady = true;
+        Status = AudioAssetStatus.Uploaded;
 
-        RaiseDomainEvent(new AudioAssetReadyDomainEvent(TrackId));
+        RaiseDomainEvent(new AudioAssetUploadedDomainEvent(TrackId));
     }
 
     public void UnlinkFromTrack()
         => TrackId = null;
+
+    public void MarkAsOrphaned()
+    {
+        UnlinkFromTrack();
+        Status = AudioAssetStatus.Orphaned;
+    }
 
     private AudioAsset(
         AudioAssetId id,
         TimeSpan duration,
         AudioFormat? format,
         long? sizeInBytes,
-        bool isReady,
+        AudioAssetStatus status,
         DateTimeOffset createdAt,
         TrackId? trackId)
         : base(id)
@@ -87,7 +92,7 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
         Duration = duration;
         Format = format;
         SizeInBytes = sizeInBytes;
-        IsReady = isReady;
+        Status = status;
         CreatedAt = createdAt;
         TrackId = trackId;
     }

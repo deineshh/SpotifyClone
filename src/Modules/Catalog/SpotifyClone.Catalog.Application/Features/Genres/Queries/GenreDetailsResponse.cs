@@ -2,6 +2,6 @@
 
 namespace SpotifyClone.Catalog.Application.Features.Genres.Queries;
 
-public sealed record GenreDetailsResult(
+public sealed record GenreDetailsResponse(
     string Name,
     ImageMetadataDetailsResult Cover);

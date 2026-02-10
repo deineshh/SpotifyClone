@@ -2,10 +2,10 @@
 
 namespace SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetDetails;
 
-public sealed class GetTrackDetailsByIdQueryValidator
-    : AbstractValidator<GetTrackDetailsByIdQuery>
+public sealed class GetTrackDetailsQueryValidator
+    : AbstractValidator<GetTrackDetailsQuery>
 {
-    public GetTrackDetailsByIdQueryValidator()
+    public GetTrackDetailsQueryValidator()
         => RuleFor(x => x.TrackId)
             .NotNull().WithMessage("Track ID is required.")
             .NotEqual(Guid.Empty).WithMessage("Track ID is required.");

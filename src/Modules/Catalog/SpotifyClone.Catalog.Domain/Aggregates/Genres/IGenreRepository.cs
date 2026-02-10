@@ -11,4 +11,8 @@ public interface IGenreRepository
     Task AddAsync(
         Genre genre,
         CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(
+        Genre genre,
+        CancellationToken cancellationToken = default);
 }

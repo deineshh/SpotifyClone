@@ -19,4 +19,9 @@ internal sealed class ArtistEfCoreRepository(CatalogAppDbContext context)
         ArtistId id,
         CancellationToken cancellationToken = default)
         => await _artists.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+
+    public async Task DeleteAsync(
+        Artist artist,
+        CancellationToken cancellationToken = default)
+        => _artists.Remove(artist);
 }

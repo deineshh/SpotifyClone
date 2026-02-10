@@ -27,4 +27,7 @@ public static class ArtistErrors
     public static readonly Error NotVerified = new(
         "Artist.NotVerified",
         "The artist has not been verified yet.");
+
+    public static readonly Error NotFound = CommonErrors.NotFound(
+        "Artist", "Artist");
 }

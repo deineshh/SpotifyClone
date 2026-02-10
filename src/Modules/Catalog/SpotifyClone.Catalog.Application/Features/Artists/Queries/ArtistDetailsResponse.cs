@@ -2,10 +2,10 @@
 
 namespace SpotifyClone.Catalog.Application.Features.Artists.Queries;
 
-public sealed record ArtistDetailsResult(
+public sealed record ArtistDetailsResponse(
     string Name,
     string? Bio,
     bool IsVerified,
-    ImageMetadataDetailsResult Avatar,
-    ImageMetadataDetailsResult Banner,
+    ImageMetadataDetailsResult? Avatar,
+    ImageMetadataDetailsResult? Banner,
     IEnumerable<ImageMetadataDetailsResult> Gallery);

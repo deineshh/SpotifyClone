@@ -42,13 +42,14 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("format");
 
-                    b.Property<bool>("IsReady")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_ready");
-
                     b.Property<long?>("SizeInBytes")
                         .HasColumnType("bigint")
                         .HasColumnName("size_in_bytes");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
 
                     b.Property<Guid?>("TrackId")
                         .HasColumnType("uuid")

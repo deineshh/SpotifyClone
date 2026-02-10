@@ -19,4 +19,9 @@ internal sealed class AlbumEfCoreRepository(CatalogAppDbContext context)
         AlbumId id,
         CancellationToken cancellationToken = default)
         => await _albums.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+
+    public async Task DeleteAsync(
+        Album album,
+        CancellationToken cancellationToken = default)
+        => _albums.Remove(album);
 }

@@ -2,7 +2,7 @@
 
 namespace SpotifyClone.Catalog.Application.Features.Albums.Queries;
 
-public sealed record AlbumSummaryResult(
+public sealed record AlbumSummaryResponse(
     string Title,
     DateTimeOffset? ReleaseDate,
     string Status,

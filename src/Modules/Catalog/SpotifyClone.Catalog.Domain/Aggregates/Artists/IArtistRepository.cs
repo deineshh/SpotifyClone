@@ -11,4 +11,8 @@ public interface IArtistRepository
     Task AddAsync(
         Artist artist,
         CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(
+        Artist artist,
+        CancellationToken cancellationToken = default);
 }

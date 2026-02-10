@@ -30,8 +30,9 @@ internal sealed class AudioAssetEfCoreConfiguration : IEntityTypeConfiguration<A
         builder.Property(x => x.SizeInBytes)
             .HasColumnName("size_in_bytes");
 
-        builder.Property(x => x.IsReady)
-            .HasColumnName("is_ready")
+        builder.Property(x => x.Status)
+            .HasColumnName("status")
+            .HasConversion(StreamingEfCoreValueConverters.AudioAssetStatusConverter)
             .IsRequired();
 
         builder.Property(x => x.CreatedAt)

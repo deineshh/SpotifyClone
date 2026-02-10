@@ -2,6 +2,6 @@
 
 namespace SpotifyClone.Catalog.Application.Features.Moods.Queries;
 
-public sealed record MoodDetailsResult(
+public sealed record MoodDetailsResponse(
     string Name,
     ImageMetadataDetailsResult Cover);

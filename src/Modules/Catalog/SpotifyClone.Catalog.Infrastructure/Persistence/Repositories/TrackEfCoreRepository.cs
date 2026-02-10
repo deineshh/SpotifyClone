@@ -10,13 +10,18 @@ internal sealed class TrackEfCoreRepository(CatalogAppDbContext context)
 {
     private readonly DbSet<Track> _tracks = context.Tracks;
 
+    public async Task<Track?> GetByIdAsync(
+        TrackId id,
+        CancellationToken cancellationToken = default)
+        => await _tracks.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+
     public async Task AddAsync(
         Track track,
         CancellationToken cancellationToken = default)
         => await _tracks.AddAsync(track, cancellationToken);
 
-    public async Task<Track?> GetByIdAsync(
-        TrackId id,
+    public async Task DeleteAsync(
+        Track track,
         CancellationToken cancellationToken = default)
-        => await _tracks.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+        => _tracks.Remove(track);
 }

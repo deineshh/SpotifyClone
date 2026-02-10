@@ -4,14 +4,14 @@ using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Events;
 
 namespace SpotifyClone.Streaming.Application.EventHandlers.AudioAssets;
 
-internal sealed class AudioAssetReadyDomainEventHandler(
+internal sealed class AudioAssetUploadedDomainEventHandler(
     IPublisher publisher)
-    : INotificationHandler<AudioAssetReadyDomainEvent>
+    : INotificationHandler<AudioAssetUploadedDomainEvent>
 {
     private readonly IPublisher _publisher = publisher;
 
     public async Task Handle(
-        AudioAssetReadyDomainEvent notification,
+        AudioAssetUploadedDomainEvent notification,
         CancellationToken cancellationToken)
     {
         var integrationEvent = new AudioReadyIntegrationEvent(

@@ -40,12 +40,19 @@ public static class CatalogModule
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ICatalogUnitOfWork>());
         services.AddScoped<ICatalogUnitOfWork, CatalogEfCoreUnitOfWork>();
+
         services.AddScoped<ITrackRepository, TrackEfCoreRepository>();
         services.AddScoped<IAlbumRepository, AlbumEfCoreRepository>();
         services.AddScoped<IArtistRepository, ArtistEfCoreRepository>();
         services.AddScoped<IGenreRepository, GenreEfCoreRepository>();
         services.AddScoped<IMoodRepository, MoodEfCoreRepository>();
+
         services.AddScoped<ITrackReadService, TrackEfCoreReadService>();
+        services.AddScoped<IAlbumReadService, AlbumEfCoreReadService>();
+        services.AddScoped<IArtistReadService, ArtistEfCoreReadService>();
+        services.AddScoped<IGenreReadService, GenreEfCoreReadService>();
+        services.AddScoped<IMoodReadService, MoodEfCoreReadService>();
+
         services.AddScoped<IDomainExceptionMapper, CatalogDomainExceptionMapper>();
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CatalogTransactionalPipelineBehavior<,>));
