@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SpotifyClone.Catalog.Application;
 using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Application.Abstractions.Data;
+using SpotifyClone.Catalog.Application.Abstractions.Repositories;
 using SpotifyClone.Catalog.Application.Behaviors;
 using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Application.Jobs;
@@ -46,6 +47,7 @@ public static class CatalogModule
         services.AddScoped<IArtistRepository, ArtistEfCoreRepository>();
         services.AddScoped<IGenreRepository, GenreEfCoreRepository>();
         services.AddScoped<IMoodRepository, MoodEfCoreRepository>();
+        services.AddScoped<IOutboxRepository, OutboxEfCoreRepository>();
 
         services.AddScoped<ITrackReadService, TrackEfCoreReadService>();
         services.AddScoped<IAlbumReadService, AlbumEfCoreReadService>();

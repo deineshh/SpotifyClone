@@ -9,6 +9,7 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
 using SpotifyClone.Streaming.Application;
 using SpotifyClone.Streaming.Application.Abstractions;
+using SpotifyClone.Streaming.Application.Abstractions.Repositories;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
 using SpotifyClone.Streaming.Application.Behaviors;
 using SpotifyClone.Streaming.Application.Errors;
@@ -50,6 +51,7 @@ public static class StreamingModule
         services.AddScoped<IStreamingUnitOfWork, StreamingEfCoreUnitOfWork>();
         services.AddScoped<IAudioAssetRepository, AudioAssetEfCoreRepository>();
         services.AddScoped<IImageAssetRepository, ImageAssetEfCoreRepository>();
+        services.AddScoped<IOutboxRepository, OutboxEfCoreRepository>();
         services.AddScoped<IMediaService, FfmpegMediaService>();
         services.AddScoped<IFileStorage, MinioFileStorage>();
         services.AddScoped<IDomainExceptionMapper, StreamingDomainExceptionMapper>();

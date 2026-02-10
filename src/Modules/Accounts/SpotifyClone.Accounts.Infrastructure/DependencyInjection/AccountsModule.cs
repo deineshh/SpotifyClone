@@ -58,19 +58,20 @@ public static class AccountsModule
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<IAccountsUnitOfWork>());
+        services.AddScoped<IAccountsUnitOfWork, AccountsEfCoreUnitOfWork>();
+        services.AddScoped<IUserProfileRepository, UserProfileEfCoreRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenEfCoreRepository>();
+        services.AddScoped<IOutboxRepository, OutboxEfCoreRepository>();
+        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
+
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AccountsTransactionalPipelineBehavior<,>));
         services.AddTransient<ITokenHasher, Sha256TokenHasher>();
         services.AddTransient<ITokenService, JwtTokenService>();
         services.AddTransient<ICurrentUser, CurrentUser>();
         services.AddTransient<IAccountVerificationService, IdentityAccountVerificationService>();
         services.AddTransient<ISmsSender, LoggerSmsSender>();
-
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<IAccountsUnitOfWork>());
-        services.AddScoped<IAccountsUnitOfWork, AccountsEfCoreUnitOfWork>();
-        services.AddScoped<IUserProfileRepository, UserProfileEfCoreRepository>();
-        services.AddScoped<IRefreshTokenRepository, RefreshTokenEfCoreRepository>();
-        services.AddScoped<IIdentityService, IdentityService>();
-        services.AddScoped<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
 
         return services;
     }

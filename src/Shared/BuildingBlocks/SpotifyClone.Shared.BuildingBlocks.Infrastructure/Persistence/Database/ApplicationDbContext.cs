@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SpotifyClone.Shared.BuildingBlocks.Application.Outbox;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence.Database;
 
@@ -6,6 +7,8 @@ public abstract class ApplicationDbContext<TDbContext>(string schema, DbContextO
     : DbContext(options)
     where TDbContext : DbContext
 {
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

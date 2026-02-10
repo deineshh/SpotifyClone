@@ -1,6 +1,8 @@
-﻿using MediatR;
+﻿using System.Text.Json;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
+using SpotifyClone.Shared.BuildingBlocks.Application.Outbox;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence;
@@ -16,16 +18,21 @@ public abstract class EfCoreUnitOfWorkBase<TDbContext>(
 
     public virtual async Task<int> Commit(CancellationToken cancellationToken = default)
     {
-        var domainEntities = DbContext.ChangeTracker
-            .Entries<IHasDomainEvents>()
-            .Where(x => x.Entity.DomainEvents.Count != 0)
-            .ToList();
+        var domainEvents = DbContext.ChangeTracker
+        .Entries<IHasDomainEvents>()
+        .Select(x => x.Entity)
+        .SelectMany(x => {
+            var events = x.DomainEvents.ToList();
+            x.ClearDomainEvents();
+            return events;
+        }).ToList();
 
-        var domainEvents = domainEntities
-            .SelectMany(x => x.Entity.DomainEvents)
-            .ToList();
+        var outboxMessages = domainEvents.Select(domainEvent => new OutboxMessage(
+            domainEvent.GetType().Name,
+            JsonSerializer.Serialize(domainEvent, domainEvent.GetType())))
+        .ToList();
 
-        domainEntities.ForEach(x => x.Entity.ClearDomainEvents());
+        DbContext.Set<OutboxMessage>().AddRange(outboxMessages);
 
         int result = await DbContext.SaveChangesAsync(cancellationToken);
 
