@@ -1,4 +1,5 @@
 ﻿using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
+using SpotifyClone.Streaming.Application.Abstractions.Repositories;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
 using SpotifyClone.Streaming.Domain.Aggregates.ImageAssets;
 
@@ -8,4 +9,5 @@ public interface IStreamingUnitOfWork : IUnitOfWork
 {
     IAudioAssetRepository AudioAssets { get; }
     IImageAssetRepository ImageAssets { get; }
+    IOutboxRepository OutboxMessages { get; }
 }

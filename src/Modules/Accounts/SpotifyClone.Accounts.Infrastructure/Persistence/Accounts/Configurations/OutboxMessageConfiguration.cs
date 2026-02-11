@@ -35,7 +35,6 @@ internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outb
         builder.Property(x => x.Error)
             .HasColumnName("error");
 
-        builder.HasIndex(x => x.ProcessedOn)
-            .HasFilter("[ProcessedOnUtc] IS NULL");
+        builder.HasIndex(x => x.ProcessedOn);
     }
 }

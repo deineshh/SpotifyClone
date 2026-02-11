@@ -4,7 +4,7 @@ using SpotifyClone.Streaming.Application.Features.Media.Commands.MarkAsOrphaned;
 
 namespace SpotifyClone.Streaming.Application.Jobs;
 
-internal sealed class MarkAudioAssetAsOrphanedJob(
+public sealed class MarkAudioAssetAsOrphanedJob(
     ISender sender,
     ILogger<MarkAudioAssetAsOrphanedJob> logger)
 {

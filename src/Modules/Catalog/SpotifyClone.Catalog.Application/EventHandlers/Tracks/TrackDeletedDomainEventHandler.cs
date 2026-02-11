@@ -1,29 +1,33 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
+﻿using System.Text.Json;
+using MediatR;
+using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Events;
+using SpotifyClone.Shared.BuildingBlocks.Application.Outbox;
+using SpotifyClone.Shared.IntegrationEvents;
 using SpotifyClone.Shared.IntegrationEvents.Catalog.Tracks;
 
 namespace SpotifyClone.Catalog.Application.EventHandlers.Tracks;
 
 internal sealed class TrackDeletedDomainEventHandler(
-    IPublisher publisher,
-    ILogger<TrackDeletedDomainEventHandler> logger)
+    ICatalogUnitOfWork unit)
     : INotificationHandler<TrackDeletedDomainEvent>
 {
-    private readonly IPublisher _publisher = publisher;
-    private readonly ILogger<TrackDeletedDomainEventHandler> _logger = logger;
+    private readonly ICatalogUnitOfWork _unit = unit;
 
     public async Task Handle(
         TrackDeletedDomainEvent notification,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Publishing event {DomainEvent}...", typeof(TrackDeletedDomainEvent).Name);
+        var integrationEvent = new TrackDeletedIntegrationEvent(
+                notification.AudioFileId.Value);
 
-        await _publisher.Publish(
-            new TrackDeletedIntegrationEvent(
-                notification.AudioFileId.Value),
-            cancellationToken);
+        var message = new OutboxMessage(
+            IntegrationEventTypeRegistry.GetKeyForType(integrationEvent.GetType()),
+            JsonSerializer.Serialize(
+            integrationEvent,
+            integrationEvent.GetType()));
 
-        _logger.LogInformation("Event {DomainEvent} published...", typeof(TrackDeletedDomainEvent).Name);
+        await _unit.OutboxMessages.AddAsync(message, cancellationToken);
+        await _unit.Commit(cancellationToken);
     }
 }

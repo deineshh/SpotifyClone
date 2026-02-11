@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SpotifyClone.Catalog.Application.Abstractions;
+using SpotifyClone.Catalog.Application.Abstractions.Repositories;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres;
@@ -17,6 +18,7 @@ internal sealed class CatalogEfCoreUnitOfWork(
     IArtistRepository artists,
     IGenreRepository genres,
     IMoodRepository moods,
+    IOutboxRepository outbox,
     IPublisher publisher)
     : EfCoreUnitOfWorkBase<CatalogAppDbContext>(context, publisher),
     ICatalogUnitOfWork
@@ -26,4 +28,5 @@ internal sealed class CatalogEfCoreUnitOfWork(
     public IArtistRepository Artists => artists;
     public IGenreRepository Genres => genres;
     public IMoodRepository Moods => moods;
+    public IOutboxRepository OutboxMessages => outbox;
 }

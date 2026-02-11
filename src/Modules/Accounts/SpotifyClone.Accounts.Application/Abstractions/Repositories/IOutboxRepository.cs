@@ -7,4 +7,7 @@ public interface IOutboxRepository
     Task AddAsync(
         OutboxMessage outboxMessage,
         CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<OutboxMessage>> GetPendings(
+        CancellationToken cancellationToken = default);
 }

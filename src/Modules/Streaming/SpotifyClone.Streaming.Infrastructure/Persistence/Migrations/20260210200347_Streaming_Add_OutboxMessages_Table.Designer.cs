@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
@@ -11,9 +12,11 @@ using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
 namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(StreamingAppDbContext))]
-    partial class StreamingAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260210200347_Streaming_Add_OutboxMessages_Table")]
+    partial class Streaming_Add_OutboxMessages_Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,7 +57,8 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProcessedOn");
+                    b.HasIndex("ProcessedOn")
+                        .HasFilter("[ProcessedOnUtc] IS NULL");
 
                     b.ToTable("outbox_messages", "streaming");
                 });

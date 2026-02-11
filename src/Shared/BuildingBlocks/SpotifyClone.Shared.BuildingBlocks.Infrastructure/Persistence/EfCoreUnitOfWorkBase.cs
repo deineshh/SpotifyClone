@@ -1,8 +1,6 @@
-﻿using System.Text.Json;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
-using SpotifyClone.Shared.BuildingBlocks.Application.Outbox;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence;
@@ -27,12 +25,14 @@ public abstract class EfCoreUnitOfWorkBase<TDbContext>(
             return events;
         }).ToList();
 
-        var outboxMessages = domainEvents.Select(domainEvent => new OutboxMessage(
-            domainEvent.GetType().Name,
-            JsonSerializer.Serialize(domainEvent, domainEvent.GetType())))
-        .ToList();
+        // Domain events are not stored for now
 
-        DbContext.Set<OutboxMessage>().AddRange(outboxMessages);
+        //var outboxMessages = domainEvents.Select(domainEvent => new OutboxMessage(
+        //    domainEvent.GetType().Name,
+        //    JsonSerializer.Serialize(domainEvent, domainEvent.GetType())))
+        //.ToList();
+
+        //DbContext.Set<OutboxMessage>().AddRange(outboxMessages);
 
         int result = await DbContext.SaveChangesAsync(cancellationToken);
 

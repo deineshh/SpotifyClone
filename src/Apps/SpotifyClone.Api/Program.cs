@@ -117,6 +117,8 @@ else
 
 WebApplication app = builder.Build();
 
+app.UseCatalogModule();
+
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".m3u8"] = "application/vnd.apple.mpegurl";
 provider.Mappings[".mpd"] = "application/dash+xml";

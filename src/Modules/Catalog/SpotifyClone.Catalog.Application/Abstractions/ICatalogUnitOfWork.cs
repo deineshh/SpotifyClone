@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums;
+﻿using SpotifyClone.Catalog.Application.Abstractions.Repositories;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres;
 using SpotifyClone.Catalog.Domain.Aggregates.Moods;
@@ -14,4 +15,5 @@ public interface ICatalogUnitOfWork : IUnitOfWork
     IArtistRepository Artists { get; }
     IGenreRepository Genres { get; }
     IMoodRepository Moods { get; }
+    IOutboxRepository OutboxMessages { get; }
 }

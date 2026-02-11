@@ -59,6 +59,7 @@ public static class StreamingModule
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(StreamingTransactionalPipelineBehavior<,>));
         services.AddTransient<AudioConversionJob>();
         services.AddTransient<ImageConversionJob>();
+        services.AddTransient<MarkAudioAssetAsOrphanedJob>();
 
         services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.SectionName));
 

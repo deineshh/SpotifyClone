@@ -11,10 +11,12 @@ internal sealed class AccountsEfCoreUnitOfWork(
     AccountsAppDbContext context,
     IUserProfileRepository userProfiles,
     IRefreshTokenRepository refreshTokens,
+    IOutboxRepository outbox,
     IPublisher publisher)
     : EfCoreUnitOfWorkBase<AccountsAppDbContext>(context, publisher),
     IAccountsUnitOfWork
 {
     public IUserProfileRepository UserProfiles => userProfiles;
     public IRefreshTokenRepository RefreshTokens => refreshTokens;
+    public IOutboxRepository OutboxMessages => outbox;
 }

@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
+using Hangfire;
 using MediatR;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -59,7 +61,21 @@ public static class CatalogModule
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CatalogTransactionalPipelineBehavior<,>));
         services.AddTransient<LinkTrackToAudioFileJob>();
+        services.AddTransient<MarkTrackAsReadyToPublishJob>();
+        services.AddTransient<ProcessOutboxMessagesJob>();
 
         return services;
+    }
+
+    public static void UseCatalogModule(this IApplicationBuilder app)
+    {
+        IRecurringJobManager recurringJobManager =
+            app.ApplicationServices.GetRequiredService<IRecurringJobManager>();
+
+        recurringJobManager.AddOrUpdate<ProcessOutboxMessagesJob>(
+            "catalog-outbox-processor",
+            job => job.ProcessAsync(CancellationToken.None),
+            "*/5 * * * * *" // Every 5 seconds (Cron expression)
+        );
     }
 }
