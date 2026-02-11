@@ -19,7 +19,8 @@ public sealed class ProcessOutboxMessagesJob(
     private readonly ICatalogUnitOfWork _unit = unit;
     private readonly ILogger<ProcessOutboxMessagesJob> _logger = logger;
 
-    public async Task ProcessAsync(CancellationToken cancellationToken)
+    public async Task ProcessAsync(
+        CancellationToken cancellationToken = default)
     {
         IEnumerable<OutboxMessage> messages = await _outbox.GetPendings(cancellationToken);
 
@@ -37,7 +38,7 @@ public sealed class ProcessOutboxMessagesJob(
                 if (type is null)
                 {
                     message.MarkAsFailed("Could not load.");
-                    logger.LogError("Could not find type {TypeName} for outbox message {Id}", message.Type, message.Id);
+                    _logger.LogError("Could not find type {TypeName} for outbox message {Id}", message.Type, message.Id);
                     continue;
                 }
 
@@ -51,7 +52,7 @@ public sealed class ProcessOutboxMessagesJob(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to process outbox message {Id}", message.Id);
+                _logger.LogError(ex, "Failed to process outbox message {Id}", message.Id);
                 message.MarkAsFailed(ex.Message);
             }
         }

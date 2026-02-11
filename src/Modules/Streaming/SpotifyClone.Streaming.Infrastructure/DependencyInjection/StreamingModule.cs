@@ -2,6 +2,7 @@ using FluentValidation;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using MediatR;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,9 +61,22 @@ public static class StreamingModule
         services.AddTransient<AudioConversionJob>();
         services.AddTransient<ImageConversionJob>();
         services.AddTransient<MarkAudioAssetAsOrphanedJob>();
+        services.AddTransient<AudioAssetCleanupJob>();
 
         services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.SectionName));
 
         return services;
+    }
+
+    public static void UseStreamingModule(this IApplicationBuilder app)
+    {
+        IRecurringJobManager recurringJobManager =
+            app.ApplicationServices.GetRequiredService<IRecurringJobManager>();
+
+        recurringJobManager.AddOrUpdate<AudioAssetCleanupJob>(
+            "streaming-audio-asset-cleanup",
+            job => job.ProcessAsync(),
+            Cron.HourInterval(6)
+        );
     }
 }

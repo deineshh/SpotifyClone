@@ -74,7 +74,7 @@ public static class CatalogModule
 
         recurringJobManager.AddOrUpdate<ProcessOutboxMessagesJob>(
             "catalog-outbox-processor",
-            job => job.ProcessAsync(CancellationToken.None),
+            job => job.ProcessAsync(),
             "*/5 * * * * *" // Every 5 seconds (Cron expression)
         );
     }

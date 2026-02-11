@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Minio;
+using Minio.DataModel;
 using Minio.DataModel.Args;
 using Minio.Exceptions;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
@@ -156,21 +157,66 @@ public class MinioFileStorage : IFileStorage
         }
     }
 
-    public async Task DeleteAudioFileAsync(string relativePath)
+    public async Task DeleteAudioFileAsync(string folderPath)
     {
-        RemoveObjectArgs args = new RemoveObjectArgs()
-            .WithBucket(_options.AudioBucketName)
-            .WithObject(relativePath);
+        string prefix = folderPath.EndsWith('/')
+            ? folderPath
+            : $"{folderPath}/";
 
-        await _minioClient.RemoveObjectAsync(args);
+        ListObjectsArgs listArgs = new ListObjectsArgs()
+            .WithBucket(_options.AudioBucketName)
+            .WithPrefix(prefix)
+            .WithRecursive(true);
+
+        IAsyncEnumerable<Item> objects = _minioClient.ListObjectsEnumAsync(listArgs);
+
+        var objectsToDelete = new List<string>();
+        await foreach (Item item in objects)
+        {
+            objectsToDelete.Add(item.Key);
+        }
+
+        if (objectsToDelete.Count == 0)
+        {
+            return;
+        }
+
+        RemoveObjectsArgs removeArgs = new RemoveObjectsArgs()
+            .WithBucket(_options.AudioBucketName)
+            .WithObjects(objectsToDelete);
+
+        await _minioClient.RemoveObjectsAsync(removeArgs);
     }
 
-    public async Task DeleteImageFileAsync(string relativePath)
+    public async Task DeleteImageFileAsync(string folderPath)
     {
-        RemoveObjectArgs args = new RemoveObjectArgs()
+        string prefix = folderPath.EndsWith('/')
+            ? folderPath
+            : $"{folderPath}/";
+
+        ListObjectsArgs listArgs = new ListObjectsArgs()
             .WithBucket(_options.ImageBucketName)
-            .WithObject(relativePath);
-        await _minioClient.RemoveObjectAsync(args);
+            .WithPrefix(prefix)
+            .WithRecursive(true);
+
+        IAsyncEnumerable<Item> objects = _minioClient.ListObjectsEnumAsync(listArgs);
+
+        var objectsToDelete = new List<string>();
+        await foreach (Item item in objects)
+        {
+            objectsToDelete.Add(item.Key);
+        }
+
+        if (objectsToDelete.Count == 0)
+        {
+            return;
+        }
+
+        RemoveObjectsArgs removeArgs = new RemoveObjectsArgs()
+            .WithBucket(_options.AudioBucketName)
+            .WithObjects(objectsToDelete);
+
+        await _minioClient.RemoveObjectsAsync(removeArgs);
     }
 
     public async Task<bool> AudioExists(string relativePath)

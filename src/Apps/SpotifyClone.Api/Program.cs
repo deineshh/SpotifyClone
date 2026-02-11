@@ -118,6 +118,7 @@ else
 WebApplication app = builder.Build();
 
 app.UseCatalogModule();
+app.UseStreamingModule();
 
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".m3u8"] = "application/vnd.apple.mpegurl";
