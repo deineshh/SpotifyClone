@@ -14,7 +14,7 @@ internal sealed class AudioAssetUploadedDomainEventHandler(
         AudioAssetUploadedDomainEvent notification,
         CancellationToken cancellationToken)
     {
-        var integrationEvent = new AudioReadyIntegrationEvent(
+        var integrationEvent = new AudioUploadedIntegrationEvent(
             notification.TrackId.Value
         );
 

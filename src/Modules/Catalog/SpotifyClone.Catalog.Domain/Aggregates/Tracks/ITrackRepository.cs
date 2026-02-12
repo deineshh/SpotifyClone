@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Shared.Kernel.IDs;
+﻿using SpotifyClone.Catalog.Domain.Aggregates.Tracks.ValueObjects;
+using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 
@@ -15,4 +16,6 @@ public interface ITrackRepository
     Task DeleteAsync(
         Track track,
         CancellationToken cancellationToken = default);
+
+    Task<bool> IsAudioFileUsedAsync(AudioFileId audioFileId, CancellationToken cancellationToken);
 }

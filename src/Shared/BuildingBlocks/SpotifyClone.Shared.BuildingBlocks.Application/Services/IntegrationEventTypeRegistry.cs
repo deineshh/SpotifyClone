@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
 
-namespace SpotifyClone.Shared.IntegrationEvents;
+namespace SpotifyClone.Shared.BuildingBlocks.Application.Services;
 
 public static class IntegrationEventTypeRegistry
 {

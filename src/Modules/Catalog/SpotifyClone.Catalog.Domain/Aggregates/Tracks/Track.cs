@@ -94,6 +94,24 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         ReplaceAudioFile(audioFileId, duration);
     }
 
+    public void UnlinkAudioFile()
+    {
+        if (AudioFileId is null)
+        {
+            return;
+        }
+
+        if (Status.IsPublished)
+        {
+            throw new TrackAlreadyPublishedDomainException("Cannot unlink publichsed track from it's audio file.");
+        }
+
+        RaiseDomainEvent(new TrackUnlinkedFromAudioFileDomainEvent(AudioFileId));
+
+        AudioFileId = null;
+        Status = TrackStatus.Draft;
+    }
+
     public void Publish(DateTimeOffset releaseDate)
     {
         if (Status.IsPublished)
@@ -212,10 +230,10 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     private void DoesNotContainExplicitContent()
         => ContainsExplicitContent = false;
 
-
     public void ReplaceAudioFile(AudioFileId audioFileId, TimeSpan duration)
     {
         ArgumentNullException.ThrowIfNull(audioFileId);
+
         if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
@@ -224,8 +242,17 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
         TrackDurationRules.Validate(duration);
 
-        AudioFileId = audioFileId;
+        if (AudioFileId is not null && Duration is not null)
+        {
+            RaiseDomainEvent(
+                new AudioFileReplacedInTrackDomainEvent(
+                    Id,
+                    AudioFileId,
+                    (TimeSpan)Duration));
+        }
+
         Duration = duration;
+        AudioFileId = audioFileId;
     }
 
     public void AddMainArtist(ArtistId artistId)

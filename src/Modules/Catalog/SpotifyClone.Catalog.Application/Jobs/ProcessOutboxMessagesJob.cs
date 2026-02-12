@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Application.Abstractions.Repositories;
 using SpotifyClone.Shared.BuildingBlocks.Application.Outbox;
-using SpotifyClone.Shared.IntegrationEvents;
+using SpotifyClone.Shared.BuildingBlocks.Application.Services;
 
 namespace SpotifyClone.Catalog.Application.Jobs;
 

@@ -9,12 +9,10 @@ namespace SpotifyClone.Streaming.Application.Jobs;
 internal sealed class UnlinkAudioAssetFromTrackJob(
     ISender sender,
     IStreamingUnitOfWork unit,
-    IPublisher publisher,
     ILogger<UnlinkAudioAssetFromTrackJob> logger)
 {
     private readonly ISender _sender = sender;
     private readonly IStreamingUnitOfWork _unit = unit;
-    private readonly IPublisher _publisher = publisher;
     private readonly ILogger<UnlinkAudioAssetFromTrackJob> _logger = logger;
 
     public async Task ProcessAsync(

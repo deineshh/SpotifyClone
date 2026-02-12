@@ -6,17 +6,17 @@ using SpotifyClone.Shared.IntegrationEvents.Catalog.Tracks;
 
 namespace SpotifyClone.Catalog.Application.EventHandlers.Tracks;
 
-internal sealed class TrackDeletedDomainEventHandler(
+internal sealed class TrackUnlinkedFromAudioFileDomainEventHandler(
     ICatalogUnitOfWork unit)
-    : INotificationHandler<TrackDeletedDomainEvent>
+    : INotificationHandler<TrackUnlinkedFromAudioFileDomainEvent>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
 
     public async Task Handle(
-        TrackDeletedDomainEvent notification,
+        TrackUnlinkedFromAudioFileDomainEvent notification,
         CancellationToken cancellationToken)
     {
-        var integrationEvent = new TrackDeletedIntegrationEvent(
+        var integrationEvent = new TrackUnlinkedFromAudioIntegrationEvent(
                 notification.AudioFileId.Value);
 
         var message = OutboxMessage.FromIntegrationEvent(integrationEvent);

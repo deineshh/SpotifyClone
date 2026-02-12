@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.Create;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.PublishTrack;
-using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.UnpublishTrack;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.UpdateInfo;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Delete;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.PublishTrack;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnlinkFromAudioFile;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnpublishTrack;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UpdateInfo;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
@@ -51,14 +51,15 @@ public sealed class MediaController(IMediator mediator)
             createResultData.TrackId));
     }
 
-    [HttpPost("publish")]
+    [HttpPost("{id:guid}/publish")]
     public async Task<ActionResult> PublishTrack(
+        [FromRoute] Guid id,
         [FromBody] PublishTrackRequest request,
         CancellationToken cancellationToken = default)
     {
         Result<PublishTrackCommandResult> result = await Mediator.Send(
             new PublishTrackCommand(
-                request.TrackId,
+                id,
                 request.ReleaseDate),
             cancellationToken);
         if (result.IsFailure)
@@ -73,14 +74,33 @@ public sealed class MediaController(IMediator mediator)
         return Ok();
     }
 
-    [HttpPost("unpublish")]
+    [HttpPost("{id:guid}/unpublish")]
     public async Task<ActionResult> UnpublishTrack(
-        [FromBody] UnpublishTrackRequest request,
+        [FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
         Result<UnpublishTrackCommandResult> result = await Mediator.Send(
-            new UnpublishTrackCommand(
-                request.TrackId),
+            new UnpublishTrackCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok();
+    }
+
+    [HttpPost("{id:guid}/unlink-audio-file")]
+    public async Task<ActionResult> UnlinkFromAudioFile(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UnlinkTrackFromAudioFileCommandResult> result = await Mediator.Send(
+            new UnlinkTrackFromAudioFileCommand(id),
             cancellationToken);
         if (result.IsFailure)
         {

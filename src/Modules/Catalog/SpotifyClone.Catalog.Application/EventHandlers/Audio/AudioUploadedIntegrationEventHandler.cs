@@ -5,13 +5,13 @@ using SpotifyClone.Shared.IntegrationEvents.Streaming.AudioAssets;
 
 namespace SpotifyClone.Catalog.Application.EventHandlers.Audio;
 
-internal sealed class AudioReadyIntegrationEventHandler(
+internal sealed class AudioUploadedIntegrationEventHandler(
     IBackgroundJobService jobService)
-    : INotificationHandler<AudioReadyIntegrationEvent>
+    : INotificationHandler<AudioUploadedIntegrationEvent>
 {
     private readonly IBackgroundJobService _jobService = jobService;
 
-    public async Task Handle(AudioReadyIntegrationEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(AudioUploadedIntegrationEvent notification, CancellationToken cancellationToken)
         => _jobService.Enqueue<MarkTrackAsReadyToPublishJob>(job =>
             job.ProcessAsync(notification.TrackId));
 }

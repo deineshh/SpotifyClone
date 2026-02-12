@@ -38,7 +38,7 @@ public static class TrackErrors
 
     public static readonly Error AlreadyLinkedToAudioFile = new(
         "Track.AlreadyLinkedToAudio",
-        "Track is already linked to an audio.");
+        "Track is already linked to an audio file.");
 
     public static readonly Error CannotPublish = new(
         "Track.CannotPublish",
@@ -51,6 +51,10 @@ public static class TrackErrors
     public static readonly Error AlreadyReleased = new(
         "Track.AlreadyReleased",
         "The specified track is already released.");
+
+    public static readonly Error AudioFileInUse = new(
+        "Track.AudioFileInUse",
+        "The specified audio file is already in use.");
 
     public static readonly Error NotFound = CommonErrors.NotFound(
         "Track", "Track");

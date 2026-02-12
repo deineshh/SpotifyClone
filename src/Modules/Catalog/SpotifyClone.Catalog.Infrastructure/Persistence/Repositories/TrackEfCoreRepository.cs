@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
+using SpotifyClone.Catalog.Domain.Aggregates.Tracks.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
 using SpotifyClone.Shared.Kernel.IDs;
 
@@ -24,4 +25,9 @@ internal sealed class TrackEfCoreRepository(CatalogAppDbContext context)
         Track track,
         CancellationToken cancellationToken = default)
         => _tracks.Remove(track);
+
+    public async Task<bool> IsAudioFileUsedAsync(
+        AudioFileId audioFileId,
+        CancellationToken cancellationToken)
+        => await _tracks.AnyAsync(t => t.AudioFileId == audioFileId, cancellationToken);
 }

@@ -2,6 +2,6 @@
 
 namespace SpotifyClone.Shared.IntegrationEvents.Streaming.AudioAssets;
 
-public sealed record AudioReadyIntegrationEvent(
+public sealed record AudioUploadedIntegrationEvent(
     Guid TrackId)
     : IntegrationEvent;

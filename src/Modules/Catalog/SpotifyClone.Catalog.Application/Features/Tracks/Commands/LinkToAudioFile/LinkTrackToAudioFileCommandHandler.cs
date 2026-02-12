@@ -22,7 +22,7 @@ internal sealed class LinkTrackToAudioFileCommandHandler(
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
-            "Linking Track {TrackId} with {AudioFileId}", request.TrackId, request.AudioFileId);
+            "Linking Track {TrackId} with Audio File {AudioFileId}", request.TrackId, request.AudioFileId);
 
         Track? track = await _unit.Tracks.GetByIdAsync(
             TrackId.From(request.TrackId),
@@ -31,7 +31,7 @@ internal sealed class LinkTrackToAudioFileCommandHandler(
         if (track is null)
         {
             _logger.LogWarning(
-                "Track {TrackId} not found while linking Track to Audio file", request.TrackId);
+                "Track {TrackId} not found while linking Track to Audio File", request.TrackId);
 
             return Result.Failure<LinkTrackToAudioFileCommandResult>(TrackErrors.NotFound);
         }
