@@ -3,15 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.Create;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.PublishTrack;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.UnpublishTrack;
+using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.UpdateInfo;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Delete;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.PublishTrack;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnpublishTrack;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UpdateInfo;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetDetails;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
-using Twilio.Http;
 
 namespace SpotifyClone.Api.Controllers.Catalog;
 
@@ -120,6 +121,32 @@ public sealed class MediaController(IMediator mediator)
     {
         Result<DeleteTrackCommandResult> result = await Mediator.Send(
             new DeleteTrackCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(result.Value);
+    }
+
+    [HttpPut("{id:guid}/info")]
+    public async Task<ActionResult> UpdateTrackInfo(
+        [FromRoute] Guid id,
+        [FromBody] UpdateTrackInfoRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UpdateTrackInfoCommandResult> result = await Mediator.Send(
+            new UpdateTrackInfoCommand(
+                id,
+                request.Title,
+                request.ReleaseDate,
+                request.ContainsExplicitContent,
+                request.TrackNumber),
             cancellationToken);
         if (result.IsFailure)
         {

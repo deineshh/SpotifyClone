@@ -27,6 +27,7 @@ public sealed class CatalogDomainExceptionMapper : IDomainExceptionMapper
             TrackAlreadyLinkedToAudioFileDomainException => TrackErrors.AlreadyLinkedToAudioFile,
             CannotPublishTrackDomainException => TrackErrors.CannotPublish,
             TrackNotPublishedDomainException => TrackErrors.NotPublished,
+            TrackAlreadyReleasedDomainException => TrackErrors.AlreadyReleased,
 
             // Album
             InvalidAlbumTitleDomainException => AlbumErrors.InvalidTitle,

@@ -48,6 +48,10 @@ public static class TrackErrors
         "Track.NotPublished",
         "The specified track is not published.");
 
+    public static readonly Error AlreadyReleased = new(
+        "Track.AlreadyReleased",
+        "The specified track is already released.");
+
     public static readonly Error NotFound = CommonErrors.NotFound(
         "Track", "Track");
 }
