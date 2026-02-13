@@ -1,25 +1,35 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.CorrectTitle;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.Create;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.PublishTrack;
-using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.UpdateInfo;
+using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.RescheduleRelease;
 using SpotifyClone.Api.Mappers;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.CorrectTitle;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Delete;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.MarkAsExplicit;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.MarkAsNotExplicit;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.PublishTrack;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.RescheduleRelease;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnlinkFromAudioFile;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnpublishTrack;
-using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UpdateInfo;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetDetails;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Api.Controllers.Catalog;
 
+[Tags("Catalog Module")]
 [Route("api/v1/tracks")]
 public sealed class MediaController(IMediator mediator)
     : ApiController(mediator)
 {
+    [EndpointSummary("Create Track")]
+    [EndpointDescription("Creates a Track in a Draft state.")]
+    [ProducesResponseType(typeof(CreateTrackResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpPost]
     public async Task<ActionResult<CreateTrackResponse>> CreateTrack(
         [FromBody] CreateTrackRequest request,
@@ -47,10 +57,18 @@ public sealed class MediaController(IMediator mediator)
 
         CreateTrackCommandResult createResultData = createResult.Value;
 
-        return Ok(new CreateTrackResponse(
-            createResultData.TrackId));
+        return Created(new Uri(
+            $"api/v1/tracks/{createResultData.TrackId}"),
+            new CreateTrackResponse(
+                createResultData.TrackId));
     }
 
+    [EndpointSummary("Publish Track")]
+    [EndpointDescription("Publishes a Track if it's ready.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpPost("{id:guid}/publish")]
     public async Task<ActionResult> PublishTrack(
         [FromRoute] Guid id,
@@ -71,9 +89,15 @@ public sealed class MediaController(IMediator mediator)
             return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
-        return Ok();
+        return NoContent();
     }
 
+    [EndpointSummary("Unpublish Track")]
+    [EndpointDescription("Unpublishes a Track if it's published.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpPost("{id:guid}/unpublish")]
     public async Task<ActionResult> UnpublishTrack(
         [FromRoute] Guid id,
@@ -91,9 +115,18 @@ public sealed class MediaController(IMediator mediator)
             return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
-        return Ok();
+        return NoContent();
     }
 
+    [EndpointSummary("Unlink Audio file")]
+    [EndpointDescription("Unlinks the audio file from the Track if it's not yet published. " +
+        "The Track will return to a Draft state. The audio content will be permanently deleted. " +
+        "Note: This operation is eventually consistent; " +
+        "the physical file deletion happens in the background.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpPost("{id:guid}/unlink-audio-file")]
     public async Task<ActionResult> UnlinkFromAudioFile(
         [FromRoute] Guid id,
@@ -111,9 +144,15 @@ public sealed class MediaController(IMediator mediator)
             return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
-        return Ok();
+        return NoContent();
     }
 
+    [EndpointSummary("Get Track Details")]
+    [EndpointDescription("Returns all the necessary track details.")]
+    [ProducesResponseType(typeof(TrackDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<TrackDetailsResponse>> GetTrackDetails(
         [FromRoute] Guid id,
@@ -134,6 +173,12 @@ public sealed class MediaController(IMediator mediator)
         return Ok(result.Value);
     }
 
+    [EndpointSummary("Delete Track")]
+    [EndpointDescription("Deletes an Track if it's not yet published.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult> DeleteTrack(
         [FromRoute] Guid id,
@@ -151,22 +196,25 @@ public sealed class MediaController(IMediator mediator)
             return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
-        return Ok(result.Value);
+        return NoContent();
     }
 
-    [HttpPut("{id:guid}/info")]
-    public async Task<ActionResult> UpdateTrackInfo(
+    [EndpointSummary("Correct Track title")]
+    [EndpointDescription("Corrects the track title.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPost("{id:guid}/correct-title")]
+    public async Task<ActionResult> CorrectTrackTitle(
         [FromRoute] Guid id,
-        [FromBody] UpdateTrackInfoRequest request,
+        [FromBody] CorrectTrackTitleRequest request,
         CancellationToken cancellationToken = default)
     {
-        Result<UpdateTrackInfoCommandResult> result = await Mediator.Send(
-            new UpdateTrackInfoCommand(
+        Result<CorrectTrackTitleCommandResult> result = await Mediator.Send(
+            new CorrectTrackTitleCommand(
                 id,
-                request.Title,
-                request.ReleaseDate,
-                request.ContainsExplicitContent,
-                request.TrackNumber),
+                request.Title),
             cancellationToken);
         if (result.IsFailure)
         {
@@ -177,6 +225,87 @@ public sealed class MediaController(IMediator mediator)
             return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
-        return Ok(result.Value);
+        return NoContent();
+    }
+
+    [EndpointSummary("Reschedule Track release")]
+    [EndpointDescription("Reschedules the track release if it's already published, but not released yet.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPost("{id:guid}/reschedule-release")]
+    public async Task<ActionResult> RescheduleTrackRelease(
+        [FromRoute] Guid id,
+        [FromBody] RescheduleTrackReleaseRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<RescheduleTrackReleaseCommandResult> result = await Mediator.Send(
+            new RescheduleTrackReleaseCommand(
+                id,
+                request.ReleaseDate),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Mark Track as Explicit")]
+    [EndpointDescription("Flags the track as containing explicit content.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPatch("{id:guid}/explicit")]
+    public async Task<ActionResult> MarkTrackAsExplicit(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<MarkTrackAsExplicitCommandResult> result = await Mediator.Send(
+            new MarkTrackAsExplicitCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Unmark Track as Explicit")]
+    [EndpointDescription("Flags the track as containing NO explicit content.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("{id:guid}/explicit")]
+    public async Task<ActionResult> MarkTrackAsNotExplicit(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<MarkTrackAsNotExplicitCommandResult> result = await Mediator.Send(
+            new MarkTrackAsNotExplicitCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
     }
 }

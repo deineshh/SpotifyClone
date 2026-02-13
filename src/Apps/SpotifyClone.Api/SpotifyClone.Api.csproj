@@ -5,6 +5,10 @@
     <DockerfileContext>..\..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
+  <PropertyGroup>
+  	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+  	<NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Hangfire.Redis.StackExchange" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
@@ -16,6 +20,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
     <PackageReference Include="Scalar.AspNetCore" />
     <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Accounts\SpotifyClone.Accounts.Application\SpotifyClone.Accounts.Application.csproj" />

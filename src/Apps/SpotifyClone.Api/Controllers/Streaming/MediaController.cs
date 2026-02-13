@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.Create;
 using SpotifyClone.Api.Contracts.v1.Streaming.Media.GetAudioAsset;
 using SpotifyClone.Api.Contracts.v1.Streaming.Media.GetImageAsset;
 using SpotifyClone.Api.Contracts.v1.Streaming.Media.UploadAudioAsset;
@@ -14,11 +14,17 @@ using SpotifyClone.Streaming.Application.Features.Media.Queries.GetImageAsset;
 
 namespace SpotifyClone.Api.Controllers.Streaming;
 
+[Tags("Streaming Module")]
 [Route("api/v1/media")]
 public sealed class MediaController(IMediator mediator)
     : ApiController(mediator)
 {
-    //[Authorize]
+    [EndpointSummary("Upload Audio")]
+    [EndpointDescription("Starts uploading an audio in the background. " +
+        "Note: you will need a track without an audio file linked to it before calling this endpoint.")]
+    [ProducesResponseType(typeof(CreateTrackResponse), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpPost("audio")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UploadAudioAssetResponse>> UploadAudioAsset(
@@ -48,7 +54,11 @@ public sealed class MediaController(IMediator mediator)
             resultData.AudioId));
     }
 
-    //[Authorize]
+    [EndpointSummary("Get Audio Asset details")]
+    [EndpointDescription("Returns all the necessary Audio Asset details.")]
+    [ProducesResponseType(typeof(CreateTrackResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpGet("audio")]
     public async Task<ActionResult<GetAudioAssetResponse>> GetAudioAsset(
         [FromQuery] GetAudioAssetRequest request,
@@ -68,12 +78,17 @@ public sealed class MediaController(IMediator mediator)
 
         GetAudioAssetQueryResult resultData = result.Value;
 
-        return new GetAudioAssetResponse(
+        return Ok(new GetAudioAssetResponse(
             resultData.AudioId,
             resultData.HlsUrl,
-            resultData.DashUrl);
+            resultData.DashUrl));
     }
 
+    [EndpointSummary("Upload Image")]
+    [EndpointDescription("Starts uploading an image in the background.")]
+    [ProducesResponseType(typeof(CreateTrackResponse), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpPost("images")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UploadImageAssetResponse>> UploadImageAsset(
@@ -102,7 +117,11 @@ public sealed class MediaController(IMediator mediator)
             resultData.ImageId));
     }
 
-    //[Authorize]
+    [EndpointSummary("Get Image Asset details")]
+    [EndpointDescription("Returns all the necessary Image Asset details.")]
+    [ProducesResponseType(typeof(CreateTrackResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpGet("images")]
     public async Task<ActionResult<GetImageAssetResponse>> GetImageAsset(
         [FromQuery] GetImageAssetRequest request,
@@ -122,8 +141,8 @@ public sealed class MediaController(IMediator mediator)
 
         GetImageAssetQueryResult resultData = result.Value;
 
-        return new GetImageAssetResponse(
+        return Ok(new GetImageAssetResponse(
             resultData.ImageId,
-            resultData.WebpUrl);
+            resultData.WebpUrl));
     }
 }

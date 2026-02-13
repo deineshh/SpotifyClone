@@ -5,16 +5,16 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Catalog.Application.Features.Tracks.Commands.UpdateInfo;
+namespace SpotifyClone.Catalog.Application.Features.Tracks.Commands.MarkAsNotExplicit;
 
-internal sealed class UpdateTrackInfoCommandHandler(
+internal sealed class MarkTrackAsNotExplicitCommandHandler(
     ICatalogUnitOfWork unit)
-    : ICommandHandler<UpdateTrackInfoCommand, UpdateTrackInfoCommandResult>
+    : ICommandHandler<MarkTrackAsNotExplicitCommand, MarkTrackAsNotExplicitCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
 
-    public async Task<Result<UpdateTrackInfoCommandResult>> Handle(
-        UpdateTrackInfoCommand request,
+    public async Task<Result<MarkTrackAsNotExplicitCommandResult>> Handle(
+        MarkTrackAsNotExplicitCommand request,
         CancellationToken cancellationToken)
     {
         Track? track = await _unit.Tracks.GetByIdAsync(
@@ -23,15 +23,11 @@ internal sealed class UpdateTrackInfoCommandHandler(
 
         if (track is null)
         {
-            return Result.Failure<UpdateTrackInfoCommandResult>(TrackErrors.NotFound);
+            return Result.Failure<MarkTrackAsNotExplicitCommandResult>(TrackErrors.NotFound);
         }
 
-        track.UpdateMainInfo(
-            request.Title,
-            request.ReleaseDate,
-            request.ContainsExplicitContent,
-            request.TrackNumber);
+        track.MarkAsNotExplicit();
 
-        return new UpdateTrackInfoCommandResult();
+        return new MarkTrackAsNotExplicitCommandResult();
     }
 }

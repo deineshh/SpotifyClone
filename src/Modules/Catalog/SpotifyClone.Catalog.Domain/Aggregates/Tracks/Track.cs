@@ -162,27 +162,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         }
     }
 
-    public void UpdateMainInfo(
-        string title,
-        DateTimeOffset releaseDate,
-        bool containsExplicitContent,
-        int trackNumber)
-    {
-        CorrectTitle(title);
-        RescheduleRelease(releaseDate);
-        MoveToPosition(trackNumber);
-
-        if (containsExplicitContent)
-        {
-            DoesContainExplicitContent();
-        }
-        else
-        {
-            DoesNotContainExplicitContent();
-        }
-    }
-
-    private void CorrectTitle(string title)
+    public void CorrectTitle(string title)
     {
         if (title == Title)
         {
@@ -194,7 +174,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         Title = title;
     }
 
-    private void RescheduleRelease(DateTimeOffset releaseDate)
+    public void RescheduleRelease(DateTimeOffset releaseDate)
     {
         if (releaseDate == ReleaseDate)
         {
@@ -214,7 +194,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         ReleaseDate = releaseDate.ToUniversalTime();
     }
 
-    private void MoveToPosition(int trackNumber)
+    public void MoveToPosition(int trackNumber)
     {
         if (trackNumber == TrackNumber)
         {
@@ -224,10 +204,10 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(trackNumber);
         TrackNumber = trackNumber;
     }
-    private void DoesContainExplicitContent()
+    public void MarkAsExplicit()
         => ContainsExplicitContent = true;
 
-    private void DoesNotContainExplicitContent()
+    public void MarkAsNotExplicit()
         => ContainsExplicitContent = false;
 
     public void ReplaceAudioFile(AudioFileId audioFileId, TimeSpan duration)
