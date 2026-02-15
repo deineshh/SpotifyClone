@@ -153,7 +153,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         if (Status.IsPublished)
         {
-            throw new TrackAlreadyPublishedDomainException("Track needs to be unpublished before deletion.");
+            throw new TrackAlreadyPublishedDomainException("Cannot delete a published track.");
         }
 
         if (AudioFileId is not null)

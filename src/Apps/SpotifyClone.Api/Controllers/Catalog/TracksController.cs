@@ -63,6 +63,58 @@ public sealed class TracksController(IMediator mediator)
                 createResultData.TrackId));
     }
 
+    [EndpointSummary("Get Track Details")]
+    [EndpointDescription("Returns all the necessary Track details.")]
+    [ProducesResponseType(typeof(TrackDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<TrackDetailsResponse>> GetTrackDetails(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<TrackDetailsResponse> result = await Mediator.Send(
+            new GetTrackDetailsQuery(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(result.Value);
+    }
+
+    [EndpointSummary("Delete Track")]
+    [EndpointDescription("Deletes an Track if it's not yet published.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> DeleteTrack(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<DeleteTrackCommandResult> result = await Mediator.Send(
+            new DeleteTrackCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
     [EndpointSummary("Publish Track")]
     [EndpointDescription("Publishes a Track if it's ready.")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -134,58 +186,6 @@ public sealed class TracksController(IMediator mediator)
     {
         Result<UnlinkTrackFromAudioFileCommandResult> result = await Mediator.Send(
             new UnlinkTrackFromAudioFileCommand(id),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return NoContent();
-    }
-
-    [EndpointSummary("Get Track Details")]
-    [EndpointDescription("Returns all the necessary track details.")]
-    [ProducesResponseType(typeof(TrackDetailsResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<TrackDetailsResponse>> GetTrackDetails(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        Result<TrackDetailsResponse> result = await Mediator.Send(
-            new GetTrackDetailsQuery(id),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return Ok(result.Value);
-    }
-
-    [EndpointSummary("Delete Track")]
-    [EndpointDescription("Deletes an Track if it's not yet published.")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpDelete("{id:guid}")]
-    public async Task<ActionResult> DeleteTrack(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        Result<DeleteTrackCommandResult> result = await Mediator.Send(
-            new DeleteTrackCommand(id),
             cancellationToken);
         if (result.IsFailure)
         {

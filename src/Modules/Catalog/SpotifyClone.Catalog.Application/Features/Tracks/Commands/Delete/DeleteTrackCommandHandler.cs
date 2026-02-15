@@ -21,7 +21,7 @@ internal sealed class DeleteTrackCommandHandler(
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
-            "Deleting Track {TrackId}", request.TrackId);
+            "Deleting Track {Id}", request.TrackId);
 
         Track? track = await _unit.Tracks.GetByIdAsync(
             TrackId.From(request.TrackId),
@@ -30,7 +30,7 @@ internal sealed class DeleteTrackCommandHandler(
         if (track is null)
         {
             _logger.LogWarning(
-                "Track {TrackId} not found while deleting", request.TrackId);
+                "Track {Id} not found while deleting", request.TrackId);
 
             return Result.Failure<DeleteTrackCommandResult>(TrackErrors.NotFound);
         }

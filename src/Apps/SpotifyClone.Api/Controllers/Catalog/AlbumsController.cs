@@ -1,9 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.Create;
-using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.Create;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.Create;
+using SpotifyClone.Catalog.Application.Features.Albums.Commands.Delete;
+using SpotifyClone.Catalog.Application.Features.Albums.Queries;
+using SpotifyClone.Catalog.Application.Features.Albums.Queries.GetDetails;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Api.Controllers.Catalog;
@@ -46,5 +48,57 @@ public sealed class AlbumsController(IMediator mediator)
 
         return Ok(new CreateAlbumResponse(
                 createResultData.AlbumId));
+    }
+
+    [EndpointSummary("Get Album Details")]
+    [EndpointDescription("Returns all the necessary Album details.")]
+    [ProducesResponseType(typeof(AlbumDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<AlbumDetailsResponse>> GetTrackDetails(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<AlbumDetailsResponse> result = await Mediator.Send(
+            new GetAlbumDetailsQuery(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(result.Value);
+    }
+
+    [EndpointSummary("Delete Track")]
+    [EndpointDescription("Deletes an Track if it's not yet published.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> DeleteTrack(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<DeleteAlbumCommandResult> result = await Mediator.Send(
+            new DeleteAlbumCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
     }
 }

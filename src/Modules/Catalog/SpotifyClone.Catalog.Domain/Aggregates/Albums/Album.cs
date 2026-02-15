@@ -138,6 +138,14 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         Cover = newCover;
     }
 
+    public void PrepareForDeletion()
+    {
+        if (Status.IsPublished)
+        {
+            throw new AlbumAlreadyPublishedDomainException("Cannot delete a published album.");
+        }
+    }
+
     private Album(
         AlbumId id, string title, DateTimeOffset? releaseDate, AlbumStatus status, AlbumType? type,
         AlbumCoverImage? cover, IEnumerable<ArtistId> mainArtists)
