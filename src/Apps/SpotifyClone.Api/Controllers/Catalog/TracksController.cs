@@ -22,7 +22,7 @@ namespace SpotifyClone.Api.Controllers.Catalog;
 
 [Tags("Catalog Module")]
 [Route("api/v1/tracks")]
-public sealed class MediaController(IMediator mediator)
+public sealed class TracksController(IMediator mediator)
     : ApiController(mediator)
 {
     [EndpointSummary("Create Track")]
@@ -57,8 +57,8 @@ public sealed class MediaController(IMediator mediator)
 
         CreateTrackCommandResult createResultData = createResult.Value;
 
-        return Created(new Uri(
-            $"api/v1/tracks/{createResultData.TrackId}"),
+        return CreatedAtAction(nameof(GetTrackDetails),
+            new { id = createResultData.TrackId },
             new CreateTrackResponse(
                 createResultData.TrackId));
     }
@@ -263,7 +263,7 @@ public sealed class MediaController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPatch("{id:guid}/explicit")]
+    [HttpPost("{id:guid}/explicit")]
     public async Task<ActionResult> MarkTrackAsExplicit(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)

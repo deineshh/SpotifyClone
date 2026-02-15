@@ -35,9 +35,7 @@ internal sealed class UserProfileEfCoreConfiguration : IEntityTypeConfiguration<
             .IsRequired();
 
         builder.OwnsOne(x => x.AvatarImage, avatar => avatar.Configure());
-
-        builder.Navigation(x => x.AvatarImage)
-            .IsRequired(false);
+        builder.Navigation(x => x.AvatarImage).IsRequired(false);
 
         builder.Ignore(u => u.DomainEvents);
     }

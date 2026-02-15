@@ -7,5 +7,12 @@ public sealed class CreateAlbumCommandValidator
 {
     public CreateAlbumCommandValidator()
     {
+        RuleFor(x => x.Title)
+            .NotNull().WithMessage("Title is required.")
+            .NotEmpty().WithMessage("Title is required.");
+
+        RuleFor(x => x.MainArtists)
+            .NotNull().WithMessage("Main artists are required.")
+            .NotEmpty().WithMessage("Main artists are required.");
     }
 }

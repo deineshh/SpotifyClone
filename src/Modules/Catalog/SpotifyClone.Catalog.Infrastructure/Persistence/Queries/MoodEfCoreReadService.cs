@@ -22,9 +22,9 @@ internal sealed class MoodEfCoreReadService(
             m.Name,
             new ImageMetadataDetailsResult(
                 m.Cover.ImageId.Value,
-                m.Cover.Metadata.Width!.Value,
-                m.Cover.Metadata.Height!.Value,
-                m.Cover.Metadata.FileType!.Value,
-                m.Cover.Metadata.SizeInBytes!.Value)))
+                m.Cover.Metadata.Width,
+                m.Cover.Metadata.Height,
+                m.Cover.Metadata.FileType.Value,
+                m.Cover.Metadata.SizeInBytes)))
         .SingleOrDefaultAsync(cancellationToken);
 }

@@ -36,10 +36,10 @@ internal sealed class TrackEfCoreReadService(
                     a.IsVerified,
                     a.Avatar == null ? null : new ImageMetadataDetailsResult(
                         a.Avatar.ImageId.Value,
-                        a.Avatar.Metadata.Width!.Value,
-                        a.Avatar.Metadata.Height!.Value,
-                        a.Avatar.Metadata.FileType!.Value,
-                        a.Avatar.Metadata.SizeInBytes!.Value))
+                        a.Avatar.Metadata.Width,
+                        a.Avatar.Metadata.Height,
+                        a.Avatar.Metadata.FileType.Value,
+                        a.Avatar.Metadata.SizeInBytes))
                 ).ToList(),
             _context.Artists
                 .Where(a => t.FeaturedArtists.Contains(a.Id))
@@ -48,10 +48,10 @@ internal sealed class TrackEfCoreReadService(
                     a.IsVerified,
                     a.Avatar == null ? null : new ImageMetadataDetailsResult(
                         a.Avatar.ImageId.Value,
-                        a.Avatar.Metadata.Width!.Value,
-                        a.Avatar.Metadata.Height!.Value,
-                        a.Avatar.Metadata.FileType!.Value,
-                        a.Avatar.Metadata.SizeInBytes!.Value))
+                        a.Avatar.Metadata.Width,
+                        a.Avatar.Metadata.Height,
+                        a.Avatar.Metadata.FileType.Value,
+                        a.Avatar.Metadata.SizeInBytes))
                 ).ToList(),
             _context.Genres
                 .Where(g => t.Genres.Contains(g.Id))

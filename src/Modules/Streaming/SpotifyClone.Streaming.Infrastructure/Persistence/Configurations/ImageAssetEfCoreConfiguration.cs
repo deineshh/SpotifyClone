@@ -30,10 +30,29 @@ internal sealed class ImageAssetEfCoreConfiguration : IEntityTypeConfiguration<I
             .HasColumnName("created_at")
             .IsRequired();
 
-        builder.OwnsOne(x => x.Metadata, metadata => metadata.Configure());
+        builder.OwnsOne(x => x.Metadata, metadataBuilder =>
+        {
+            metadataBuilder.Property(m => m.Width)
+                .HasColumnName("metadata_width")
+                .IsRequired();
 
-        builder.Navigation(x => x.Metadata)
-            .IsRequired(false);
+            metadataBuilder.Property(m => m.Height)
+                .HasColumnName("metadata_height")
+                .IsRequired();
+
+            metadataBuilder.Property(m => m.FileType)
+                .HasConversion(StreamingEfCoreValueConverters.ImageFileTypeConverter)
+                .HasColumnName("metadata_file_type")
+                .HasMaxLength(10)
+                .IsRequired(false);
+
+            metadataBuilder.Property(m => m.SizeInBytes)
+                .HasColumnName("metadata_size_in_bytes")
+                .IsRequired();
+
+            builder.Navigation(x => x.Metadata)
+                .IsRequired(false);
+        });
 
         builder.Ignore(x => x.DomainEvents);
     }

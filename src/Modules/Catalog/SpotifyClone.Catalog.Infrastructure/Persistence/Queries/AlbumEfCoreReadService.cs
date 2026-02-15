@@ -25,12 +25,12 @@ internal sealed class AlbumEfCoreReadService(
             a.ReleaseDate,
             a.Status.Value,
             a.Type == null ? null : a.Type.Value,
-            new ImageMetadataDetailsResult(
+            a.Cover == null ? null : new ImageMetadataDetailsResult(
                 a.Cover.ImageId.Value,
-                a.Cover.Metadata.Width!.Value,
-                a.Cover.Metadata.Height!.Value,
-                a.Cover.Metadata.FileType!.Value,
-                a.Cover.Metadata.SizeInBytes!.Value),
+                a.Cover.Metadata.Width,
+                a.Cover.Metadata.Height,
+                a.Cover.Metadata.FileType.Value,
+                a.Cover.Metadata.SizeInBytes),
             _context.Artists
                 .Where(artist => a.MainArtists.Contains(artist.Id))
                 .Select(artist => new ArtistSummaryResponse(
@@ -38,10 +38,10 @@ internal sealed class AlbumEfCoreReadService(
                     artist.IsVerified,
                     artist.Avatar == null ? null : new ImageMetadataDetailsResult(
                         artist.Avatar.ImageId.Value,
-                        artist.Avatar.Metadata.Width!.Value,
-                        artist.Avatar.Metadata.Height!.Value,
-                        artist.Avatar.Metadata.FileType!.Value,
-                        artist.Avatar.Metadata.SizeInBytes!.Value))
+                        artist.Avatar.Metadata.Width,
+                        artist.Avatar.Metadata.Height,
+                        artist.Avatar.Metadata.FileType.Value,
+                        artist.Avatar.Metadata.SizeInBytes))
                 ).ToList(),
             _context.Tracks
                 .Where(t => a.Tracks.Contains(t.Id))

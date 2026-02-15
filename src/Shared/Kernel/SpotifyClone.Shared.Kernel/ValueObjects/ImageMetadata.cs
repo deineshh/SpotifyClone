@@ -5,10 +5,10 @@ namespace SpotifyClone.Shared.Kernel.ValueObjects;
 
 public sealed record ImageMetadata : ValueObject
 {
-    public int? Width { get; }
-    public int? Height { get; }
-    public ImageFileType? FileType { get; }
-    public long? SizeInBytes { get; }
+    public int Width { get; }
+    public int Height { get; }
+    public ImageFileType FileType { get; }
+    public long SizeInBytes { get; }
 
     private ImageMetadata()
         => FileType = null!;

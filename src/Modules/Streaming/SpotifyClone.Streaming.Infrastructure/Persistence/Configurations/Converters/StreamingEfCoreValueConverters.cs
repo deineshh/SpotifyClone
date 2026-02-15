@@ -23,9 +23,9 @@ internal static class StreamingEfCoreValueConverters
         f => f.Value,
         v => AudioAssetStatus.From(v));
 
-    public static readonly ValueConverter<ImageFileType?, string?> ImageFileTypeConverter = new(
-        t => t == null ? null : t.Value,
-        v => v == null ? null : ImageFileType.From(v));
+    public static readonly ValueConverter<ImageFileType, string> ImageFileTypeConverter = new(
+        t => t.Value,
+        v => ImageFileType.From(v));
 
     public static readonly ValueConverter<TrackId?, Guid?> TrackIdConverter = new(
         id => id == null ? null : id.Value,

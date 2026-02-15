@@ -18,7 +18,7 @@ internal static class AccountsEfCoreValueConverters
         g => g.Value,
         v => Gender.From(v));
 
-    public static readonly ValueConverter<ImageFileType?, string> ImageFileTypeConverter = new(
-        t => t == null ? string.Empty : t.Value,
+    public static readonly ValueConverter<ImageFileType, string> ImageFileTypeConverter = new(
+        t => t.Value,
         v => ImageFileType.From(v));
 }

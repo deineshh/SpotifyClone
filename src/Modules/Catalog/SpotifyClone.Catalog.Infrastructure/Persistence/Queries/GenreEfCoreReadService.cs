@@ -22,9 +22,9 @@ internal sealed class GenreEfCoreReadService(
             g.Name,
             new ImageMetadataDetailsResult(
                 g.Cover.ImageId.Value,
-                g.Cover.Metadata.Width!.Value,
-                g.Cover.Metadata.Height!.Value,
-                g.Cover.Metadata.FileType!.Value,
-                g.Cover.Metadata.SizeInBytes!.Value)))
+                g.Cover.Metadata.Width,
+                g.Cover.Metadata.Height,
+                g.Cover.Metadata.FileType.Value,
+                g.Cover.Metadata.SizeInBytes)))
         .SingleOrDefaultAsync(cancellationToken);
 }

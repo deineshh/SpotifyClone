@@ -33,76 +33,98 @@ internal sealed class ArtistEfCoreConfiguration : IEntityTypeConfiguration<Artis
             .HasColumnName("is_verified")
             .IsRequired();
 
-        builder.OwnsOne(x => x.Avatar, coverBuilder =>
+        builder.OwnsOne(x => x.Avatar, avatarBuilder =>
         {
-            coverBuilder.Property(x => x.ImageId)
+            avatarBuilder.Property(x => x.ImageId)
                 .HasColumnName("avatar_image_id")
                 .HasConversion(CatalogEfCoreValueConverters.ImageIdConverter)
                 .IsRequired();
 
-            coverBuilder.OwnsOne(x => x.Metadata, metadataBuilder =>
+            avatarBuilder.OwnsOne(x => x.Metadata, metadataBuilder =>
             {
                 metadataBuilder.Property(x => x.Width)
-                    .HasColumnName("avatar_metadata_width");
+                    .HasColumnName("avatar_metadata_width")
+                    .IsRequired();
 
                 metadataBuilder.Property(x => x.Height)
-                    .HasColumnName("avatar_metadata_height");
+                    .HasColumnName("avatar_metadata_height")
+                    .IsRequired();
 
                 metadataBuilder.Property(x => x.FileType)
+                    .HasColumnName("avatar_metadata_file_type")
                     .HasConversion(CatalogEfCoreValueConverters.ImageFileTypeConverter)
-                    .HasColumnName("avatar_metadata_file_type");
+                    .IsRequired();
 
                 metadataBuilder.Property(x => x.SizeInBytes)
-                    .HasColumnName("avatar_metadata_size_in_bytes");
+                    .HasColumnName("avatar_metadata_size_in_bytes")
+                    .IsRequired();
             });
+
+            builder.Navigation(x => x.Avatar).IsRequired(false);
         });
 
-        builder.OwnsOne(x => x.Banner, coverBuilder =>
+        builder.OwnsOne(x => x.Banner, bannerBuilder =>
         {
-            coverBuilder.Property(x => x.ImageId)
+            bannerBuilder.Property(x => x.ImageId)
                 .HasColumnName("banner_image_id")
                 .HasConversion(CatalogEfCoreValueConverters.ImageIdConverter)
                 .IsRequired();
 
-            coverBuilder.OwnsOne(x => x.Metadata, metadataBuilder =>
+            bannerBuilder.OwnsOne(x => x.Metadata, metadataBuilder =>
             {
                 metadataBuilder.Property(x => x.Width)
-                    .HasColumnName("banner_metadata_width");
+                    .HasColumnName("banner_metadata_width")
+                    .IsRequired();
 
                 metadataBuilder.Property(x => x.Height)
-                    .HasColumnName("banner_metadata_height");
+                    .HasColumnName("banner_metadata_height")
+                    .IsRequired();
 
                 metadataBuilder.Property(x => x.FileType)
+                    .HasColumnName("banner_metadata_file_type")
                     .HasConversion(CatalogEfCoreValueConverters.ImageFileTypeConverter)
-                    .HasColumnName("banner_metadata_file_type");
+                    .IsRequired(false);
 
                 metadataBuilder.Property(x => x.SizeInBytes)
-                    .HasColumnName("banner_metadata_size_in_bytes");
+                    .HasColumnName("banner_metadata_size_in_bytes")
+                    .IsRequired();
             });
+
+            builder.Navigation(x => x.Banner).IsRequired(false);
         });
 
-        builder.OwnsMany(x => x.Gallery, gb =>
+        builder.OwnsMany(x => x.Gallery, galleryBuilder =>
         {
-            gb.ToTable("artist_gallery_images");
+            galleryBuilder.ToTable("artist_gallery_images");
 
-            gb.WithOwner().HasForeignKey("ArtistId");
+            galleryBuilder.WithOwner().HasForeignKey("ArtistId");
 
-            gb.Property<ArtistId>("ArtistId")
+            galleryBuilder.Property<ArtistId>("ArtistId")
                 .HasColumnName("artist_id");
 
-            gb.Property(p => p.ImageId)
+            galleryBuilder.Property(p => p.ImageId)
                 .HasColumnName("image_id")
                 .HasConversion(CatalogEfCoreValueConverters.ImageIdConverter)
                 .IsRequired();
 
-            gb.OwnsOne(p => p.Metadata, mb =>
+            galleryBuilder.OwnsOne(p => p.Metadata, metadataBuilder =>
             {
-                mb.Property(m => m.Width).HasColumnName("metadata_width");
-                mb.Property(m => m.Height).HasColumnName("metadata_height");
-                mb.Property(m => m.SizeInBytes).HasColumnName("metadata_size_in_bytes");
-                mb.Property(m => m.FileType)
+                metadataBuilder.Property(m => m.Width)
+                    .HasColumnName("metadata_width")
+                    .IsRequired();
+
+                metadataBuilder.Property(m => m.Height)
+                    .HasColumnName("metadata_height")
+                    .IsRequired();
+
+                metadataBuilder.Property(m => m.FileType)
                     .HasColumnName("metadata_file_type")
-                    .HasConversion(CatalogEfCoreValueConverters.ImageFileTypeConverter);
+                    .HasConversion(CatalogEfCoreValueConverters.ImageFileTypeConverter)
+                    .IsRequired();
+
+                metadataBuilder.Property(m => m.SizeInBytes)
+                    .HasColumnName("metadata_size_in_bytes")
+                    .IsRequired();
             });
         });
 

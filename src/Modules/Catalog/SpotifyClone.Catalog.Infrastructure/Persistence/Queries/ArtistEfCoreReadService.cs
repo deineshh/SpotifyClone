@@ -24,22 +24,22 @@ internal sealed class ArtistEfCoreReadService(
             a.IsVerified,
             a.Avatar == null ? null : new ImageMetadataDetailsResult(
                 a.Avatar.ImageId.Value,
-                a.Avatar.Metadata.Width!.Value,
-                a.Avatar.Metadata.Height!.Value,
-                a.Avatar.Metadata.FileType!.Value,
-                a.Avatar.Metadata.SizeInBytes!.Value),
+                a.Avatar.Metadata.Width,
+                a.Avatar.Metadata.Height,
+                a.Avatar.Metadata.FileType.Value,
+                a.Avatar.Metadata.SizeInBytes),
             a.Banner == null ? null : new ImageMetadataDetailsResult(
                 a.Banner.ImageId.Value,
-                a.Banner.Metadata.Width!.Value,
-                a.Banner.Metadata.Height!.Value,
-                a.Banner.Metadata.FileType!.Value,
-                a.Banner.Metadata.SizeInBytes!.Value),
+                a.Banner.Metadata.Width,
+                a.Banner.Metadata.Height,
+                a.Banner.Metadata.FileType.Value,
+                a.Banner.Metadata.SizeInBytes),
             a.Gallery.Select(img => new ImageMetadataDetailsResult(
-                img.ImageId.Value,
-                img.Metadata.Width!.Value,
-                img.Metadata.Height!.Value,
-                img.Metadata.FileType!.Value,
-                img.Metadata.SizeInBytes!.Value
+                img.ImageId!.Value,
+                img.Metadata.Width,
+                img.Metadata.Height,
+                img.Metadata.FileType.Value,
+                img.Metadata.SizeInBytes
             )).ToList()))
         .SingleOrDefaultAsync(cancellationToken);
 }

@@ -12,8 +12,8 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
     public string Name { get; private set; } = null!;
     public string? Bio { get; private set; }
     public bool IsVerified { get; private set; }
-    public ArtistAvatarImage? Avatar { get; private set; } = null!;
-    public ArtistBannerImage? Banner { get; private set; } = null!;
+    public ArtistAvatarImage? Avatar { get; private set; }
+    public ArtistBannerImage? Banner { get; private set; }
     public IReadOnlySet<ArtistGalleryImage> Gallery => _gallery.AsReadOnly();
 
     public static Artist Create(ArtistId id, string name)

@@ -48,19 +48,27 @@ internal sealed class AlbumEfCoreConfiguration : IEntityTypeConfiguration<Album>
             coverBuilder.OwnsOne(x => x.Metadata, metadataBuilder =>
             {
                 metadataBuilder.Property(x => x.Width)
-                    .HasColumnName("cover_metadata_width");
+                    .HasColumnName("cover_metadata_width")
+                    .IsRequired();
 
                 metadataBuilder.Property(x => x.Height)
-                    .HasColumnName("cover_metadata_height");
+                    .HasColumnName("cover_metadata_height")
+                    .IsRequired();
 
                 metadataBuilder.Property(x => x.FileType)
+                    .HasColumnName("cover_metadata_file_type")
                     .HasConversion(CatalogEfCoreValueConverters.ImageFileTypeConverter)
-                    .HasColumnName("cover_metadata_file_type");
+                    .IsRequired();
 
                 metadataBuilder.Property(x => x.SizeInBytes)
-                    .HasColumnName("cover_metadata_size_in_bytes");
+                    .HasColumnName("cover_metadata_size_in_bytes")
+                    .IsRequired();
             });
+
+            builder.Navigation(x => x.Cover).IsRequired(false);
         });
+
+        builder.Navigation(x => x.Cover).IsRequired(false);
 
         builder.OwnsMany(t => t.MainArtists, a =>
         {

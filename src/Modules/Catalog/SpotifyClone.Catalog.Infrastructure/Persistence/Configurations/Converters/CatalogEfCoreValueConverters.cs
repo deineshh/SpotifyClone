@@ -23,14 +23,14 @@ internal static class CatalogEfCoreValueConverters
     public static readonly StronglyTypedIdEfCoreConverter<ArtistId, Guid> ArtistIdConverter = new(
         v => ArtistId.From(v));
 
-    public static readonly StronglyTypedIdEfCoreConverter<ImageId, Guid> ImageIdConverter = new(
-        v => ImageId.From(v));
-
     public static readonly StronglyTypedIdEfCoreConverter<GenreId, Guid> GenreIdConverter = new(
         v => GenreId.From(v));
 
     public static readonly StronglyTypedIdEfCoreConverter<MoodId, Guid> MoodIdConverter = new(
         v => MoodId.From(v));
+
+    public static readonly StronglyTypedIdEfCoreConverter<ImageId, Guid> ImageIdConverter = new(
+        v => ImageId.From(v));
 
     public static readonly ValueConverter<AudioFileId?, Guid?> AudioFileIdConverter = new(
         f => f == null ? null : f.Value,
@@ -40,9 +40,9 @@ internal static class CatalogEfCoreValueConverters
         t => t == null ? null : t.Value,
         v => v == null ? null : AlbumType.From(v));
 
-    public static readonly ValueConverter<ImageFileType?, string?> ImageFileTypeConverter = new(
-        t => t == null ? null : t.Value,
-        v => v == null ? null : ImageFileType.From(v));
+    public static readonly ValueConverter<ImageFileType, string> ImageFileTypeConverter = new(
+        t => t.Value,
+        v => ImageFileType.From(v));
 
     public static readonly ValueConverter<TrackStatus, string> TrackStatusConverter = new(
         s => s.Value,

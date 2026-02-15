@@ -18,15 +18,14 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     public DateTimeOffset? ReleaseDate { get; private set; }
     public AlbumStatus Status { get; private set; } = null!;
     public AlbumType? Type { get; private set; }
-    public AlbumCoverImage Cover { get; private set; } = null!;
+    public AlbumCoverImage? Cover { get; private set; }
     public IReadOnlySet<ArtistId> MainArtists => _mainArtists.AsReadOnly();
     public IReadOnlySet<TrackId> Tracks => _tracks.AsReadOnly();
 
-    public static Album Create(AlbumId id, string title, AlbumCoverImage cover, IEnumerable<ArtistId> mainArtists)
+    public static Album Create(AlbumId id, string title, IEnumerable<ArtistId> mainArtists)
     {
         ArgumentNullException.ThrowIfNull(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
-        ArgumentNullException.ThrowIfNull(cover);
         ArgumentNullException.ThrowIfNull(mainArtists);
 
         AlbumTitleRules.Validate(title);
@@ -37,7 +36,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
                 "An album must have at least one main artist.");
         }
 
-        return new Album(id, title, null, AlbumStatus.Draft, null, cover, mainArtists);
+        return new Album(id, title, null, AlbumStatus.Draft, null, null, mainArtists);
     }
 
     public void Publish(DateTimeOffset releaseDate)
@@ -141,7 +140,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
 
     private Album(
         AlbumId id, string title, DateTimeOffset? releaseDate, AlbumStatus status, AlbumType? type,
-        AlbumCoverImage cover, IEnumerable<ArtistId> mainArtists)
+        AlbumCoverImage? cover, IEnumerable<ArtistId> mainArtists)
         : base(id)
     {
         Title = title;

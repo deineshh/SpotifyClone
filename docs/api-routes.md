@@ -53,19 +53,21 @@ Base URL: `/api/v1`
 | Method   | Endpoint                                | Description                  | Request Body                        | Response                             |
 | :------- | :-------------------------------------- | :--------------------------- | :---------------------------------- | :----------------------------------- |
 | `POST`   | `/catalog/tracks`                       | Create a new track draft     | `CreateTrackRequest`                | `CreateTrackResponse`                |
-| `POST`   | `/catalog/tracks/publish`               | Publish a new track          | `PublishTrackRequest`               | `PublishTrackResponse`               |
-| `POST`   | `/catalog/tracks/unpublish`             | Unpublish a new track        | `UnpublishTrackRequest`             | `UnpublishTrackResponse`             |
-| `GET`    | `/catalog/tracks/{trackId}`             | Get track details            | -                                   | `GetTrackDetailsResponse`            |
-| `DELETE` | `/catalog/tracks/{trackId}`             | Unpublish/Delete a track     | -                                   | `UnpublishTrackResponse`             |
-| `PATCH`  | `/catalog/tracks/{trackId}/title`       | Rename track                 | `RenameTrackRequest`                | `RenameTrackResponse`                |
-| `PATCH`  | `/catalog/tracks/{trackId}/description` | Change track description     | `ChangeTrackDescriptionRequest`     | `ChangeTrackDescriptionResponse`     |
-| `PATCH`  | `/catalog/tracks/{trackId}/explicit`    | Update explicit content flag | `UpdateTrackExplicitContentRequest` | `UpdateTrackExplicitContentResponse` |
-| `PUT`    | `/catalog/tracks/{trackId}/audio`       | Replace track audio file     | `ReplaceTrackAudioResourceRequest`  | `ReplaceTrackAudioResourceResponse`  |
+| `POST`   | `/catalog/tracks/publish`               | Publish a new track          | `PublishTrackRequest`               | -                                    |
+| `POST`   | `/catalog/tracks/unpublish`             | Unpublish a new track        | -                                   | -                                    |
+| `POST`   | `/catalog/tracks/unlink-audio-file`     | Unlink track from audio file | -                                   | -                                    |
+| `GET`    | `/catalog/tracks/{trackId}`             | Get track details            | -                                   | `TrackDetailsResponse`               |
+| `DELETE` | `/catalog/tracks/{trackId}`             | Delete a track               | -                                   | -                                    |
+| `PATCH`  | `/catalog/tracks/{trackId}/correct-title`|Correct track title          | `CorrectTrackTitleRequest`          | -                                    |
+| `PATCH`  | `/catalog/tracks/{trackId}/reschedule-release`|Reschedule track release| `RescheduleTrackReleaseRequest`     | -                                    |
+| `POST`   | `/catalog/tracks/{trackId}/explicit`    | Mark track as explicit       | -                                   | -                                    |
+| `DELETE` | `/catalog/tracks/{trackId}/explicit`    | Unmark track as not explicit | -                                   | -                                    |
 
 ### Albums
 
 | Method   | Endpoint                                | Description                   | Request Body                      | Response                            |
 | :------- | :-------------------------------------- | :---------------------------- | :-------------------------------- | :---------------------------------- |
+| `GET`    | `/catalog/albums/{albumId}`             | Get album details             | -                                 | `GetAlbumDetailsResponse`           |
 | `GET`    | `/catalog/albums/{albumId}`             | Get album details             | -                                 | `GetAlbumDetailsResponse`           |
 | `GET`    | `/catalog/albums/{albumId}/tracks`      | Get album details with tracks | -                                 | `GetAlbumDetailsWithTracksResponse` |
 | `POST`   | `/catalog/albums`                       | Publish a new album           | `PublishAlbumRequest`             | `PublishAlbumResponse`              |
