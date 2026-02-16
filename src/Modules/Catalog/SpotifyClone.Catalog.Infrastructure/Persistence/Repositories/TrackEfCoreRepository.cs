@@ -16,6 +16,20 @@ internal sealed class TrackEfCoreRepository(CatalogAppDbContext context)
         CancellationToken cancellationToken = default)
         => await _tracks.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 
+    public async Task<IEnumerable<Track>> GetByIdsAsync(
+        IEnumerable<TrackId> ids,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ids.Any())
+        {
+            return [];
+        }
+
+        return await _tracks
+            .Where(track => ids.Contains(track.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddAsync(
         Track track,
         CancellationToken cancellationToken = default)

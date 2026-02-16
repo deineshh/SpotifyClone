@@ -39,6 +39,49 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         return new Album(id, title, null, AlbumStatus.Draft, null, null, mainArtists);
     }
 
+    public bool TryMarkAsReadyToPublish()
+    {
+        if (Cover is null ||
+            _tracks.Count <= 0)
+        {
+            return false;
+        }
+
+        Status = AlbumStatus.ReadyToPublish;
+        return true;
+    }
+
+    public void AttachCover(AlbumCoverImage cover)
+    {
+        ArgumentNullException.ThrowIfNull(cover);
+
+        if (Cover is not null)
+        {
+            throw new AlbumAlreadyHaveACoverDomainException(
+                "Album is already have a cover. " +
+                "Consider to unattach the attached cover first.");
+        }
+
+        Cover = cover;
+        TryMarkAsReadyToPublish();
+    }
+
+    public void UnattachCover()
+    {
+        if (Cover is null)
+        {
+            return;
+        }
+
+        if (Status.IsPublished)
+        {
+            throw new AlbumAlreadyPublishedDomainException("Cannot unattach published album from it's cover.");
+        }
+
+        Cover = null;
+        Status = AlbumStatus.Draft;
+    }
+
     public void Publish(DateTimeOffset releaseDate)
     {
         if (Status.IsPublished)
@@ -46,15 +89,13 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new AlbumAlreadyPublishedDomainException("This album has been already published.");
         }
 
-        if (_tracks.Count <= 0)
+        if (!Status.IsReadyToPublish)
         {
-            throw new InvalidAlbumTracksDomainException(
-                "Album must contain at least one track before publishing.");
+            throw new CannotPublishAlbumDomainException("Album is not ready to publish.");
         }
 
-        ReleaseDate = releaseDate;
+        ReleaseDate = releaseDate.ToUniversalTime();
         Status = AlbumStatus.Published;
-        Type = AlbumType.From(_tracks.Count);
 
         RaiseDomainEvent(new AlbumPublishedDomainEvent(Id, releaseDate));
     }
@@ -107,6 +148,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
 
         _tracks.Add(trackId);
         Type = AlbumType.From(_tracks.Count);
+        TryMarkAsReadyToPublish();
     }
 
     public void RemoveTrack(TrackId trackId)

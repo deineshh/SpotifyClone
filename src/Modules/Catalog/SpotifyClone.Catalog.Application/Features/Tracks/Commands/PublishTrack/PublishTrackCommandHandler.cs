@@ -21,7 +21,7 @@ internal sealed class PublishTrackCommandHandler(
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
-            "Publishing Track {TrackId}", request.TrackId);
+            "Publishing Track {Id}", request.TrackId);
 
         Track? track = await _unit.Tracks.GetByIdAsync(
             TrackId.From(request.TrackId),
@@ -30,7 +30,7 @@ internal sealed class PublishTrackCommandHandler(
         if (track is null)
         {
             _logger.LogWarning(
-                "Track {TrackId} not found while publishing", request.TrackId);
+                "Track {Id} not found while publishing", request.TrackId);
 
             return Result.Failure<PublishTrackCommandResult>(TrackErrors.NotFound);
         }

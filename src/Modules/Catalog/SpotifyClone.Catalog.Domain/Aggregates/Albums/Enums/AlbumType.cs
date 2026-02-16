@@ -9,9 +9,9 @@ public sealed record AlbumType : ValueObject
     private const ushort MaxTracksForExtendedPlay = 6;
     private const ushort MaxTracksForLongPlay = 50;
 
-    public static readonly AlbumType Single = new("Single");
-    public static readonly AlbumType ExtendedPlay = new("ExtendedPlay");
-    public static readonly AlbumType LongPlay = new("LongPlay");
+    public static readonly AlbumType Single = new("single");
+    public static readonly AlbumType ExtendedPlay = new("extended_play");
+    public static readonly AlbumType LongPlay = new("long_play");
 
     public string Value { get; }
 
@@ -43,10 +43,8 @@ public sealed record AlbumType : ValueObject
         => value.ToLowerInvariant() switch
     {
         "single" => Single,
-        "extendedplay" => ExtendedPlay,
-        "ep" => ExtendedPlay,
-        "longplay" => LongPlay,
-        "lp" => LongPlay,
+        "extended_play" => ExtendedPlay,
+        "long_play" => LongPlay,
         _ => null,
     };
 }

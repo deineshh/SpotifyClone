@@ -28,9 +28,17 @@ public static class AlbumErrors
         "Album.InvalidTracks",
         "The specified tracks are invalid.");
 
+    public static readonly Error AlreadyHaveACover = new(
+        "Album.AlreadyHaveACover",
+        "The album is already attached to a cover.");
+
     public static readonly Error AlreadyPublished = new(
         "Album.AlreadyPublished",
         "The album has already been published.");
+
+    public static readonly Error CannotPublish = new(
+        "Album.CannotPublish",
+        "The album cannot be published.");
 
     public static readonly Error NotFound = CommonErrors.NotFound(
         "Album", "Album");

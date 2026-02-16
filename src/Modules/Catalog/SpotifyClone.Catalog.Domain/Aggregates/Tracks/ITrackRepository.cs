@@ -9,6 +9,10 @@ public interface ITrackRepository
         TrackId id,
         CancellationToken cancellationToken = default);
 
+    Task<IEnumerable<Track>> GetByIdsAsync(
+        IEnumerable<TrackId> ids,
+        CancellationToken cancellationToken = default);
+
     Task AddAsync(
         Track track,
         CancellationToken cancellationToken = default);
