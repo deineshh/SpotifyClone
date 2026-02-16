@@ -53,7 +53,7 @@ internal sealed class AlbumEfCoreReadService(
                     t.TrackNumber,
                     t.Status.Value,
                     t.AudioFileId == null ? null : t.AudioFileId.Value,
-                    t.AlbumId.Value))
+                    t.AlbumId == null ? null : t.AlbumId.Value))
                 .ToList()))
         .SingleOrDefaultAsync(cancellationToken);
 }

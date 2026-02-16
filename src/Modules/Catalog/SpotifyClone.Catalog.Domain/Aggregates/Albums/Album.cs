@@ -186,6 +186,8 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         {
             throw new AlbumAlreadyPublishedDomainException("Cannot delete a published album.");
         }
+
+        RaiseDomainEvent(new AlbumDeletedDomainEvent([.. _tracks]));
     }
 
     private Album(

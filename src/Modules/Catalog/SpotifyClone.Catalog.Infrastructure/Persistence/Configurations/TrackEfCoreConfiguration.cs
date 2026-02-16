@@ -52,8 +52,7 @@ internal sealed class TrackEfCoreConfiguration : IEntityTypeConfiguration<Track>
 
         builder.Property(x => x.AlbumId)
             .HasColumnName("album_id")
-            .HasConversion(CatalogEfCoreValueConverters.AlbumIdConverter)
-            .IsRequired();
+            .HasConversion(CatalogEfCoreValueConverters.AlbumIdNullableConverter);
         builder.HasIndex(x => x.AlbumId);
 
         builder.OwnsMany(t => t.MainArtists, a =>

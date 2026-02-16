@@ -28,7 +28,7 @@ internal sealed class TrackEfCoreReadService(
             t.TrackNumber,
             t.Status.Value,
             t.AudioFileId == null ? null : t.AudioFileId.Value,
-            t.AlbumId.Value,
+            t.AlbumId == null ? null : t.AlbumId.Value,
             _context.Artists
                 .Where(a => t.MainArtists.Contains(a.Id))
                 .Select(a => new ArtistSummaryResponse(

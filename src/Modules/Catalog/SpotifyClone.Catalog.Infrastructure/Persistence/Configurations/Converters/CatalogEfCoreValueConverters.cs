@@ -32,6 +32,10 @@ internal static class CatalogEfCoreValueConverters
     public static readonly StronglyTypedIdEfCoreConverter<ImageId, Guid> ImageIdConverter = new(
         v => ImageId.From(v));
 
+    public static readonly ValueConverter<AlbumId?, Guid?> AlbumIdNullableConverter = new(
+        f => f == null ? null : f.Value,
+        v => v == null ? null : AlbumId.From((Guid)v));
+
     public static readonly ValueConverter<AudioFileId?, Guid?> AudioFileIdConverter = new(
         f => f == null ? null : f.Value,
         v => v == null ? null : AudioFileId.From((Guid)v));

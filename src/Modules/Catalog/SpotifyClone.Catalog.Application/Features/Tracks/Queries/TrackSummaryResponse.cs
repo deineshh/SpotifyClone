@@ -8,4 +8,4 @@ public sealed record TrackSummaryResponse(
     int TrackNumber,
     string Status,
     Guid? AudioFileId,
-    Guid AlbumId);
+    Guid? AlbumId);

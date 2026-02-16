@@ -26,7 +26,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     public int TrackNumber { get; private set; }
     public TrackStatus Status { get; private set; } = null!;
     public AudioFileId? AudioFileId { get; private set; }
-    public AlbumId AlbumId { get; private set; } = null!;
+    public AlbumId? AlbumId { get; private set; }
     public IReadOnlySet<ArtistId> MainArtists => _mainArtists.AsReadOnly();
     public IReadOnlySet<ArtistId> FeaturedArtists => _featuredArtists.AsReadOnly();
     public IReadOnlySet<GenreId> Genres => _genres.AsReadOnly();
@@ -114,6 +114,12 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
         AudioFileId = null;
         Status = TrackStatus.Draft;
+    }
+
+    public void Archive()
+    {
+        AlbumId = null;
+        Status = TrackStatus.Archived;
     }
 
     public void Publish(DateTimeOffset releaseDate)
@@ -350,7 +356,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         int trackNumber,
         TrackStatus status,
         AudioFileId? audioFileId,
-        AlbumId albumId,
+        AlbumId? albumId,
         IEnumerable<ArtistId> mainArtists,
         IEnumerable<ArtistId> featuredArtists,
         IEnumerable<GenreId> genres,
