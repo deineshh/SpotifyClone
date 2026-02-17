@@ -72,10 +72,23 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         }
 
         var track = new Track(
-            id, title, null, null, containsExplicitContent, trackNumber, TrackStatus.Draft, null, albumId,
+            id, title, null, null, containsExplicitContent, trackNumber, TrackStatus.Draft, null, null,
             mainArtists, featuredArtists, genres, moods);
 
+        track.MoveInAlbum(albumId);
+
         return track;
+    }
+
+    public void MoveInAlbum(AlbumId albumId)
+    {
+        if (AlbumId == albumId)
+        {
+            return;
+        }
+
+        RaiseDomainEvent(new TrackMovedInAlbumDomainEvent(Id, AlbumId, albumId));
+        AlbumId = albumId;
     }
 
     public void MarkAsReadyToPublish()

@@ -127,6 +127,8 @@ internal sealed class ArtistEfCoreConfiguration : IEntityTypeConfiguration<Artis
                     .IsRequired();
             });
         });
+        builder.Navigation(x => x.Gallery)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Ignore(x => x.DomainEvents);
     }

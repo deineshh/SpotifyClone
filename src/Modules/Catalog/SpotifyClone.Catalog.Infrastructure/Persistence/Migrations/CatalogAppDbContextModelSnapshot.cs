@@ -55,6 +55,20 @@ namespace SpotifyClone.Catalog.Infrastructure.Persistence.Migrations
                     b.ToTable("albums", "catalog");
                 });
 
+            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities.AlbumTrack", b =>
+                {
+                    b.Property<Guid>("album_id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TrackId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("track_id");
+
+                    b.HasKey("album_id", "TrackId");
+
+                    b.ToTable("album_tracks", "catalog");
+                });
+
             modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Artists.Artist", b =>
                 {
                     b.Property<Guid>("Id")
@@ -273,30 +287,18 @@ namespace SpotifyClone.Catalog.Infrastructure.Persistence.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsMany("SpotifyClone.Shared.Kernel.IDs.TrackId", "Tracks", b1 =>
-                        {
-                            b1.Property<Guid>("AlbumId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("album_id");
-
-                            b1.Property<Guid>("Value")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid")
-                                .HasColumnName("track_id");
-
-                            b1.HasKey("AlbumId", "Value");
-
-                            b1.ToTable("album_tracks", "catalog");
-
-                            b1.WithOwner()
-                                .HasForeignKey("AlbumId");
-                        });
-
                     b.Navigation("Cover");
 
                     b.Navigation("MainArtists");
+                });
 
-                    b.Navigation("Tracks");
+            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities.AlbumTrack", b =>
+                {
+                    b.HasOne("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", null)
+                        .WithMany("_tracks")
+                        .HasForeignKey("album_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Artists.Artist", b =>
@@ -661,6 +663,11 @@ namespace SpotifyClone.Catalog.Infrastructure.Persistence.Migrations
                     b.Navigation("MainArtists");
 
                     b.Navigation("Moods");
+                });
+
+            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", b =>
+                {
+                    b.Navigation("_tracks");
                 });
 #pragma warning restore 612, 618
         }

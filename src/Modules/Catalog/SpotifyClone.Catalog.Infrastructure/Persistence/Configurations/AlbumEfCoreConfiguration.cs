@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Rules;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Configurations.Converters;
+using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Catalog.Infrastructure.Persistence.Configurations;
 
@@ -85,22 +87,16 @@ internal sealed class AlbumEfCoreConfiguration : IEntityTypeConfiguration<Album>
 
             a.HasKey("AlbumId", "Value");
         });
+        builder.Navigation(x => x.MainArtists)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.OwnsMany(t => t.Tracks, a =>
-        {
-            a.ToTable("album_tracks");
-
-            a.Property<AlbumId>("AlbumId")
-                .HasColumnName("album_id");
-
-            a.WithOwner().HasForeignKey("AlbumId");
-
-            a.Property(x => x.Value)
-                .HasColumnName("track_id")
-                .IsRequired();
-
-            a.HasKey("AlbumId", "Value");
-        });
+        builder
+            .HasMany<AlbumTrack>("_tracks")
+            .WithOne()
+            .HasForeignKey("album_id");
+        builder.Navigation("_tracks")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Ignore(x => x.Tracks);
 
         builder.Ignore(x => x.DomainEvents);
     }

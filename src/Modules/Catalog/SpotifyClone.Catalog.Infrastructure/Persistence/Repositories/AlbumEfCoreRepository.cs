@@ -18,7 +18,10 @@ internal sealed class AlbumEfCoreRepository(CatalogAppDbContext context)
     public async Task<Album?> GetByIdAsync(
         AlbumId id,
         CancellationToken cancellationToken = default)
-        => await _albums.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+        => await _albums
+            .Where(a => a.Id == id)
+            .Include("_tracks")
+            .SingleOrDefaultAsync(cancellationToken);
 
     public async Task DeleteAsync(
         Album album,

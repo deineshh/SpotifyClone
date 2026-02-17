@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.Enums;
+﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Events;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Exceptions;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Rules;
@@ -12,7 +13,7 @@ namespace SpotifyClone.Catalog.Domain.Aggregates.Albums;
 public sealed class Album : AggregateRoot<AlbumId, Guid>
 {
     private readonly HashSet<ArtistId> _mainArtists = [];
-    private readonly HashSet<TrackId> _tracks = [];
+    private readonly HashSet<AlbumTrack> _tracks = new();
 
     public string Title { get; private set; } = null!;
     public DateTimeOffset? ReleaseDate { get; private set; }
@@ -20,7 +21,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     public AlbumType? Type { get; private set; }
     public AlbumCoverImage? Cover { get; private set; }
     public IReadOnlySet<ArtistId> MainArtists => _mainArtists.AsReadOnly();
-    public IReadOnlySet<TrackId> Tracks => _tracks.AsReadOnly();
+    public IReadOnlySet<TrackId> Tracks => _tracks.Select(x => x.TrackId).ToHashSet();
 
     public static Album Create(AlbumId id, string title, IEnumerable<ArtistId> mainArtists)
     {
@@ -37,18 +38,6 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         }
 
         return new Album(id, title, null, AlbumStatus.Draft, null, null, mainArtists);
-    }
-
-    public bool TryMarkAsReadyToPublish()
-    {
-        if (Cover is null ||
-            _tracks.Count <= 0)
-        {
-            return false;
-        }
-
-        Status = AlbumStatus.ReadyToPublish;
-        return true;
     }
 
     public void AttachCover(AlbumCoverImage cover)
@@ -100,6 +89,21 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         RaiseDomainEvent(new AlbumPublishedDomainEvent(Id, releaseDate));
     }
 
+    public void Unpublish()
+    {
+        if (!Status.IsPublished)
+        {
+            throw new AlbumNotPublishedDomainException("Cannot unpublish album which is not published.");
+        }
+
+        if (!TryMarkAsReadyToPublish())
+        {
+            Status = AlbumStatus.Draft;
+        }
+
+        ReleaseDate = null;
+    }
+
     public void AddMainArtist(ArtistId artistId)
     {
         ArgumentNullException.ThrowIfNull(artistId);
@@ -128,7 +132,12 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
                 "An album must have at least one main artist.");
         }
 
-        _mainArtists.Remove(artistId);
+        if (!_mainArtists.Remove(artistId))
+        {
+            throw new MainArtistNotFoundInAlbumDomainException(
+                $"Cannot remove main artist '{artistId.Value}' from the album, " +
+                $"because it was not found in the album.");
+        }
     }
 
     public bool MainArtistExists(ArtistId artistId)
@@ -146,7 +155,9 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new AlbumAlreadyPublishedDomainException("Cannot add track to a published album.");
         }
 
-        _tracks.Add(trackId);
+        var track = new AlbumTrack(trackId);
+        _tracks.Add(track);
+
         Type = AlbumType.From(_tracks.Count);
         TryMarkAsReadyToPublish();
     }
@@ -160,7 +171,13 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new AlbumAlreadyPublishedDomainException("Cannot remove track from a published album.");
         }
 
-        _tracks.Remove(trackId);
+        AlbumTrack? track = _tracks.FirstOrDefault(t => t.TrackId == trackId);
+        if (track is null && !_tracks.Remove(track!))
+        {
+            throw new TrackNotFoundInAlbumDomainException(
+                $"Cannot remove track '{trackId.Value}' from the album, because it was not found in the album.");
+        }
+        
         Type = AlbumType.From(_tracks.Count);
     }
 
@@ -187,7 +204,22 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new AlbumAlreadyPublishedDomainException("Cannot delete a published album.");
         }
 
-        RaiseDomainEvent(new AlbumDeletedDomainEvent([.. _tracks]));
+        if (_tracks.Count > 0)
+        {
+            RaiseDomainEvent(new AlbumDeletedDomainEvent(_tracks.Select(t => t.TrackId)));
+        }
+    }
+
+    private bool TryMarkAsReadyToPublish()
+    {
+        if (Cover is null ||
+            _tracks.Count <= 0)
+        {
+            return false;
+        }
+
+        Status = AlbumStatus.ReadyToPublish;
+        return true;
     }
 
     private Album(

@@ -70,6 +70,8 @@ internal sealed class TrackEfCoreConfiguration : IEntityTypeConfiguration<Track>
 
             a.HasKey("TrackId", "Value");
         });
+        builder.Navigation(x => x.MainArtists)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.OwnsMany(t => t.FeaturedArtists, a =>
         {
@@ -86,6 +88,8 @@ internal sealed class TrackEfCoreConfiguration : IEntityTypeConfiguration<Track>
 
             a.HasKey("TrackId", "Value");
         });
+        builder.Navigation(x => x.FeaturedArtists)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.OwnsMany(t => t.Genres, g =>
         {
@@ -102,6 +106,8 @@ internal sealed class TrackEfCoreConfiguration : IEntityTypeConfiguration<Track>
 
             g.HasKey("TrackId", "Value");
         });
+        builder.Navigation(x => x.Genres)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.OwnsMany(t => t.Moods, m =>
         {
@@ -118,6 +124,8 @@ internal sealed class TrackEfCoreConfiguration : IEntityTypeConfiguration<Track>
 
             m.HasKey("TrackId", "Value");
         });
+        builder.Navigation(x => x.Moods)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Ignore(x => x.DomainEvents);
     }

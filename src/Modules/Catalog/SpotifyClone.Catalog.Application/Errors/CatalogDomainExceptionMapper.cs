@@ -24,9 +24,9 @@ public sealed class CatalogDomainExceptionMapper : IDomainExceptionMapper
             InvalidTrackTitleDomainException => TrackErrors.InvalidTitle,
             InvalidTrackReleaseDateDomainException => TrackErrors.InvalidReleaseDate,
             TrackAlreadyPublishedDomainException => TrackErrors.AlreadyPublished,
-            TrackAlreadyLinkedToAudioFileDomainException => TrackErrors.AlreadyLinkedToAudioFile,
             CannotPublishTrackDomainException => TrackErrors.CannotPublish,
             TrackNotPublishedDomainException => TrackErrors.NotPublished,
+            TrackAlreadyLinkedToAudioFileDomainException => TrackErrors.AlreadyLinkedToAudioFile,
             TrackAlreadyReleasedDomainException => TrackErrors.AlreadyReleased,
 
             // Album
@@ -39,6 +39,9 @@ public sealed class CatalogDomainExceptionMapper : IDomainExceptionMapper
             AlbumAlreadyHaveACoverDomainException => AlbumErrors.AlreadyHaveACover,
             AlbumAlreadyPublishedDomainException => AlbumErrors.AlreadyPublished,
             CannotPublishAlbumDomainException => AlbumErrors.CannotPublish,
+            AlbumNotPublishedDomainException => AlbumErrors.NotPublished,
+            MainArtistNotFoundInAlbumDomainException => AlbumErrors.MainArtistNotFound,
+            TrackNotFoundInAlbumDomainException => AlbumErrors.TrackNotFound,
 
             // Artist
             InvalidArtistAvatarImageDomainException => ArtistErrors.InvalidAvatarImage,

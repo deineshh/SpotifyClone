@@ -40,6 +40,18 @@ public static class AlbumErrors
         "Album.CannotPublish",
         "The album cannot be published.");
 
+    public static readonly Error NotPublished = new(
+        "Album.NotPublished",
+        "The album is not published.");
+
+    public static readonly Error MainArtistNotFound = new(
+        "Album.MainArtistNotFound",
+        "Main artist was not found in the album.");
+
+    public static readonly Error TrackNotFound = new(
+        "Album.TrackNotFound",
+        "Track was not found in the album.");
+
     public static readonly Error NotFound = CommonErrors.NotFound(
         "Album", "Album");
 }

@@ -33,9 +33,6 @@ internal sealed class CreateAlbumCommandHandler(
             ImageFileType.Jpg,
             4_000_000));
 
-        // IMPORTANT: remove this line after implementing 'add track to album' use case
-        album.AddTrack(TrackId.From(Guid.NewGuid()));
-
         await _unit.Albums.AddAsync(album, cancellationToken);
 
         return new CreateAlbumCommandResult(album.Id.Value);

@@ -1,4 +1,6 @@
 ﻿using SpotifyClone.Catalog.Application.Abstractions;
+using SpotifyClone.Catalog.Application.Errors;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
@@ -20,14 +22,21 @@ internal sealed class CreateTrackCommandHandler(
         CreateTrackCommand request,
         CancellationToken cancellationToken)
     {
-        var trackId = Guid.NewGuid();
+        var trackId = TrackId.From(Guid.NewGuid());
+        var albumId = AlbumId.From(request.AlbumId);
+
+        Album? album = await _unit.Albums.GetByIdAsync(albumId, cancellationToken);
+        if (album is null)
+        {
+            return Result.Failure<CreateTrackCommandResult>(AlbumErrors.NotFound);
+        }
 
         var track = Track.Create(
-            TrackId.From(trackId),
+            trackId,
             request.Title,
             request.ContainsExplicitContent,
             request.TrackNumber,
-            AlbumId.From(request.AlbumId),
+            albumId,
             request.MainArtists.Select(a => ArtistId.From(a)),
             request.FeaturedArtists.Select(a => ArtistId.From(a)),
             request.Genres.Select(g => GenreId.From(g)),
@@ -35,6 +44,6 @@ internal sealed class CreateTrackCommandHandler(
 
         await _unit.Tracks.AddAsync(track, cancellationToken);
 
-        return new CreateTrackCommandResult(trackId);
+        return new CreateTrackCommandResult(trackId.Value);
     }
 }
