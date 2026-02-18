@@ -24,7 +24,7 @@ internal sealed class AlbumEfCoreReadService(
             a.Title,
             a.ReleaseDate,
             a.Status.Value,
-            a.Type == null ? null : a.Type.Value,
+            a.Type.Value,
             a.Cover == null ? null : new ImageMetadataDetailsResult(
                 a.Cover.ImageId.Value,
                 a.Cover.Metadata.Width,

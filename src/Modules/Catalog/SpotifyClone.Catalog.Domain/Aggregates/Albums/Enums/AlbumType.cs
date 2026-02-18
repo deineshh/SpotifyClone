@@ -9,6 +9,7 @@ public sealed record AlbumType : ValueObject
     private const ushort MaxTracksForExtendedPlay = 6;
     private const ushort MaxTracksForLongPlay = 50;
 
+    public static readonly AlbumType Empty = new("empty");
     public static readonly AlbumType Single = new("single");
     public static readonly AlbumType ExtendedPlay = new("extended_play");
     public static readonly AlbumType LongPlay = new("long_play");
@@ -18,9 +19,13 @@ public sealed record AlbumType : ValueObject
     private AlbumType(string value)
         => Value = value;
 
-    public static AlbumType? From(int trackCount)
+    public static AlbumType From(int trackCount)
     {
-        if (trackCount <= MaxTracksForSingle)
+        if (trackCount == 0)
+        {
+            return Empty;
+        }
+        else if (trackCount <= MaxTracksForSingle)
         {
             return Single;
         }
@@ -35,16 +40,17 @@ public sealed record AlbumType : ValueObject
         else
         {
             throw new InvalidAlbumTypeDomainException(
-                $"Track count must be between 1 and {MaxTracksForLongPlay}.");
+                $"Track count must be between 0 and {MaxTracksForLongPlay}.");
         }
     }
 
-    public static AlbumType? From(string value)
+    public static AlbumType From(string value)
         => value.ToLowerInvariant() switch
     {
         "single" => Single,
+        "empty" => Empty,
         "extended_play" => ExtendedPlay,
         "long_play" => LongPlay,
-        _ => null,
+        _ => throw new InvalidAlbumTypeDomainException($"Invalid album type: {value}.")
     };
 }

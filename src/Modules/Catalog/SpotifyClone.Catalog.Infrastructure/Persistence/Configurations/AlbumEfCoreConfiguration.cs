@@ -5,7 +5,6 @@ using SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Rules;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Configurations.Converters;
-using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Catalog.Infrastructure.Persistence.Configurations;
 
@@ -38,7 +37,8 @@ internal sealed class AlbumEfCoreConfiguration : IEntityTypeConfiguration<Album>
 
         builder.Property(x => x.Type)
             .HasConversion(CatalogEfCoreValueConverters.AlbumTypeConverter)
-            .HasColumnName("type");
+            .HasColumnName("type")
+            .IsRequired();
 
         builder.OwnsOne(x => x.Cover, coverBuilder =>
         {

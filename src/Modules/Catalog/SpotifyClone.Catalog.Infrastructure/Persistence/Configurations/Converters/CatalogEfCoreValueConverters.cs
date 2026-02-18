@@ -40,9 +40,9 @@ internal static class CatalogEfCoreValueConverters
         f => f == null ? null : f.Value,
         v => v == null ? null : AudioFileId.From((Guid)v));
 
-    public static readonly ValueConverter<AlbumType?, string?> AlbumTypeConverter = new(
-        t => t == null ? null : t.Value,
-        v => v == null ? null : AlbumType.From(v));
+    public static readonly ValueConverter<AlbumType, string> AlbumTypeConverter = new(
+        t =>t.Value,
+        v => AlbumType.From(v));
 
     public static readonly ValueConverter<ImageFileType, string> ImageFileTypeConverter = new(
         t => t.Value,

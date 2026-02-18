@@ -6,6 +6,5 @@ namespace SpotifyClone.Catalog.Domain.Aggregates.Tracks.Events;
 
 public sealed record TrackMovedInAlbumDomainEvent(
     TrackId TrackId,
-    AlbumId? OldAlbumId,
     AlbumId NewAlbumId)
     : DomainEvent;

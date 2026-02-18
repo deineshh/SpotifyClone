@@ -4,10 +4,6 @@ namespace SpotifyClone.Catalog.Application.Errors;
 
 public static class AlbumErrors
 {
-    public static readonly Error InvalidCoverImage = new(
-        "Album.InvalidCoverImage",
-        "The specified cover image is invalid.");
-
     public static readonly Error InvalidTitle = new(
         "Album.InvalidTitle",
         "The specified title is invalid.");
@@ -19,6 +15,14 @@ public static class AlbumErrors
     public static readonly Error InvalidStatus = new(
         "Album.InvalidStatus",
         "The specified status is invalid.");
+
+    public static readonly Error InvalidCoverImage = new(
+        "Album.InvalidCoverImage",
+        "The specified cover image is invalid.");
+
+    public static readonly Error InvalidReleaseDate = new(
+        "Album.InvalidReleaseDate",
+        "The specified release date is invalid.");
 
     public static readonly Error InvalidMainArtists = new(
         "Album.InvalidMainArtists",

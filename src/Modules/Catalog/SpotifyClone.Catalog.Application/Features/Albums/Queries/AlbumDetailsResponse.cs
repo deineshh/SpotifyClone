@@ -8,7 +8,7 @@ public sealed record AlbumDetailsResponse(
     string Title,
     DateTimeOffset? ReleaseDate,
     string Status,
-    string? Type,
+    string Type,
     ImageMetadataDetailsResult? Cover,
     IEnumerable<ArtistSummaryResponse> MainArtists,
     IEnumerable<TrackSummaryResponse> Tracks);

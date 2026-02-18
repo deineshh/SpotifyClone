@@ -6,11 +6,12 @@ namespace SpotifyClone.Shared.BuildingBlocks.Application.Services;
 public static class IntegrationEventTypeRegistry
 {
     private static readonly Dictionary<string, Type> _typeMap = new Dictionary<string, Type>();
-    private static readonly Assembly _assembly = typeof(IntegrationEventTypeRegistry).Assembly;
 
     static IntegrationEventTypeRegistry()
     {
-        IEnumerable<Type> eventTypes = _assembly.GetTypes()
+        var integrationEventsAssembly = Assembly.Load("SpotifyClone.Shared.IntegrationEvents");
+
+        IEnumerable<Type> eventTypes = integrationEventsAssembly.GetTypes()
             .Where(t => t.IsSubclassOf(typeof(IntegrationEvent)) && !t.IsAbstract);
 
         foreach (Type type in eventTypes)

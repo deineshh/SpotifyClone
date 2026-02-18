@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
@@ -15,6 +16,13 @@ internal sealed class TrackEfCoreRepository(CatalogAppDbContext context)
         TrackId id,
         CancellationToken cancellationToken = default)
         => await _tracks.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+
+    public async Task<IEnumerable<Track>> GetAllByAlbumAsync(
+        AlbumId albumId,
+        CancellationToken cancellationToken = default)
+        => await _tracks
+            .Where(a => a.AlbumId == albumId)
+            .ToListAsync(cancellationToken);
 
     public async Task<IEnumerable<Track>> GetByIdsAsync(
         IEnumerable<TrackId> ids,

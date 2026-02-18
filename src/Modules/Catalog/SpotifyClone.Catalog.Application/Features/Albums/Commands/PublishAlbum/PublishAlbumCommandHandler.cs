@@ -3,7 +3,7 @@ using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
-using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
+using SpotifyClone.Catalog.Domain.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
@@ -11,10 +11,12 @@ namespace SpotifyClone.Catalog.Application.Features.Albums.Commands.PublishAlbum
 
 internal sealed class PublishAlbumCommandHandler(
     ICatalogUnitOfWork unit,
+    AlbumTrackDomainService albumTrackDomainService,
     ILogger<PublishAlbumCommandHandler> logger)
     : ICommandHandler<PublishAlbumCommand, PublishAlbumCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
+    private readonly AlbumTrackDomainService _albumTrackDomainService = albumTrackDomainService;
     private readonly ILogger<PublishAlbumCommandHandler> _logger = logger;
 
     public async Task<Result<PublishAlbumCommandResult>> Handle(
@@ -33,19 +35,11 @@ internal sealed class PublishAlbumCommandHandler(
             _logger.LogWarning(
                 "Album {Id} not found while publishing", request.AlbumId);
 
-            return Result.Failure<PublishAlbumCommandResult>(TrackErrors.NotFound);
+            return Result.Failure<PublishAlbumCommandResult>(AlbumErrors.NotFound);
         }
 
         album.Publish(request.ReleaseDate);
-
-        IEnumerable<Track> tracks = await _unit.Tracks.GetByIdsAsync(
-            album.Tracks,
-            cancellationToken);
-
-        foreach (Track track in tracks)
-        {
-            track.Publish(request.ReleaseDate);
-        }
+        _albumTrackDomainService.ReevaluateAlbumType(album);
 
         return new PublishAlbumCommandResult();
     }

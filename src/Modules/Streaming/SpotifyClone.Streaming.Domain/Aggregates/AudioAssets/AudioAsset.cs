@@ -70,12 +70,9 @@ public sealed class AudioAsset : AggregateRoot<AudioAssetId, Guid>
         RaiseDomainEvent(new AudioAssetUploadedDomainEvent(TrackId));
     }
 
-    public void UnlinkFromTrack()
-        => TrackId = null;
-
     public void MarkAsOrphaned()
     {
-        UnlinkFromTrack();
+        TrackId = null;
         Status = AudioAssetStatus.Orphaned;
     }
 

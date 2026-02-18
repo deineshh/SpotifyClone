@@ -2,6 +2,7 @@
 using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
+using SpotifyClone.Catalog.Domain.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
@@ -10,10 +11,12 @@ namespace SpotifyClone.Catalog.Application.Features.Tracks.Commands.MarkAsReadyT
 
 internal sealed class MarkTrackAsReadyToPublishCommandHandler(
     ICatalogUnitOfWork unit,
+    AlbumTrackDomainService albumTrackDomainService,
     ILogger<MarkTrackAsReadyToPublishCommandHandler> logger)
     : ICommandHandler<MarkTrackAsReadyToPublishCommand, MarkTrackAsReadyToPublishCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
+    private readonly AlbumTrackDomainService _albumTrackDomainService = albumTrackDomainService;
     private readonly ILogger<MarkTrackAsReadyToPublishCommandHandler> _logger = logger;
 
     public async Task<Result<MarkTrackAsReadyToPublishCommandResult>> Handle(

@@ -21,7 +21,7 @@ internal sealed class UnlinkAudioAssetFromTrackCommandHandler(
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
-            "Uninking Audio Asset {AudioAssetId} from Track", request.AudioAssetId);
+            "Unlinking Audio Asset {AudioAssetId} from Track", request.AudioAssetId);
 
         AudioAsset? audioAsset = await _unit.AudioAssets.GetByIdAsync(
             AudioAssetId.From(request.AudioAssetId),
@@ -36,7 +36,7 @@ internal sealed class UnlinkAudioAssetFromTrackCommandHandler(
             return Result.Failure<UnlinkAudioAssetFromTrackCommandResult>(MediaErrors.MediaAssetNotFound);
         }
 
-        audioAsset.UnlinkFromTrack();
+        audioAsset.MarkAsOrphaned();
 
         return new UnlinkAudioAssetFromTrackCommandResult();
     }

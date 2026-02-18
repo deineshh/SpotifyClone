@@ -32,13 +32,17 @@ public static class TrackErrors
         "Track.InvalidTrackStatus",
         "Track status is invalid.");
 
-    public static readonly Error AlreadyPublished = new(
-        "Track.AlreadyPublished",
-        "The track has already been published.");
+    public static readonly Error CannotMarkAsReadyToPublish = new(
+        "Track.CannotMarkAsReadyToPublish",
+        "The specified track cannot be marked as ready to publish.");
 
     public static readonly Error CannotPublish = new(
         "Track.CannotPublish",
         "The specified track cannot be published.");
+
+    public static readonly Error AlreadyPublished = new(
+        "Track.AlreadyPublished",
+        "The track has already been published.");
 
     public static readonly Error NotPublished = new(
         "Track.NotPublished",
@@ -55,6 +59,10 @@ public static class TrackErrors
     public static readonly Error AudioFileInUse = new(
         "Track.AudioFileInUse",
         "The specified audio file is already in use.");
+
+    public static readonly Error AlreadyAttachedToAnAlbum = new(
+        "Track.AlreadyAttachedToAnAlbum",
+        "The specified audio file is already attached to an album.");
 
     public static readonly Error NotFound = CommonErrors.NotFound(
         "Track", "Track");

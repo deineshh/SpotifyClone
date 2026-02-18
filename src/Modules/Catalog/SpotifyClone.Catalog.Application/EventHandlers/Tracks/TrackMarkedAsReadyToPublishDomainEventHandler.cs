@@ -7,33 +7,31 @@ using SpotifyClone.Catalog.Domain.Services;
 
 namespace SpotifyClone.Catalog.Application.EventHandlers.Tracks;
 
-internal sealed class TrackMovedInAlbumDomainEventHandler(
+internal sealed class TrackMarkedAsReadyToPublishDomainEventHandler(
     ICatalogUnitOfWork unit,
     AlbumTrackDomainService albumTrackDomainService,
-    ILogger<TrackMovedInAlbumDomainEventHandler> logger)
-    : INotificationHandler<TrackMovedInAlbumDomainEvent>
+    ILogger<TrackMarkedAsReadyToPublishDomainEventHandler> logger)
+    : INotificationHandler<TrackMarkedAsReadyToPublishDomainEvent>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
     private readonly AlbumTrackDomainService _albumTrackDomainService = albumTrackDomainService;
-    private readonly ILogger<TrackMovedInAlbumDomainEventHandler> _logger = logger;
+    private readonly ILogger<TrackMarkedAsReadyToPublishDomainEventHandler> _logger = logger;
 
     public async Task Handle(
-        TrackMovedInAlbumDomainEvent notification,
+        TrackMarkedAsReadyToPublishDomainEvent notification,
         CancellationToken cancellationToken)
     {
-        Album? album = await _unit.Albums.GetByIdAsync(notification.NewAlbumId, cancellationToken);
+        Album? album = await _unit.Albums.GetByIdAsync(notification.AlbumId, cancellationToken);
 
         if (album is null)
         {
             _logger.LogError(
-                "Album {AlbumId} not found while moving Track {TrackId} from a different album",
-                notification.NewAlbumId.Value,
-                notification.TrackId.Value);
+                "Album {AlbumId} not found while refreshing it's status",
+                notification.AlbumId.Value);
 
             return;
         }
 
-        album.AddTrack(notification.TrackId);
         _albumTrackDomainService.TryMarkAlbumAsReadyToPublish(album);
         _albumTrackDomainService.ReevaluateAlbumType(album);
 

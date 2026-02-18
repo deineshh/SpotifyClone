@@ -5,22 +5,23 @@ using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 
 namespace SpotifyClone.Catalog.Application.EventHandlers.Albums;
 
-internal sealed class AlbumDeletedDomainEventHandler(
+internal sealed class AlbumUnpublishedDomainEventHandler(
     ICatalogUnitOfWork unit)
-    : INotificationHandler<AlbumDeletedDomainEvent>
+    : INotificationHandler<AlbumUnpublishedDomainEvent>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
 
     public async Task Handle(
-        AlbumDeletedDomainEvent notification,
+        AlbumUnpublishedDomainEvent notification,
         CancellationToken cancellationToken)
     {
         IEnumerable<Track> tracks = await _unit.Tracks.GetAllByAlbumAsync(
-            notification.AlbumId, cancellationToken);
+            notification.AlbumId,
+            cancellationToken);
 
         foreach (Track track in tracks)
         {
-            track.Archive();
+            track.Unpublish();
         }
 
         await _unit.Commit(cancellationToken);

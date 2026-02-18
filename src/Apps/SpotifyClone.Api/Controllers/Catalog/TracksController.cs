@@ -2,18 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.CorrectTitle;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.Create;
-using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.PublishTrack;
-using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.RescheduleRelease;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.CorrectTitle;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Delete;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.MarkAsExplicit;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.MarkAsNotExplicit;
-using SpotifyClone.Catalog.Application.Features.Tracks.Commands.PublishTrack;
-using SpotifyClone.Catalog.Application.Features.Tracks.Commands.RescheduleRelease;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnlinkFromAudioFile;
-using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnpublishTrack;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetDetails;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -115,61 +110,6 @@ public sealed class TracksController(IMediator mediator)
         return NoContent();
     }
 
-    [EndpointSummary("Publish Track")]
-    [EndpointDescription("Publishes a Track if it's ready.")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPost("{id:guid}/publish")]
-    public async Task<ActionResult> PublishTrack(
-        [FromRoute] Guid id,
-        [FromBody] PublishTrackRequest request,
-        CancellationToken cancellationToken = default)
-    {
-        Result<PublishTrackCommandResult> result = await Mediator.Send(
-            new PublishTrackCommand(
-                id,
-                request.ReleaseDate),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return NoContent();
-    }
-
-    [EndpointSummary("Unpublish Track")]
-    [EndpointDescription("Unpublishes a Track if it's published.")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPost("{id:guid}/unpublish")]
-    public async Task<ActionResult> UnpublishTrack(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        Result<UnpublishTrackCommandResult> result = await Mediator.Send(
-            new UnpublishTrackCommand(id),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return NoContent();
-    }
-
     [EndpointSummary("Unlink Audio file")]
     [EndpointDescription("Unlinks the audio file from the Track if it's not yet published. " +
         "The Track will return to a Draft state. The audio content will be permanently deleted. " +
@@ -215,35 +155,6 @@ public sealed class TracksController(IMediator mediator)
             new CorrectTrackTitleCommand(
                 id,
                 request.Title),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return NoContent();
-    }
-
-    [EndpointSummary("Reschedule Track release")]
-    [EndpointDescription("Reschedules the track release if it's already published, but not released yet.")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPost("{id:guid}/reschedule-release")]
-    public async Task<ActionResult> RescheduleTrackRelease(
-        [FromRoute] Guid id,
-        [FromBody] RescheduleTrackReleaseRequest request,
-        CancellationToken cancellationToken = default)
-    {
-        Result<RescheduleTrackReleaseCommandResult> result = await Mediator.Send(
-            new RescheduleTrackReleaseCommand(
-                id,
-                request.ReleaseDate),
             cancellationToken);
         if (result.IsFailure)
         {

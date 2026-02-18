@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
+﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.Exceptions;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects;
@@ -38,6 +39,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         bool containsExplicitContent,
         int trackNumber,
         AlbumId albumId,
+        bool isAlbumPublished,
         IEnumerable<ArtistId> mainArtists,
         IEnumerable<ArtistId> featuredArtists,
         IEnumerable<GenreId> genres,
@@ -75,24 +77,51 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             id, title, null, null, containsExplicitContent, trackNumber, TrackStatus.Draft, null, null,
             mainArtists, featuredArtists, genres, moods);
 
-        track.MoveInAlbum(albumId);
+        track.MoveInAlbum(albumId, isAlbumPublished);
 
         return track;
     }
 
-    public void MoveInAlbum(AlbumId albumId)
+    public void MoveInAlbum(AlbumId albumId, bool isAlbumPublished)
     {
+        if (AlbumId is not null)
+        {
+            throw new TrackAlreadyAttachedToAnAlbumDomainException(
+                "This track is already attached to an album. Consider removing it from the album first.");
+        }
+
         if (AlbumId == albumId)
         {
             return;
         }
 
-        RaiseDomainEvent(new TrackMovedInAlbumDomainEvent(Id, AlbumId, albumId));
+        if (isAlbumPublished)
+        {
+            throw new AlbumAlreadyPublishedDomainException(
+                "Cannot move track into this album because the album is already published.");
+        }
+
+        RaiseDomainEvent(new TrackMovedInAlbumDomainEvent(Id, albumId));
         AlbumId = albumId;
     }
 
     public void MarkAsReadyToPublish()
-        => Status = TrackStatus.ReadyToPublish;
+    {
+        if (AlbumId is null)
+        {
+            throw new CannotMarkTrackAsReadyToPublishDomainException(
+                "Cannot mark track as ready to publish because there's no album attached to it.");
+        }
+
+        if (AudioFileId is null)
+        {
+            throw new CannotMarkTrackAsReadyToPublishDomainException(
+                "Cannot mark track as ready to publish because there's no audio file linked to it.");
+        }
+
+        Status = TrackStatus.ReadyToPublish;
+        RaiseDomainEvent(new TrackMarkedAsReadyToPublishDomainEvent(AlbumId));
+    }
 
     public void LinkAudioFile(AudioFileId audioFileId, TimeSpan duration)
     {
@@ -123,7 +152,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             throw new TrackAlreadyPublishedDomainException("Cannot unlink published track from it's audio file.");
         }
 
-        RaiseDomainEvent(new TrackUnlinkedFromAudioFileDomainEvent(AudioFileId));
+        RaiseDomainEvent(new TrackUnlinkedFromAudioFileDomainEvent(AlbumId, AudioFileId));
 
         AudioFileId = null;
         Status = TrackStatus.Draft;
@@ -147,11 +176,6 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             throw new CannotPublishTrackDomainException("This track is not ready to publish.");
         }
 
-        if (AudioFileId is null)
-        {
-            throw new CannotPublishTrackDomainException("Cannot publish track while audio file is not linked.");
-        }
-
         if (releaseDate < DateTimeOffset.UtcNow.AddMinutes(-1))
         {
             throw new InvalidTrackReleaseDateDomainException("Track release date cannot be in the past.");
@@ -165,7 +189,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         if (!Status.IsPublished)
         {
-            throw new TrackNotPublishedDomainException("Cannot unpublish track which is not published.");
+            return;
         }
 
         ReleaseDate = null;
@@ -181,7 +205,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
         if (AudioFileId is not null)
         {
-            RaiseDomainEvent(new TrackDeletedDomainEvent(AudioFileId));
+            RaiseDomainEvent(new TrackDeletedDomainEvent(Id, AlbumId, AudioFileId));
         }
     }
 
@@ -192,29 +216,8 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             return;
         }
 
-        ArgumentException.ThrowIfNullOrWhiteSpace(title);
         TrackTitleRules.Validate(title);
         Title = title;
-    }
-
-    public void RescheduleRelease(DateTimeOffset releaseDate)
-    {
-        if (releaseDate == ReleaseDate)
-        {
-            return;
-        }
-
-        if (!Status.IsPublished)
-        {
-            throw new TrackNotPublishedDomainException("Release date cannot be set before publishing the track.");
-        }
-
-        if (DateTimeOffset.UtcNow >= ReleaseDate)
-        {
-            throw new TrackAlreadyReleasedDomainException("Cannot reschedule a release of a released track.");
-        }
-
-        ReleaseDate = releaseDate.ToUniversalTime();
     }
 
     public void MoveToPosition(int trackNumber)

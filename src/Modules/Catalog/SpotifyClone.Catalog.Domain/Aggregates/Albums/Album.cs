@@ -18,7 +18,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     public string Title { get; private set; } = null!;
     public DateTimeOffset? ReleaseDate { get; private set; }
     public AlbumStatus Status { get; private set; } = null!;
-    public AlbumType? Type { get; private set; }
+    public AlbumType Type { get; private set; } = null!;
     public AlbumCoverImage? Cover { get; private set; }
     public IReadOnlySet<ArtistId> MainArtists => _mainArtists.AsReadOnly();
     public IReadOnlySet<TrackId> Tracks => _tracks.Select(x => x.TrackId).ToHashSet();
@@ -37,7 +37,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
                 "An album must have at least one main artist.");
         }
 
-        return new Album(id, title, null, AlbumStatus.Draft, null, null, mainArtists);
+        return new Album(id, title, null, AlbumStatus.Draft, AlbumType.Empty, null, mainArtists);
     }
 
     public void AttachCover(AlbumCoverImage cover)
@@ -52,7 +52,6 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         }
 
         Cover = cover;
-        TryMarkAsReadyToPublish();
     }
 
     public void UnattachCover()
@@ -83,10 +82,15 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new CannotPublishAlbumDomainException("Album is not ready to publish.");
         }
 
+        if (releaseDate < DateTimeOffset.UtcNow.AddMinutes(-1))
+        {
+            throw new InvalidAlbumReleaseDateDomainException("Album release date cannot be in the past.");
+        }
+
         ReleaseDate = releaseDate.ToUniversalTime();
         Status = AlbumStatus.Published;
 
-        RaiseDomainEvent(new AlbumPublishedDomainEvent(Id, releaseDate));
+        RaiseDomainEvent(new AlbumPublishedDomainEvent(Id, Tracks, releaseDate));
     }
 
     public void Unpublish()
@@ -96,12 +100,9 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new AlbumNotPublishedDomainException("Cannot unpublish album which is not published.");
         }
 
-        if (!TryMarkAsReadyToPublish())
-        {
-            Status = AlbumStatus.Draft;
-        }
-
         ReleaseDate = null;
+
+        RaiseDomainEvent(new AlbumUnpublishedDomainEvent(Id));
     }
 
     public void AddMainArtist(ArtistId artistId)
@@ -149,17 +150,14 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     public void AddTrack(TrackId trackId)
     {
         ArgumentNullException.ThrowIfNull(trackId);
-
+        
         if (Status.IsPublished)
         {
             throw new AlbumAlreadyPublishedDomainException("Cannot add track to a published album.");
         }
-
+        
         var track = new AlbumTrack(trackId);
         _tracks.Add(track);
-
-        Type = AlbumType.From(_tracks.Count);
-        TryMarkAsReadyToPublish();
     }
 
     public void RemoveTrack(TrackId trackId)
@@ -170,15 +168,13 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         {
             throw new AlbumAlreadyPublishedDomainException("Cannot remove track from a published album.");
         }
-
+        
         AlbumTrack? track = _tracks.FirstOrDefault(t => t.TrackId == trackId);
         if (track is null && !_tracks.Remove(track!))
         {
             throw new TrackNotFoundInAlbumDomainException(
                 $"Cannot remove track '{trackId.Value}' from the album, because it was not found in the album.");
         }
-        
-        Type = AlbumType.From(_tracks.Count);
     }
 
     public void ChangeTitle(string newTitle)
@@ -206,14 +202,16 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
 
         if (_tracks.Count > 0)
         {
-            RaiseDomainEvent(new AlbumDeletedDomainEvent(_tracks.Select(t => t.TrackId)));
+            RaiseDomainEvent(new AlbumDeletedDomainEvent(Id));
         }
     }
 
-    private bool TryMarkAsReadyToPublish()
+    internal void MarkAsDraft()
+        => Status = AlbumStatus.Draft;
+
+    internal bool TryMarkAsReadyToPublish()
     {
-        if (Cover is null ||
-            _tracks.Count <= 0)
+        if (Cover is null)
         {
             return false;
         }
@@ -222,8 +220,11 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         return true;
     }
 
+    internal void ReevaluateType(int playableTrackCount)
+        => Type = AlbumType.From(playableTrackCount);
+
     private Album(
-        AlbumId id, string title, DateTimeOffset? releaseDate, AlbumStatus status, AlbumType? type,
+        AlbumId id, string title, DateTimeOffset? releaseDate, AlbumStatus status, AlbumType type,
         AlbumCoverImage? cover, IEnumerable<ArtistId> mainArtists)
         : base(id)
     {

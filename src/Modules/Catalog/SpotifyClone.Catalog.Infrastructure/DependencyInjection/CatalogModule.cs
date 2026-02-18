@@ -17,6 +17,7 @@ using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres;
 using SpotifyClone.Catalog.Domain.Aggregates.Moods;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
+using SpotifyClone.Catalog.Domain.Services;
 using SpotifyClone.Catalog.Infrastructure.Persistence;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Queries;
@@ -51,6 +52,7 @@ public static class CatalogModule
         services.AddScoped<IMoodRepository, MoodEfCoreRepository>();
         services.AddScoped<IOutboxRepository, OutboxEfCoreRepository>();
 
+        services.AddScoped<AlbumTrackDomainService>();
         services.AddScoped<ITrackReadService, TrackEfCoreReadService>();
         services.AddScoped<IAlbumReadService, AlbumEfCoreReadService>();
         services.AddScoped<IArtistReadService, ArtistEfCoreReadService>();

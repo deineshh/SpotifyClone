@@ -6,5 +6,5 @@ public sealed record AlbumSummaryResponse(
     string Title,
     DateTimeOffset? ReleaseDate,
     string Status,
-    string? Type,
+    string Type,
     ImageMetadataDetailsResult Cover);
