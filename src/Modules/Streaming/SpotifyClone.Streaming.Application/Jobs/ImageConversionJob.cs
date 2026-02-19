@@ -96,7 +96,7 @@ public sealed class ImageConversionJob(
             ImageFileType.From(metadata.FileType),
             metadata.SizeInBytes));
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
 
         _logger.LogInformation("Job finished successfully for {ImageId}", imageId);
     }

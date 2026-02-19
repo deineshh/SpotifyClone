@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.Create;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.PublishAlbum;
 using SpotifyClone.Api.Mappers;
+using SpotifyClone.Catalog.Application.Features.Albums.Commands.AddTrack;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.Create;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.Delete;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.PublishAlbum;
+using SpotifyClone.Catalog.Application.Features.Albums.Commands.RemoveTrack;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.UnpublishAlbum;
 using SpotifyClone.Catalog.Application.Features.Albums.Queries;
 using SpotifyClone.Catalog.Application.Features.Albums.Queries.GetDetails;
@@ -144,6 +146,60 @@ public sealed class AlbumsController(IMediator mediator)
     {
         Result<UnpublishAlbumCommandResult> result = await Mediator.Send(
             new UnpublishAlbumCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Add Track to Album")]
+    [EndpointDescription("Adds a new Track to an Album if the Track is not yet attached to a different album.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPost("{id:guid}/tracks/{trackId:guid}")]
+    public async Task<ActionResult> AddTrackToAlbum(
+        [FromRoute] Guid id,
+        [FromRoute] Guid trackId,
+        CancellationToken cancellationToken = default)
+    {
+        Result<AddTrackToAlbumCommandResult> result = await Mediator.Send(
+            new AddTrackToAlbumCommand(id, trackId),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Remove Track from Album")]
+    [EndpointDescription("Removes an existing Track from an Album and archive the removed Track.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("{id:guid}/tracks/{trackId:guid}")]
+    public async Task<ActionResult> RemoveTrackFromAlbum(
+        [FromRoute] Guid id,
+        [FromRoute] Guid trackId,
+        CancellationToken cancellationToken = default)
+    {
+        Result<RemoveTrackFromAlbumCommandResult> result = await Mediator.Send(
+            new RemoveTrackFromAlbumCommand(id, trackId),
             cancellationToken);
         if (result.IsFailure)
         {

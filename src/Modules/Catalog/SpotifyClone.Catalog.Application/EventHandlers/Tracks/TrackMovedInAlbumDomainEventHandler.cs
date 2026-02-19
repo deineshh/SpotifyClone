@@ -37,6 +37,6 @@ internal sealed class TrackMovedInAlbumDomainEventHandler(
         _albumTrackDomainService.TryMarkAlbumAsReadyToPublish(album);
         _albumTrackDomainService.ReevaluateAlbumType(album);
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
     }
 }

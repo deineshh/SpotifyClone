@@ -47,6 +47,6 @@ internal sealed class TrackUnlinkedFromAudioFileDomainEventHandler(
         var message = OutboxMessage.FromIntegrationEvent(integrationEvent);
 
         await _unit.OutboxMessages.AddAsync(message, cancellationToken);
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
     }
 }

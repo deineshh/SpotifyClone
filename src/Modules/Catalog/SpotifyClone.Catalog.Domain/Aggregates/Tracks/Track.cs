@@ -84,15 +84,16 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
     public void MoveInAlbum(AlbumId albumId, bool isAlbumPublished)
     {
+        if (AlbumId == albumId)
+        {
+            // Prevent circular domain event raising
+            return;
+        }
+
         if (AlbumId is not null)
         {
             throw new TrackAlreadyAttachedToAnAlbumDomainException(
                 "This track is already attached to an album. Consider removing it from the album first.");
-        }
-
-        if (AlbumId == albumId)
-        {
-            return;
         }
 
         if (isAlbumPublished)

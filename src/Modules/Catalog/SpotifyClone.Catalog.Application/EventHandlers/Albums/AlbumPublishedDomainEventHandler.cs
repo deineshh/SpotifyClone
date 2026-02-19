@@ -36,6 +36,6 @@ internal sealed class AlbumPublishedDomainEventHandler(
             track.Publish(notification.ReleaseDate);
         }
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
     }
 }

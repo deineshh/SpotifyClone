@@ -62,7 +62,7 @@ public static class TrackErrors
 
     public static readonly Error AlreadyAttachedToAnAlbum = new(
         "Track.AlreadyAttachedToAnAlbum",
-        "The specified audio file is already attached to an album.");
+        "The specified track is already attached to an album.");
 
     public static readonly Error NotFound = CommonErrors.NotFound(
         "Track", "Track");

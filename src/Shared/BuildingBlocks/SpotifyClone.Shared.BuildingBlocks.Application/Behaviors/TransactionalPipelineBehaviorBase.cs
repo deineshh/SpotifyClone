@@ -40,7 +40,7 @@ public abstract class TransactionalPipelineBehaviorBase<TRequest, TResponse>(
             return response;
         }
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
 
         _logger.LogInformation("Committed transaction for {RequestType}", typeof(TRequest).Name);
 

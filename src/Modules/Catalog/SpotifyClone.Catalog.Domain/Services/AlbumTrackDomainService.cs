@@ -10,7 +10,7 @@ public sealed class AlbumTrackDomainService(ITrackRepository tracks)
 
     public bool TryMarkAlbumAsReadyToPublish(Album album)
     {
-        IEnumerable<Track> tracksInAlbum = _tracks.GetAllByAlbumAsync(album.Id).Result;
+        IEnumerable<Track> tracksInAlbum = _tracks.GetByIdsAsync(album.Tracks).Result;
 
         int trackCount = tracksInAlbum.Count(t =>
             t.Status == TrackStatus.ReadyToPublish ||
@@ -27,7 +27,7 @@ public sealed class AlbumTrackDomainService(ITrackRepository tracks)
 
     public void ReevaluateAlbumType(Album album)
     {
-        IEnumerable<Track> tracksInAlbum = _tracks.GetAllByAlbumAsync(album.Id).Result;
+        IEnumerable<Track> tracksInAlbum = _tracks.GetByIdsAsync(album.Tracks).Result;
 
         int trackCount = tracksInAlbum.Count(t =>
             t.Status == TrackStatus.ReadyToPublish ||

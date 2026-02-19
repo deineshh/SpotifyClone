@@ -24,6 +24,6 @@ internal sealed class AlbumUnpublishedDomainEventHandler(
             track.Unpublish();
         }
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
     }
 }

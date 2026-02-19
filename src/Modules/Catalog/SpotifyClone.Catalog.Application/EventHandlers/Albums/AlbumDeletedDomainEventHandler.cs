@@ -23,6 +23,6 @@ internal sealed class AlbumDeletedDomainEventHandler(
             track.Archive();
         }
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
     }
 }

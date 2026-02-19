@@ -14,7 +14,7 @@ public abstract class EfCoreUnitOfWorkBase<TDbContext>(
     protected TDbContext DbContext { get; } = dbContext;
     protected IPublisher Publisher { get; } = publisher;
 
-    public virtual async Task<int> Commit(CancellationToken cancellationToken = default)
+    public virtual async Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
         var domainEvents = DbContext.ChangeTracker
         .Entries<IHasDomainEvents>()

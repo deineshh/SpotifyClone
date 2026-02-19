@@ -57,7 +57,7 @@ public sealed class ProcessOutboxMessagesJob(
             }
         }
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
         
         await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }

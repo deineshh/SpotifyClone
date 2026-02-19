@@ -30,7 +30,7 @@ public sealed class AudioAssetCleanupJob(
             await _unit.AudioAssets.DeleteAsync(audioAsset, cancellationToken);
         }
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
 
         _logger.LogInformation(
             "Finished background job {Job} successfully",

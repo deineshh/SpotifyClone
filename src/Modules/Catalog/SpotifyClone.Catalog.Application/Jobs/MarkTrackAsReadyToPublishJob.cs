@@ -28,6 +28,6 @@ public sealed class MarkTrackAsReadyToPublishJob(
                 $"MarkTrackAsReadyToPublishJob failed for Track {trackId}. Errors:\n{errorMessage}");
         }
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
     }
 }

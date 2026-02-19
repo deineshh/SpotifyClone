@@ -35,6 +35,6 @@ internal sealed class UnlinkAudioAssetFromTrackJob(
                 $"UnlinkAudioAssetFromTrackJob failed for Audio Asset {audioAssetId}. Errors:\n{errors}");
         }
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
     }
 }

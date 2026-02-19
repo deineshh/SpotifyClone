@@ -43,6 +43,6 @@ public sealed class LinkTrackToAudioFileJob(
                 $"LinkTrackToAudioFileJob failed for Track {trackId}. Errors:\n{errors}");
         }
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
     }
 }

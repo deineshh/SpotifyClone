@@ -1,5 +1,4 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities;
-using SpotifyClone.Catalog.Domain.Aggregates.Albums.Enums;
+﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Events;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Exceptions;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Rules;
@@ -150,14 +149,20 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     public void AddTrack(TrackId trackId)
     {
         ArgumentNullException.ThrowIfNull(trackId);
-        
+
         if (Status.IsPublished)
         {
             throw new AlbumAlreadyPublishedDomainException("Cannot add track to a published album.");
         }
-        
+
         var track = new AlbumTrack(trackId);
-        _tracks.Add(track);
+        if (!_tracks.Add(track))
+        {
+            // Prevent circular domain event raising
+            return;
+        }
+
+        RaiseDomainEvent(new TrackAddedToAlbumDomainEvent(Id, trackId));
     }
 
     public void RemoveTrack(TrackId trackId)
@@ -170,11 +175,13 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         }
         
         AlbumTrack? track = _tracks.FirstOrDefault(t => t.TrackId == trackId);
-        if (track is null && !_tracks.Remove(track!))
+        if (track is null || !_tracks.Remove(track!))
         {
             throw new TrackNotFoundInAlbumDomainException(
                 $"Cannot remove track '{trackId.Value}' from the album, because it was not found in the album.");
         }
+
+        RaiseDomainEvent(new TrackRemovedFromAlbumDomainEvent(Id, trackId));
     }
 
     public void ChangeTitle(string newTitle)

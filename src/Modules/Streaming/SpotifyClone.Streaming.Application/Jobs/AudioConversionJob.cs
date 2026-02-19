@@ -105,7 +105,7 @@ public sealed class AudioConversionJob(
             AudioFormat.From(metadata.Format),
             metadata.SizeInBytes);
 
-        await _unit.Commit(cancellationToken);
+        await _unit.CommitAsync(cancellationToken);
 
         _logger.LogInformation("Job finished successfully for {AudioId}", audioId);
     }
