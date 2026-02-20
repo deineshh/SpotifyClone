@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
-using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Shared.BuildingBlocks.Application.Behaviors;

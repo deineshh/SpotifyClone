@@ -41,7 +41,7 @@ internal sealed class TrackAddedToAlbumDomainEventHandler(
             return;
         }
 
-        track.MoveInAlbum(album.Id, album.Status.IsPublished);
+        track.MoveToAlbum(album.Id, album.Status.IsPublished);
 
         await _unit.CommitAsync(cancellationToken);
     }

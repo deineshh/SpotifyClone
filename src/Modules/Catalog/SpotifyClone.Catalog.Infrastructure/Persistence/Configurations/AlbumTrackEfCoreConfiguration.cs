@@ -15,12 +15,18 @@ internal sealed class AlbumTrackEfCoreConfiguration : IEntityTypeConfiguration<A
         builder.Property<AlbumId>("album_id")
             .HasConversion(CatalogEfCoreValueConverters.AlbumIdConverter);
 
-        builder.HasKey("album_id", nameof(AlbumTrack.TrackId));
-
-        builder.Property(x => x.TrackId)
+        builder.Property(x => x.Id)
             .HasColumnName("track_id")
             .HasConversion(CatalogEfCoreValueConverters.TrackIdConverter)
             .IsRequired();
+
+        builder.HasKey("album_id", nameof(AlbumTrack.Id));
+
+        builder.Property(x => x.Position)
+            .HasColumnName("position")
+            .IsRequired();
+        builder.HasIndex("album_id", nameof(AlbumTrack.Position))
+            .IsUnique();
 
         builder.HasOne<Album>()
             .WithMany("_tracks")

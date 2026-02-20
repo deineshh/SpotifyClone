@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
@@ -11,9 +12,11 @@ using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
 namespace SpotifyClone.Catalog.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CatalogAppDbContext))]
-    partial class CatalogAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260219110947_Catalog_Replace_Track_TrackNumber_With_AlbumTrack_Position_Property")]
+    partial class Catalog_Replace_Track_TrackNumber_With_AlbumTrack_Position_Property
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

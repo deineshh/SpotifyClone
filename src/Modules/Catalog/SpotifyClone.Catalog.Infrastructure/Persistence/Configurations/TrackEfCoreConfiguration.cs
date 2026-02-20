@@ -35,10 +35,6 @@ internal sealed class TrackEfCoreConfiguration : IEntityTypeConfiguration<Track>
             .HasColumnName("contains_explicit_content")
             .IsRequired();
 
-        builder.Property(x => x.TrackNumber)
-            .HasColumnName("track_number")
-            .IsRequired();
-
         builder.Property(x => x.Status)
             .HasColumnName("status")
             .HasConversion(CatalogEfCoreValueConverters.TrackStatusConverter)

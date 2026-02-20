@@ -34,7 +34,6 @@ public sealed class TracksController(IMediator mediator)
             new CreateTrackCommand(
                 request.Title,
                 request.ContainsExplicitContent,
-                request.TrackNumber,
                 request.AlbumId,
                 request.MainArtists,
                 request.FeaturedArtists,

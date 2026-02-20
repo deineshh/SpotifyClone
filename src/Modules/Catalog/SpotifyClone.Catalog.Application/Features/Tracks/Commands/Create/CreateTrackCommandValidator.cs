@@ -14,9 +14,6 @@ public sealed class CreateTrackCommandValidator
         RuleFor(x => x.ContainsExplicitContent)
             .NotNull().WithMessage("Explicit content flag is required.");
 
-        RuleFor(x => x.TrackNumber)
-            .NotNull().WithMessage("Track number is required.");
-
         RuleFor(x => x.AlbumId)
             .NotNull().WithMessage("Album ID is required.")
             .NotEqual(Guid.Empty).WithMessage("Album ID is required.");

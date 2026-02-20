@@ -35,7 +35,6 @@ internal sealed class CreateTrackCommandHandler(
             trackId,
             request.Title,
             request.ContainsExplicitContent,
-            request.TrackNumber,
             album.Id,
             album.Status.IsPublished,
             request.MainArtists.Select(a => ArtistId.From(a)),

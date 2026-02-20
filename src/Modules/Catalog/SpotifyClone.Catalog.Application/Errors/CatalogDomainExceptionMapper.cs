@@ -39,6 +39,7 @@ public sealed class CatalogDomainExceptionMapper : IDomainExceptionMapper
             InvalidAlbumReleaseDateDomainException => AlbumErrors.InvalidReleaseDate,
             InvalidAlbumMainArtistsDomainException => AlbumErrors.InvalidMainArtists,
             InvalidAlbumTracksDomainException => AlbumErrors.InvalidTracks,
+            InvalidAlbumTrackOrderDomainException => AlbumErrors.InvalidTrackOrder,
             AlbumAlreadyHaveACoverDomainException => AlbumErrors.AlreadyHaveACover,
             AlbumAlreadyPublishedDomainException => AlbumErrors.AlreadyPublished,
             CannotPublishAlbumDomainException => AlbumErrors.CannotPublish,

@@ -24,7 +24,6 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     public TimeSpan? Duration { get; private set; }
     public DateTimeOffset? ReleaseDate { get; private set; }
     public bool ContainsExplicitContent { get; private set; }
-    public int TrackNumber { get; private set; }
     public TrackStatus Status { get; private set; } = null!;
     public AudioFileId? AudioFileId { get; private set; }
     public AlbumId? AlbumId { get; private set; }
@@ -37,7 +36,6 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         TrackId id,
         string title,
         bool containsExplicitContent,
-        int trackNumber,
         AlbumId albumId,
         bool isAlbumPublished,
         IEnumerable<ArtistId> mainArtists,
@@ -46,7 +44,6 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         IEnumerable<MoodId> moods)
     {
         ArgumentNullException.ThrowIfNull(id);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(trackNumber);
         ArgumentNullException.ThrowIfNull(albumId);
         ArgumentNullException.ThrowIfNull(mainArtists);
         ArgumentNullException.ThrowIfNull(featuredArtists);
@@ -74,15 +71,15 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         }
 
         var track = new Track(
-            id, title, null, null, containsExplicitContent, trackNumber, TrackStatus.Draft, null, null,
+            id, title, null, null, containsExplicitContent, TrackStatus.Draft, null, null,
             mainArtists, featuredArtists, genres, moods);
 
-        track.MoveInAlbum(albumId, isAlbumPublished);
+        track.MoveToAlbum(albumId, isAlbumPublished);
 
         return track;
     }
 
-    public void MoveInAlbum(AlbumId albumId, bool isAlbumPublished)
+    public void MoveToAlbum(AlbumId albumId, bool isAlbumPublished)
     {
         if (AlbumId == albumId)
         {
@@ -219,17 +216,6 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
         TrackTitleRules.Validate(title);
         Title = title;
-    }
-
-    public void MoveToPosition(int trackNumber)
-    {
-        if (trackNumber == TrackNumber)
-        {
-            return;
-        }
-
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(trackNumber);
-        TrackNumber = trackNumber;
     }
     public void MarkAsExplicit()
         => ContainsExplicitContent = true;
@@ -370,7 +356,6 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         TimeSpan? duration,
         DateTimeOffset? releaseDate,
         bool containsExplicitContent,
-        int trackNumber,
         TrackStatus status,
         AudioFileId? audioFileId,
         AlbumId? albumId,
@@ -384,7 +369,6 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         Duration = duration;
         ReleaseDate = releaseDate;
         ContainsExplicitContent = containsExplicitContent;
-        TrackNumber = trackNumber;
         Status = status;
         AudioFileId = audioFileId;
         AlbumId = albumId;

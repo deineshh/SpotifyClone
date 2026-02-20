@@ -11,6 +11,8 @@ namespace SpotifyClone.Catalog.Domain.Aggregates.Albums;
 
 public sealed class Album : AggregateRoot<AlbumId, Guid>
 {
+    private const int PositionStep = 1000;
+
     private readonly HashSet<ArtistId> _mainArtists = [];
     private readonly HashSet<AlbumTrack> _tracks = new();
 
@@ -20,7 +22,10 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     public AlbumType Type { get; private set; } = null!;
     public AlbumCoverImage? Cover { get; private set; }
     public IReadOnlySet<ArtistId> MainArtists => _mainArtists.AsReadOnly();
-    public IReadOnlySet<TrackId> Tracks => _tracks.Select(x => x.TrackId).ToHashSet();
+    public IReadOnlySet<TrackId> Tracks => _tracks
+                                           .OrderBy(t => t.Position)
+                                           .Select(t => t.Id)
+                                           .ToHashSet();
 
     public static Album Create(AlbumId id, string title, IEnumerable<ArtistId> mainArtists)
     {
@@ -155,7 +160,12 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new AlbumAlreadyPublishedDomainException("Cannot add track to a published album.");
         }
 
-        var track = new AlbumTrack(trackId);
+        int nextPosition = _tracks.Count != 0
+            ? _tracks.Max(t => t.Position) + PositionStep
+            : PositionStep;
+
+        var track = new AlbumTrack(trackId, nextPosition);
+
         if (!_tracks.Add(track))
         {
             // Prevent circular domain event raising
@@ -174,7 +184,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new AlbumAlreadyPublishedDomainException("Cannot remove track from a published album.");
         }
         
-        AlbumTrack? track = _tracks.FirstOrDefault(t => t.TrackId == trackId);
+        AlbumTrack? track = _tracks.FirstOrDefault(t => t.Id == trackId);
         if (track is null || !_tracks.Remove(track!))
         {
             throw new TrackNotFoundInAlbumDomainException(
@@ -184,15 +194,89 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         RaiseDomainEvent(new TrackRemovedFromAlbumDomainEvent(Id, trackId));
     }
 
-    public void ChangeTitle(string newTitle)
+    public void MoveTrack(TrackId trackId, int targetIndex)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(newTitle);
-        AlbumTitleRules.Validate(newTitle);
-        Title = newTitle;
+        if (Status.IsPublished)
+        {
+            throw new AlbumAlreadyPublishedDomainException(
+                "Cannot move track to a new position in a published album.");
+        }
+
+        AlbumTrack trackToMove = _tracks.SingleOrDefault(t => t.Id == trackId)
+            ?? throw new TrackNotFoundInAlbumDomainException(trackId.Value.ToString());
+
+        // 1. Get current sorted list to identify neighbors
+        var sortedTracks = _tracks.OrderBy(t => t.Position).ToList();
+        sortedTracks.Remove(trackToMove); // Remove it from current spot to simulate the "gap"
+
+        // Clamp the index to ensure it's within bounds
+        targetIndex = Math.Clamp(targetIndex, 0, sortedTracks.Count);
+
+        int newPosition;
+
+        // 2. Calculate Midpoint
+        if (targetIndex == 0)
+        {
+            // Moving to the very top
+            int firstPos = sortedTracks.Count > 0 ? sortedTracks[0].Position : PositionStep;
+            newPosition = firstPos / 2;
+        }
+        else if (targetIndex >= sortedTracks.Count)
+        {
+            // Moving to the very bottom
+            int lastPos = sortedTracks[^1].Position;
+            newPosition = lastPos + PositionStep;
+        }
+        else
+        {
+            // Moving between two tracks
+            int prevPos = sortedTracks[targetIndex - 1].Position;
+            int nextPos = sortedTracks[targetIndex].Position;
+            newPosition = (prevPos + nextPos) / 2;
+
+            // 3. Collision Detection (The "Rebalance" Trigger)
+            if (newPosition == prevPos || newPosition == nextPos)
+            {
+                RebalanceTrackPositions();
+                // Recurse once after rebalancing to find the new midpoint in a fresh 1000-step list
+                MoveTrack(trackId, targetIndex);
+                return;
+            }
+        }
+
+        trackToMove.ChangePosition(newPosition);
     }
 
-    public void ChangeReleaseDate(DateTimeOffset newReleaseDate)
-        => ReleaseDate = newReleaseDate;
+    private void RebalanceTrackPositions()
+    {
+        var sorted = _tracks.OrderBy(t => t.Position).ToList();
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            sorted[i].ChangePosition((i + 1) * PositionStep);
+        }
+    }
+
+    public void CorrectTitle(string title)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        AlbumTitleRules.Validate(title);
+        Title = title;
+    }
+
+    public void RescheduleRelease(DateTimeOffset releaseDate)
+    {
+        if (Status.IsPublished)
+        {
+            throw new AlbumAlreadyPublishedDomainException("Cannot reschedule release of a published album.");
+        }
+
+        if (releaseDate < DateTimeOffset.UtcNow.AddMinutes(-1))
+        {
+            throw new InvalidAlbumReleaseDateDomainException("Album release date cannot be in the past.");
+        }
+
+        ReleaseDate = releaseDate;
+    }
 
     public void ChangeCover(AlbumCoverImage newCover)
     {

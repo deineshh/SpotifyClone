@@ -1,11 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.Create;
+using SpotifyClone.Api.Contracts.v1.Catalog.Albums.MoveTrack;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.PublishAlbum;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.AddTrack;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.Create;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.Delete;
+using SpotifyClone.Catalog.Application.Features.Albums.Commands.MoveTrack;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.PublishAlbum;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.RemoveTrack;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.UnpublishAlbum;
@@ -200,6 +202,35 @@ public sealed class AlbumsController(IMediator mediator)
     {
         Result<RemoveTrackFromAlbumCommandResult> result = await Mediator.Send(
             new RemoveTrackFromAlbumCommand(id, trackId),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Move Track in Album")]
+    [EndpointDescription("Move an existing Track in an Album.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPut("{id:guid}/tracks/{trackId:guid}/move")]
+    public async Task<ActionResult> MoveTrackInAlbum(
+        [FromRoute] Guid id,
+        [FromRoute] Guid trackId,
+        [FromBody] MoveTrackInAlbumRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<MoveTrackInAlbumCommandResult> result = await Mediator.Send(
+            new MoveTrackInAlbumCommand(
+                id, trackId, request.TargetPositionIndex),
             cancellationToken);
         if (result.IsFailure)
         {

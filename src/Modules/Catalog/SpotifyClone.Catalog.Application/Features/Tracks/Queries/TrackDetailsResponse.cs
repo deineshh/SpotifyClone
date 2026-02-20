@@ -9,7 +9,6 @@ public sealed record TrackDetailsResponse(
     TimeSpan? Duration,
     DateTimeOffset? ReleaseDate,
     bool ContainsExplicitContent,
-    int TrackNumber,
     string Status,
     Guid? AudioFileId,
     Guid? AlbumId,

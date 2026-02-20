@@ -3,14 +3,25 @@ using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 
-public sealed record AlbumTrack : ValueObject
+public sealed class AlbumTrack : Entity<TrackId, Guid>
 {
-    public TrackId TrackId { get; private set; } = null!;
+    public int Position { get; private set; }
+
+    internal AlbumTrack(TrackId trackId, int position)
+        : base(trackId)
+        => Position = position;
+
+    internal void ChangePosition(int newPosition)
+    {
+        if (newPosition == Position)
+        {
+            return;
+        }
+
+        Position = newPosition;
+    }
 
     private AlbumTrack()
     {
     }
-
-    internal AlbumTrack(TrackId trackId)
-        => TrackId = trackId;
 }

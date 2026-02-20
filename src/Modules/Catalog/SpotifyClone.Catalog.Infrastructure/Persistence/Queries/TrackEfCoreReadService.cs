@@ -25,7 +25,6 @@ internal sealed class TrackEfCoreReadService(
             t.Duration,
             t.ReleaseDate,
             t.ContainsExplicitContent,
-            t.TrackNumber,
             t.Status.Value,
             t.AudioFileId == null ? null : t.AudioFileId.Value,
             t.AlbumId == null ? null : t.AlbumId.Value,
