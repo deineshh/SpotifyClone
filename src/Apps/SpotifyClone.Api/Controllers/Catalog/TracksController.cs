@@ -144,7 +144,7 @@ public sealed class TracksController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPost("{id:guid}/correct-title")]
+    [HttpPatch("{id:guid}/title")]
     public async Task<ActionResult> CorrectTrackTitle(
         [FromRoute] Guid id,
         [FromBody] CorrectTrackTitleRequest request,
@@ -173,7 +173,7 @@ public sealed class TracksController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPost("{id:guid}/explicit")]
+    [HttpPatch("{id:guid}/explicit")]
     public async Task<ActionResult> MarkTrackAsExplicit(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)

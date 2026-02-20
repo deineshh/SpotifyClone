@@ -265,9 +265,15 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
 
     public void RescheduleRelease(DateTimeOffset releaseDate)
     {
-        if (Status.IsPublished)
+        if (!Status.IsPublished)
         {
-            throw new AlbumAlreadyPublishedDomainException("Cannot reschedule release of a published album.");
+            throw new AlbumNotPublishedDomainException("Cannot reschedule the release of an unpublished album.");
+        }
+
+        if (ReleaseDate <= DateTimeOffset.UtcNow)
+        {
+            throw new InvalidAlbumReleaseDateDomainException(
+                "Cannot reschedule the release of an album that has been already released.");
         }
 
         if (releaseDate < DateTimeOffset.UtcNow.AddMinutes(-1))
@@ -275,7 +281,8 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new InvalidAlbumReleaseDateDomainException("Album release date cannot be in the past.");
         }
 
-        ReleaseDate = releaseDate;
+        ReleaseDate = releaseDate.ToUniversalTime();
+        RaiseDomainEvent(new AlbumReleaseRescheduledDomainEvent(Id, releaseDate));
     }
 
     public void ChangeCover(AlbumCoverImage newCover)

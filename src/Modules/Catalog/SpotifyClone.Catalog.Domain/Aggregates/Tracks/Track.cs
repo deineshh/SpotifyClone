@@ -200,7 +200,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         {
             throw new TrackAlreadyPublishedDomainException("Cannot delete a published track.");
         }
-
+        
         if (AudioFileId is not null)
         {
             RaiseDomainEvent(new TrackDeletedDomainEvent(Id, AlbumId, AudioFileId));
@@ -213,10 +213,32 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         {
             return;
         }
-
+        
         TrackTitleRules.Validate(title);
         Title = title;
     }
+
+    public void RescheduleRelease(DateTimeOffset releaseDate)
+    {
+        if (!Status.IsPublished)
+        {
+            throw new TrackNotPublishedDomainException("Cannot reschedule the release of an unpublished track.");
+        }
+
+        if (ReleaseDate <= DateTimeOffset.UtcNow)
+        {
+            throw new InvalidTrackReleaseDateDomainException(
+                "Cannot reschedule the release of a track that has been already released.");
+        }
+
+        if (releaseDate < DateTimeOffset.UtcNow.AddMinutes(-1))
+        {
+            throw new InvalidTrackReleaseDateDomainException("Track release date cannot be in the past.");
+        }
+
+        ReleaseDate = releaseDate.ToUniversalTime();
+    }
+
     public void MarkAsExplicit()
         => ContainsExplicitContent = true;
 

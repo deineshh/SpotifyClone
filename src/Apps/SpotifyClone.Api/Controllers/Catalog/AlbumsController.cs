@@ -1,15 +1,19 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SpotifyClone.Api.Contracts.v1.Catalog.Albums.CorrectTitle;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.Create;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.MoveTrack;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.PublishAlbum;
+using SpotifyClone.Api.Contracts.v1.Catalog.Albums.RescheduleRelease;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.AddTrack;
+using SpotifyClone.Catalog.Application.Features.Albums.Commands.CorrectTitle;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.Create;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.Delete;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.MoveTrack;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.PublishAlbum;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.RemoveTrack;
+using SpotifyClone.Catalog.Application.Features.Albums.Commands.RescheduleRelease;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.UnpublishAlbum;
 using SpotifyClone.Catalog.Application.Features.Albums.Queries;
 using SpotifyClone.Catalog.Application.Features.Albums.Queries.GetDetails;
@@ -231,6 +235,65 @@ public sealed class AlbumsController(IMediator mediator)
         Result<MoveTrackInAlbumCommandResult> result = await Mediator.Send(
             new MoveTrackInAlbumCommand(
                 id, trackId, request.TargetPositionIndex),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Correct Album title")]
+    [EndpointDescription("Corrects the Album title.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPatch("{id:guid}/title")]
+    public async Task<ActionResult> CorrectAlbumTitle(
+        [FromRoute] Guid id,
+        [FromBody] CorrectAlbumTitleRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<CorrectAlbumTitleCommandResult> result = await Mediator.Send(
+            new CorrectAlbumTitleCommand(
+                id,
+                request.Title),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Reschedule Album Release")]
+    [EndpointDescription("Reschedules Album release if it's published but not released yet. " +
+        "Automatically does the same for all it's Tracks.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPut("{id:guid}/release")]
+    public async Task<ActionResult> RescheduleAlbumRelease(
+        [FromRoute] Guid id,
+        [FromBody] RescheduleAlbumReleaseRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<RescheduleAlbumReleaseCommandResult> result = await Mediator.Send(
+            new RescheduleAlbumReleaseCommand(
+                id,
+                request.ReleaseDate),
             cancellationToken);
         if (result.IsFailure)
         {
