@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.CorrectTitle;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.Create;
+using SpotifyClone.Api.Contracts.v1.Catalog.Albums.LinkNewCover;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.MoveTrack;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.PublishAlbum;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.RescheduleRelease;
@@ -10,6 +11,7 @@ using SpotifyClone.Catalog.Application.Features.Albums.Commands.AddTrack;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.CorrectTitle;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.Create;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.Delete;
+using SpotifyClone.Catalog.Application.Features.Albums.Commands.LinkNewCover;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.MoveTrack;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.PublishAlbum;
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.RemoveTrack;
@@ -294,6 +296,39 @@ public sealed class AlbumsController(IMediator mediator)
             new RescheduleAlbumReleaseCommand(
                 id,
                 request.ReleaseDate),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Link Album to new Cover image")]
+    [EndpointDescription("Links an Album to a new Cover image.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPost("{id:guid}/cover")]
+    public async Task<ActionResult> LinkNewCoverImage(
+        [FromRoute] Guid id,
+        [FromBody] LinkAlbumToNewCoverRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<LinkNewCoverToAlbumCommandResult> result = await Mediator.Send(
+            new LinkNewCoverToAlbumCommand(
+                id,
+                request.ImageId,
+                request.ImageWidth,
+                request.ImageHeight,
+                request.ImageFileType,
+                request.ImageSizeInBytes),
             cancellationToken);
         if (result.IsFailure)
         {

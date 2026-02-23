@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SpotifyClone.Shared.Kernel.Enums;
 using SpotifyClone.Streaming.Domain.Aggregates.ImageAssets;
 using SpotifyClone.Streaming.Infrastructure.Persistence.Configurations.Converters;
 
@@ -22,12 +23,12 @@ internal sealed class ImageAssetEfCoreConfiguration : IEntityTypeConfiguration<I
             .HasColumnName("is_ready")
             .IsRequired();
 
-        builder.Property(x => x.IsReady)
-            .HasColumnName("is_ready")
-            .IsRequired();
-
         builder.Property(x => x.CreatedAt)
             .HasColumnName("created_at")
+            .IsRequired();
+
+        builder.Property(x => x.LinkCount)
+            .HasColumnName("link_count")
             .IsRequired();
 
         builder.OwnsOne(x => x.Metadata, metadataBuilder =>
@@ -43,7 +44,7 @@ internal sealed class ImageAssetEfCoreConfiguration : IEntityTypeConfiguration<I
             metadataBuilder.Property(m => m.FileType)
                 .HasConversion(StreamingEfCoreValueConverters.ImageFileTypeConverter)
                 .HasColumnName("metadata_file_type")
-                .HasMaxLength(10)
+                .HasMaxLength(ImageFileType.MaxLength)
                 .IsRequired(false);
 
             metadataBuilder.Property(m => m.SizeInBytes)

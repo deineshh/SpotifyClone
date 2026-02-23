@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
-using SpotifyClone.Streaming.Application.Features.Media.Commands.MarkAsOrphaned;
+using SpotifyClone.Streaming.Application.Features.Media.Commands.MarkAudioAssetAsOrphaned;
 
 namespace SpotifyClone.Streaming.Application.Jobs;
 
@@ -19,7 +19,7 @@ public sealed class MarkAudioAssetAsOrphanedJob(
             "Background job {Job} started.",
             typeof(MarkAudioAssetAsOrphanedJob).Name);
 
-        await _sender.Send(new MarkAsOrphanedCommand(
+        await _sender.Send(new MarkAudioAssetAsOrphanedCommand(
             audioAssetId));
     }
 }

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace SpotifyClone.Streaming.Application.Features.Media.Commands.UnlinkFromTrack;
+namespace SpotifyClone.Streaming.Application.Features.Media.Commands.UnlinkAudioAssetFromTrack;
 
 public sealed class UnlinkAudioAssetFromTrackCommandValidator
     : AbstractValidator<UnlinkAudioAssetFromTrackCommand>

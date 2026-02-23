@@ -6,7 +6,7 @@ using SpotifyClone.Streaming.Application.Errors;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.ValueObjects;
 
-namespace SpotifyClone.Streaming.Application.Features.Media.Commands.UnlinkFromTrack;
+namespace SpotifyClone.Streaming.Application.Features.Media.Commands.UnlinkAudioAssetFromTrack;
 
 internal sealed class UnlinkAudioAssetFromTrackCommandHandler(
     IStreamingUnitOfWork unit,

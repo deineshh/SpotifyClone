@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Streaming.Application.Abstractions;
-using SpotifyClone.Streaming.Application.Features.Media.Commands.UnlinkFromTrack;
+using SpotifyClone.Streaming.Application.Features.Media.Commands.UnlinkAudioAssetFromTrack;
 
 namespace SpotifyClone.Streaming.Application.Jobs;
 

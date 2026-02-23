@@ -44,34 +44,23 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         return new Album(id, title, null, AlbumStatus.Draft, AlbumType.Empty, null, mainArtists);
     }
 
-    public void AttachCover(AlbumCoverImage cover)
+    public void LinkNewCover(AlbumCoverImage cover)
     {
         ArgumentNullException.ThrowIfNull(cover);
 
+        if (Status.IsPublished)
+        {
+            throw new AlbumAlreadyPublishedDomainException("Cannot link a new cover to a published album.");
+        }
+
         if (Cover is not null)
         {
-            throw new AlbumAlreadyHaveACoverDomainException(
-                "Album is already have a cover. " +
-                "Consider to unattach the attached cover first.");
+            RaiseDomainEvent(new AlbumUnlinkedFromCoverImageDomainEvent(Cover.ImageId));
+            Cover = null;
         }
 
         Cover = cover;
-    }
-
-    public void UnattachCover()
-    {
-        if (Cover is null)
-        {
-            return;
-        }
-
-        if (Status.IsPublished)
-        {
-            throw new AlbumAlreadyPublishedDomainException("Cannot unattach published album from it's cover.");
-        }
-
-        Cover = null;
-        Status = AlbumStatus.Draft;
+        RaiseDomainEvent(new AlbumLinkedToCoverImageDomainEvent(Cover.ImageId));
     }
 
     public void Publish(DateTimeOffset releaseDate)

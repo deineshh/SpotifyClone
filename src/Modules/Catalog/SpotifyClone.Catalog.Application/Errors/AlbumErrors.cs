@@ -36,10 +36,6 @@ public static class AlbumErrors
         "Album.InvalidTrackOrder",
         "The specified track order is invalid.");
 
-    public static readonly Error AlreadyHaveACover = new(
-        "Album.AlreadyHaveACover",
-        "The album is already attached to a cover.");
-
     public static readonly Error AlreadyPublished = new(
         "Album.AlreadyPublished",
         "The album has already been published.");

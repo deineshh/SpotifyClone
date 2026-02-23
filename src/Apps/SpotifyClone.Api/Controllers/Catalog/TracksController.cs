@@ -173,7 +173,7 @@ public sealed class TracksController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPatch("{id:guid}/explicit")]
+    [HttpPost("{id:guid}/explicit")]
     public async Task<ActionResult> MarkTrackAsExplicit(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)

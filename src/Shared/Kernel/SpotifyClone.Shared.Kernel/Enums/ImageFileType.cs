@@ -5,6 +5,8 @@ namespace SpotifyClone.Shared.Kernel.Enums;
 
 public sealed record ImageFileType : ValueObject
 {
+    public const byte MaxLength = 10;
+
     public readonly static ImageFileType Jpg = new("jpg");
     public readonly static ImageFileType Jpeg = new("jpeg");
     public readonly static ImageFileType Png = new("png");

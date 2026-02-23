@@ -4,8 +4,6 @@ using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
-using SpotifyClone.Shared.Kernel.Enums;
-using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Catalog.Application.Features.Albums.Commands.Create;
 
@@ -25,13 +23,6 @@ internal sealed class CreateAlbumCommandHandler(
             AlbumId.From(albumId),
             request.Title,
             request.MainArtists.Select(a => ArtistId.From(a)));
-
-        // IMPORTANT: remove this line after implementing 'cover attaching' use case
-        album.AttachCover(new AlbumCoverImage(
-            ImageId.From(Guid.NewGuid()),
-            1000, 1000,
-            ImageFileType.Jpg,
-            4_000_000));
 
         await _unit.Albums.AddAsync(album, cancellationToken);
 

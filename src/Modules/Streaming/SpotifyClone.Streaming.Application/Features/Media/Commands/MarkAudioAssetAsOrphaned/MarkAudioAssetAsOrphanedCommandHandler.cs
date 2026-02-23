@@ -6,18 +6,18 @@ using SpotifyClone.Streaming.Application.Errors;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.ValueObjects;
 
-namespace SpotifyClone.Streaming.Application.Features.Media.Commands.MarkAsOrphaned;
+namespace SpotifyClone.Streaming.Application.Features.Media.Commands.MarkAudioAssetAsOrphaned;
 
-internal sealed class MarkAsOrphanedCommandHandler(
+internal sealed class MarkAudioAssetAsOrphanedCommandHandler(
     IStreamingUnitOfWork unit,
-    ILogger<MarkAsOrphanedCommandHandler> logger)
-    : ICommandHandler<MarkAsOrphanedCommand, MarkAsOrphanedCommandResult>
+    ILogger<MarkAudioAssetAsOrphanedCommandHandler> logger)
+    : ICommandHandler<MarkAudioAssetAsOrphanedCommand, MarkAudioAssetAsOrphanedCommandResult>
 {
     private readonly IStreamingUnitOfWork _unit = unit;
-    private readonly ILogger<MarkAsOrphanedCommandHandler> _logger = logger;
+    private readonly ILogger<MarkAudioAssetAsOrphanedCommandHandler> _logger = logger;
 
-    public async Task<Result<MarkAsOrphanedCommandResult>> Handle(
-        MarkAsOrphanedCommand request,
+    public async Task<Result<MarkAudioAssetAsOrphanedCommandResult>> Handle(
+        MarkAudioAssetAsOrphanedCommand request,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
@@ -33,11 +33,11 @@ internal sealed class MarkAsOrphanedCommandHandler(
                 "Audio Asset {AudioAssetId} not found while marking as orphaned",
                 request.AudioAssetId);
 
-            return Result.Failure<MarkAsOrphanedCommandResult>(MediaErrors.MediaAssetNotFound);
+            return Result.Failure<MarkAudioAssetAsOrphanedCommandResult>(MediaErrors.MediaAssetNotFound);
         }
 
         audioAsset.MarkAsOrphaned();
 
-        return new MarkAsOrphanedCommandResult();
+        return new MarkAudioAssetAsOrphanedCommandResult();
     }
 }
