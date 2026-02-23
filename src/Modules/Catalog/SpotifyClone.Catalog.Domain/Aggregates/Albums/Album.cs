@@ -14,7 +14,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     private const int PositionStep = 1000;
 
     private readonly HashSet<ArtistId> _mainArtists = [];
-    private readonly HashSet<AlbumTrack> _tracks = new();
+    private readonly HashSet<AlbumTrack> _tracks = [];
 
     public string Title { get; private set; } = null!;
     public DateTimeOffset? ReleaseDate { get; private set; }

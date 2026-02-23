@@ -62,6 +62,7 @@ public static class StreamingModule
         services.AddTransient<ImageConversionJob>();
         services.AddTransient<MarkAudioAssetAsOrphanedJob>();
         services.AddTransient<AudioAssetCleanupJob>();
+        services.AddTransient<ImageAssetCleanupJob>();
 
         services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.SectionName));
 
@@ -75,6 +76,12 @@ public static class StreamingModule
 
         recurringJobManager.AddOrUpdate<AudioAssetCleanupJob>(
             "streaming-audio-asset-cleanup",
+            job => job.ProcessAsync(),
+            Cron.HourInterval(6)
+        );
+
+        recurringJobManager.AddOrUpdate<ImageAssetCleanupJob>(
+            "streaming-image-asset-cleanup",
             job => job.ProcessAsync(),
             Cron.HourInterval(6)
         );

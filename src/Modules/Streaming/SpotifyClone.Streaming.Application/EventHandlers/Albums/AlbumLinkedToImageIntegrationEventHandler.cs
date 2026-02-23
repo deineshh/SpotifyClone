@@ -1,19 +1,38 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using SpotifyClone.Shared.IntegrationEvents.Catalog.Albums;
-using SpotifyClone.Streaming.Application.Features.Media.Commands.AddLinkToImageAsset;
+using SpotifyClone.Shared.Kernel.IDs;
+using SpotifyClone.Streaming.Application.Abstractions;
+using SpotifyClone.Streaming.Domain.Aggregates.ImageAssets;
 
 namespace SpotifyClone.Streaming.Application.EventHandlers.Albums;
 
 internal sealed class AlbumLinkedToImageIntegrationEventHandler(
-    IPublisher publisher)
+    IStreamingUnitOfWork unit,
+    ILogger<AlbumLinkedToImageIntegrationEventHandler> logger)
     : INotificationHandler<AlbumLinkedToImageIntegrationEvent>
 {
-    private readonly IPublisher _publisher = publisher;
+    private readonly IStreamingUnitOfWork _unit = unit;
+    private readonly ILogger<AlbumLinkedToImageIntegrationEventHandler> _logger = logger;
 
     public async Task Handle(
         AlbumLinkedToImageIntegrationEvent notification,
         CancellationToken cancellationToken)
-        => await _publisher.Publish(
-            new AddLinkToImageAssetCommand(notification.ImageId),
-            cancellationToken);
+    {
+        ImageAsset? imageAsset = await _unit.ImageAssets.GetByIdAsync(
+            ImageId.From(notification.ImageId), cancellationToken);
+        if (imageAsset is null)
+        {
+            _logger.LogError(
+                "Image asset with ID {ImageId} not found while adding new link to it",
+                notification.ImageId);
+
+            throw new InvalidOperationException(
+                $"Image asset with ID {notification.ImageId} not found");
+        }
+
+        imageAsset.AddLink();
+
+        await _unit.CommitAsync(cancellationToken);
+    }
 }

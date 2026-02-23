@@ -16,6 +16,20 @@ internal sealed class ImageAssetEfCoreRepository(
         CancellationToken cancellationToken = default)
         => await _imageAssets.AddAsync(imageAsset, cancellationToken);
 
+
+
+    public async Task<IEnumerable<ImageAsset>> GetAllInvalidAsync(
+        CancellationToken cancellationToken = default)
+    {
+        DateTimeOffset cutoffTime = DateTimeOffset.UtcNow.AddHours(-2);
+
+        return await _imageAssets
+            .Where(a => (!a.IsReady ||
+                        a.LinkCount < 1) &&
+                        a.CreatedAt < cutoffTime)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<ImageAsset?> GetByIdAsync(
         ImageId id,
         CancellationToken cancellationToken = default)

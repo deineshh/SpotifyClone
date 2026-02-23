@@ -1,19 +1,39 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using SpotifyClone.Shared.IntegrationEvents.Catalog.Albums;
-using SpotifyClone.Streaming.Application.Features.Media.Commands.RemoveLinkFromImageAsset;
+using SpotifyClone.Shared.Kernel.IDs;
+using SpotifyClone.Streaming.Application.Abstractions;
+using SpotifyClone.Streaming.Domain.Aggregates.ImageAssets;
 
 namespace SpotifyClone.Streaming.Application.EventHandlers.Albums;
 
 internal sealed class AlbumUnlinkedFromImageIntegrationEventHandler(
-    IPublisher publisher)
+    IStreamingUnitOfWork unit,
+    ILogger<AlbumUnlinkedFromImageIntegrationEventHandler> logger)
     : INotificationHandler<AlbumUnlinkedFromImageIntegrationEvent>
 {
-    private readonly IPublisher _publisher = publisher;
+    private readonly IStreamingUnitOfWork _unit = unit;
+    private readonly ILogger<AlbumUnlinkedFromImageIntegrationEventHandler> _logger = logger;
 
     public async Task Handle(
         AlbumUnlinkedFromImageIntegrationEvent notification,
         CancellationToken cancellationToken)
-        => await _publisher.Publish(
-            new RemoveLinkFromImageAssetCommand(notification.ImageId),
-            cancellationToken);
+    {
+        ImageAsset? imageAsset = await _unit.ImageAssets.GetByIdAsync(
+            ImageId.From(notification.ImageId), cancellationToken);
+
+        if (imageAsset is null)
+        {
+            _logger.LogWarning(
+                "Image asset with ID {ImageId} not found while removing a link from it",
+                notification.ImageId);
+
+            throw new InvalidOperationException(
+                $"Image asset with ID {notification.ImageId} not found");
+        }
+
+        imageAsset.RemoveLink();
+
+        await _unit.CommitAsync(cancellationToken);
+    }
 }

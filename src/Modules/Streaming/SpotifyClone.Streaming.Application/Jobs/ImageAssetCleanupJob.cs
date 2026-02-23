@@ -5,21 +5,21 @@ using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
 
 namespace SpotifyClone.Streaming.Application.Jobs;
 
-public sealed class AudioAssetCleanupJob(
+public sealed class ImageAssetCleanupJob(
     IStreamingUnitOfWork unit,
     IFileStorage storage,
-    ILogger<AudioAssetCleanupJob> logger)
+    ILogger<ImageAssetCleanupJob> logger)
 {
     private readonly IFileStorage _storage = storage;
     private readonly IStreamingUnitOfWork _unit = unit;
-    private readonly ILogger<AudioAssetCleanupJob> _logger = logger;
+    private readonly ILogger<ImageAssetCleanupJob> _logger = logger;
 
     public async Task ProcessAsync(
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation(
             "Starting background job {Job}...",
-            typeof(AudioAssetCleanupJob).Name);
+            typeof(ImageAssetCleanupJob).Name);
 
         IEnumerable<AudioAsset> audioAssets =
             await _unit.AudioAssets.GetAllInvalidAsync(cancellationToken);
@@ -34,6 +34,6 @@ public sealed class AudioAssetCleanupJob(
 
         _logger.LogInformation(
             "Finished background job {Job} successfully",
-            typeof(AudioAssetCleanupJob).Name);
+            typeof(ImageAssetCleanupJob).Name);
     }
 }

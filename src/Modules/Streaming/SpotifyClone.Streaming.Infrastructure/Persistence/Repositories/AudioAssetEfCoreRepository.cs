@@ -22,7 +22,7 @@ internal sealed class AudioAssetEfCoreRepository(
         CancellationToken cancellationToken = default)
         => await _audioAssets.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 
-    public async Task<IEnumerable<AudioAsset>> GetInvalidAudioAssetsAsync(
+    public async Task<IEnumerable<AudioAsset>> GetAllInvalidAsync(
         CancellationToken cancellationToken = default)
     {
         DateTimeOffset cutoffTime = DateTimeOffset.UtcNow.AddHours(-2);
@@ -35,7 +35,6 @@ internal sealed class AudioAssetEfCoreRepository(
                         a.CreatedAt < cutoffTime)
             .ToListAsync(cancellationToken);
     }
-        
 
     public async Task DeleteAsync(
         AudioAsset audioAsset,

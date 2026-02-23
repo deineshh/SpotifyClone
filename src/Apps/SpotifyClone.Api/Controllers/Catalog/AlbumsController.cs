@@ -315,7 +315,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPost("{id:guid}/cover")]
+    [HttpPut("{id:guid}/cover")]
     public async Task<ActionResult> LinkNewCoverImage(
         [FromRoute] Guid id,
         [FromBody] LinkAlbumToNewCoverRequest request,

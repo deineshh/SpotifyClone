@@ -1,3 +1,0 @@
-﻿namespace SpotifyClone.Streaming.Application.Features.Media.Commands.RemoveLinkFromImageAsset;
-
-public sealed record RemoveLinkFromImageAssetCommandResult;
