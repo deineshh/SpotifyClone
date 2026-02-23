@@ -1,8 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Artists.Create;
+using SpotifyClone.Api.Contracts.v1.Catalog.Artists.LinkNewAvatar;
+using SpotifyClone.Api.Contracts.v1.Catalog.Artists.LinkNewBanner;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Create;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewAvatar;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewBanner;
 using SpotifyClone.Catalog.Application.Features.Artists.Queries;
 using SpotifyClone.Catalog.Application.Features.Artists.Queries.GetDetails;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -69,5 +73,71 @@ public sealed class ArtistsController(IMediator mediator)
         }
 
         return Ok(result.Value);
+    }
+
+    [EndpointSummary("Link Artist to new Avatar image")]
+    [EndpointDescription("Links an Artist to a new Avatar image.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPut("{id:guid}/avatar")]
+    public async Task<ActionResult> LinkNewAvatarImage(
+        [FromRoute] Guid id,
+        [FromBody] LinkNewAvatarToArtistRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<LinkNewAvatarToArtistCommandResult> result = await Mediator.Send(
+            new LinkNewAvatarToArtistCommand(
+                id,
+                request.ImageId,
+                request.ImageWidth,
+                request.ImageHeight,
+                request.ImageFileType,
+                request.ImageSizeInBytes),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Link Artist to new Banner image")]
+    [EndpointDescription("Links an Artist to a new Banner image.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPut("{id:guid}/banner")]
+    public async Task<ActionResult> LinkNewBannerImage(
+        [FromRoute] Guid id,
+        [FromBody] LinkNewBannerToArtistRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<LinkNewBannerToArtistCommandResult> result = await Mediator.Send(
+            new LinkNewBannerToArtistCommand(
+                id,
+                request.ImageId,
+                request.ImageWidth,
+                request.ImageHeight,
+                request.ImageFileType,
+                request.ImageSizeInBytes),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
     }
 }

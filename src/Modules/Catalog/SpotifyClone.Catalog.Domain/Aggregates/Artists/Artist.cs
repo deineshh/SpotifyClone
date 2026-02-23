@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Artists.Exceptions;
+﻿using SpotifyClone.Catalog.Domain.Aggregates.Artists.Events;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists.Exceptions;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.Rules;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
@@ -23,6 +24,34 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         ArtistNameRules.Validate(name);
 
         return new Artist(id, name, null, false, null, null, []);
+    }
+
+    public void LinkNewAvatar(ArtistAvatarImage avatar)
+    {
+        ArgumentNullException.ThrowIfNull(avatar);
+
+        if (Avatar is not null)
+        {
+            RaiseDomainEvent(new ArtistUnlinkedFromAvatarImageDomainEvent(Avatar.ImageId));
+            Avatar = null;
+        }
+
+        Avatar = avatar;
+        RaiseDomainEvent(new ArtistLinkedToAvatarImageDomainEvent(Avatar.ImageId));
+    }
+
+    public void LinkNewBanner(ArtistBannerImage banner)
+    {
+        ArgumentNullException.ThrowIfNull(banner);
+
+        if (Banner is not null)
+        {
+            RaiseDomainEvent(new ArtistUnlinkedFromBannerImageDomainEvent(Banner.ImageId));
+            Banner = null;
+        }
+
+        Banner = banner;
+        RaiseDomainEvent(new ArtistLinkedToBannerImageDomainEvent(Banner.ImageId));
     }
 
     public void Verify(

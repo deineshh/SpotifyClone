@@ -112,6 +112,39 @@ public sealed class AlbumsController(IMediator mediator)
         return NoContent();
     }
 
+    [EndpointSummary("Link Album to new Cover image")]
+    [EndpointDescription("Links an Album to a new Cover image if it's not yet published.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPut("{id:guid}/cover")]
+    public async Task<ActionResult> LinkNewCoverImage(
+        [FromRoute] Guid id,
+        [FromBody] LinkAlbumToNewCoverRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<LinkNewCoverToAlbumCommandResult> result = await Mediator.Send(
+            new LinkNewCoverToAlbumCommand(
+                id,
+                request.ImageId,
+                request.ImageWidth,
+                request.ImageHeight,
+                request.ImageFileType,
+                request.ImageSizeInBytes),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
     [EndpointSummary("Publish Album")]
     [EndpointDescription("Publishes an Album and all of it's Tracks if the Album is ready to publish.")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -296,39 +329,6 @@ public sealed class AlbumsController(IMediator mediator)
             new RescheduleAlbumReleaseCommand(
                 id,
                 request.ReleaseDate),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return NoContent();
-    }
-
-    [EndpointSummary("Link Album to new Cover image")]
-    [EndpointDescription("Links an Album to a new Cover image.")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPut("{id:guid}/cover")]
-    public async Task<ActionResult> LinkNewCoverImage(
-        [FromRoute] Guid id,
-        [FromBody] LinkAlbumToNewCoverRequest request,
-        CancellationToken cancellationToken = default)
-    {
-        Result<LinkNewCoverToAlbumCommandResult> result = await Mediator.Send(
-            new LinkNewCoverToAlbumCommand(
-                id,
-                request.ImageId,
-                request.ImageWidth,
-                request.ImageHeight,
-                request.ImageFileType,
-                request.ImageSizeInBytes),
             cancellationToken);
         if (result.IsFailure)
         {

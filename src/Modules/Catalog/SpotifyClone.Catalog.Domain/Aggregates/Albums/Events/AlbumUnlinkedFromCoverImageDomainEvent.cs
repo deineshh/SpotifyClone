@@ -5,5 +5,5 @@ using SpotifyClone.Shared.Kernel.IDs;
 namespace SpotifyClone.Catalog.Domain.Aggregates.Albums.Events;
 
 public sealed record AlbumUnlinkedFromCoverImageDomainEvent(
-    ImageId CoverImageId)
+    ImageId ImageId)
     : DomainEvent;

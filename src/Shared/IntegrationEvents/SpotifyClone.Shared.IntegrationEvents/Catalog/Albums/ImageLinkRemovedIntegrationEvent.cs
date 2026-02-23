@@ -2,6 +2,6 @@
 
 namespace SpotifyClone.Shared.IntegrationEvents.Catalog.Albums;
 
-public sealed record AlbumLinkedToImageIntegrationEvent(
+public sealed record ImageLinkRemovedIntegrationEvent(
     Guid ImageId)
     : IntegrationEvent;

@@ -16,8 +16,8 @@ internal sealed class AlbumLinkedToCoverImageDomainEventHandler(
         AlbumLinkedToCoverImageDomainEvent notification,
         CancellationToken cancellationToken)
     {
-        var integrationEvent = new AlbumLinkedToImageIntegrationEvent(
-                notification.CoverImageId.Value);
+        var integrationEvent = new ImageLinkAddedIntegrationEvent(
+                notification.ImageId.Value);
 
         var message = OutboxMessage.FromIntegrationEvent(integrationEvent);
 
