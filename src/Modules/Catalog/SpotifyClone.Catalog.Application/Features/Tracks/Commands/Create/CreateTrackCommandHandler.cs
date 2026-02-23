@@ -31,6 +31,15 @@ internal sealed class CreateTrackCommandHandler(
             return Result.Failure<CreateTrackCommandResult>(AlbumErrors.NotFound);
         }
 
+        bool artistsExist = await _unit.Artists.Exists(
+            request.MainArtists.Select(a => ArtistId.From(a))
+                .Concat(request.FeaturedArtists.Select(a => ArtistId.From(a))),
+            cancellationToken);
+        if (!artistsExist)
+        {
+            return Result.Failure<CreateTrackCommandResult>(ArtistErrors.NotFound);
+        }
+
         var track = Track.Create(
             trackId,
             request.Title,

@@ -8,6 +8,14 @@ public interface IArtistRepository
         ArtistId id,
         CancellationToken cancellationToken = default);
 
+    Task<bool> Exists(
+        ArtistId id,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> Exists(
+        IEnumerable<ArtistId> ids,
+        CancellationToken cancellationToken = default);
+
     Task AddAsync(
         Artist artist,
         CancellationToken cancellationToken = default);

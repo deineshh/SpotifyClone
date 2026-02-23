@@ -1,4 +1,5 @@
 ﻿using SpotifyClone.Catalog.Application.Abstractions;
+using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
@@ -17,10 +18,16 @@ internal sealed class CreateAlbumCommandHandler(
         CreateAlbumCommand request,
         CancellationToken cancellationToken)
     {
-        var albumId = Guid.NewGuid();
+        bool artistsExist = await _unit.Artists.Exists(
+            request.MainArtists.Select(a => ArtistId.From(a)),
+            cancellationToken);
+        if (!artistsExist)
+        {
+            return Result.Failure<CreateAlbumCommandResult>(ArtistErrors.NotFound);
+        }
 
         var album = Album.Create(
-            AlbumId.From(albumId),
+            AlbumId.From(Guid.NewGuid()),
             request.Title,
             request.MainArtists.Select(a => ArtistId.From(a)));
 

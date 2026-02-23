@@ -20,6 +20,16 @@ internal sealed class ArtistEfCoreRepository(CatalogAppDbContext context)
         CancellationToken cancellationToken = default)
         => await _artists.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 
+    public async Task<bool> Exists(
+        ArtistId id,
+        CancellationToken cancellationToken = default)
+        => await _artists.AnyAsync(a => a.Id == id, cancellationToken);
+
+    public async Task<bool> Exists(
+        IEnumerable<ArtistId> ids,
+        CancellationToken cancellationToken = default)
+        => await _artists.CountAsync(a => ids.Contains(a.Id), cancellationToken) == ids.Count();
+
     public async Task DeleteAsync(
         Artist artist,
         CancellationToken cancellationToken = default)
