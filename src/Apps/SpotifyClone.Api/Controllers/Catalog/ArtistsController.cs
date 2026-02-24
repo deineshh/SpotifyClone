@@ -9,6 +9,8 @@ using SpotifyClone.Catalog.Application.Features.Artists.Commands.Create;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewAvatar;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewBanner;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Unban;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.Unverify;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.Verify;
 using SpotifyClone.Catalog.Application.Features.Artists.Queries;
 using SpotifyClone.Catalog.Application.Features.Artists.Queries.GetDetails;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -182,6 +184,58 @@ public sealed class ArtistsController(IMediator mediator)
     {
         Result<UnbanArtistCommandResult> result = await Mediator.Send(
             new UnbanArtistCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Verify Artist")]
+    [EndpointDescription("Verifies an artist to unlock new features (bio, banner, gallery etc).")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPost("{id:guid}/verify")]
+    public async Task<ActionResult> VerifyArtist(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<VerifyArtistCommandResult> result = await Mediator.Send(
+            new VerifyArtistCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Unverify Artist")]
+    [EndpointDescription("Unverifies a verified artist to prevent from additional features.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("{id:guid}/verify")]
+    public async Task<ActionResult> UnverifyArtist(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UnverifyArtistCommandResult> result = await Mediator.Send(
+            new UnverifyArtistCommand(id),
             cancellationToken);
         if (result.IsFailure)
         {

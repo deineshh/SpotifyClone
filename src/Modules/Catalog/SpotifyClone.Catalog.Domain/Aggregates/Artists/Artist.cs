@@ -9,7 +9,7 @@ namespace SpotifyClone.Catalog.Domain.Aggregates.Artists;
 
 public sealed class Artist : AggregateRoot<ArtistId, Guid>
 {
-    private HashSet<ArtistGalleryImage> _gallery = [];
+    private readonly HashSet<ArtistGalleryImage> _gallery = [];
 
     public string Name { get; private set; } = null!;
     public string? Bio { get; private set; }
@@ -31,6 +31,8 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
     {
         ArgumentNullException.ThrowIfNull(avatar);
 
+        ThrowIfBanned("Cannot link a new avatar image to a banned artist.");
+
         if (Avatar is not null)
         {
             RaiseDomainEvent(new ArtistUnlinkedFromAvatarImageDomainEvent(Avatar.ImageId));
@@ -45,6 +47,8 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
     {
         ArgumentNullException.ThrowIfNull(banner);
 
+        ThrowIfBanned("Cannot link a new banner image to a banned artist.");
+
         if (Banner is not null)
         {
             RaiseDomainEvent(new ArtistUnlinkedFromBannerImageDomainEvent(Banner.ImageId));
@@ -55,39 +59,42 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         RaiseDomainEvent(new ArtistLinkedToBannerImageDomainEvent(Banner.ImageId));
     }
 
-    public void Verify(
-        string? bio, ArtistAvatarImage? avatar, ArtistBannerImage? banner, IEnumerable<ArtistGalleryImage> gallery)
+    public void Verify()
     {
-        if (string.IsNullOrEmpty(bio))
-        {
-            bio = null;
-        }
-        ArtistBioRules.Validate(bio);
+        ThrowIfBanned("Cannot verify a banned artist.");
 
-        Bio = bio;
+        if (Status.IsVerified)
+        {
+            return;
+        }
+
         Status = ArtistStatus.Verified;
-        Avatar = avatar;
-        Banner = banner;
-        _gallery = gallery.ToHashSet();
     }
 
     public void Unverify()
     {
+        ThrowIfBanned("Cannot unverify a banned artist.");
+
+        if (!Status.IsVerified)
+        {
+            return;
+        }
+
         Status = ArtistStatus.NotVerified;
-        Bio = null;
-        Avatar = null;
-        Banner = null;
-        _gallery.Clear();
     }
 
-    public void ChangeName(string name)
+    public void Rename(string name)
     {
+        ThrowIfBanned("Cannot rename a banned artist.");
+
         ArtistNameRules.Validate(name);
         Name = name;
     }
 
-    public void ChangeBio(string? bio)
+    public void UpdateBio(string? bio)
     {
+        ThrowIfBanned("Cannot update the bio of a banned artist.");
+
         if (!Status.IsVerified)
         {
             throw new ArtistNotVerifiedDomainException("Only verified artists can have a bio.");
@@ -102,28 +109,10 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         Bio = bio;
     }
 
-    public void ChangeAvatar(ArtistAvatarImage? avatar)
-    {
-        if (!Status.IsVerified)
-        {
-            throw new ArtistNotVerifiedDomainException("Only verified artists can have an avatar.");
-        }
-
-        Avatar = avatar;
-    }
-
-    public void ChangeBanner(ArtistBannerImage? banner)
-    {
-        if (!Status.IsVerified)
-        {
-            throw new ArtistNotVerifiedDomainException("Only verified artists can have a banner.");
-        }
-
-        Banner = banner;
-    }
-
     public void AddGalleryImage(ArtistGalleryImage image)
     {
+        ThrowIfBanned("Cannot add a gallery image to a banned artist.");
+
         if (!Status.IsVerified)
         {
             throw new ArtistNotVerifiedDomainException("Only verified artists can have gallery images.");
@@ -133,7 +122,11 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
     }
 
     public void RemoveGalleryImage(ArtistGalleryImage image)
-        => _gallery.Remove(image);
+    {
+        ThrowIfBanned("Cannot remove a gallery image from a banned artist.");
+
+        _gallery.Remove(image);
+    }
 
     public void Ban()
     {
@@ -154,6 +147,14 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         }
 
         Status = ArtistStatus.NotVerified;
+    }
+
+    private void ThrowIfBanned(string message)
+    {
+        if (Status.IsBanned)
+        {
+            throw new ArtistBannedDomainException(message);
+        }
     }
 
     private Artist(
