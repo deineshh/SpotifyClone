@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Artists.Events;
+﻿using SpotifyClone.Catalog.Domain.Aggregates.Artists.Enums;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists.Events;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.Exceptions;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.Rules;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
@@ -12,7 +13,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
     public string Name { get; private set; } = null!;
     public string? Bio { get; private set; }
-    public bool IsVerified { get; private set; }
+    public ArtistStatus Status { get; private set; } = null!;
     public ArtistAvatarImage? Avatar { get; private set; }
     public ArtistBannerImage? Banner { get; private set; }
     public IReadOnlySet<ArtistGalleryImage> Gallery => _gallery.AsReadOnly();
@@ -23,7 +24,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
         ArtistNameRules.Validate(name);
 
-        return new Artist(id, name, null, false, null, null, []);
+        return new Artist(id, name, null, ArtistStatus.NotVerified, null, null, []);
     }
 
     public void LinkNewAvatar(ArtistAvatarImage avatar)
@@ -64,7 +65,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         ArtistBioRules.Validate(bio);
 
         Bio = bio;
-        IsVerified = true;
+        Status = ArtistStatus.Verified;
         Avatar = avatar;
         Banner = banner;
         _gallery = gallery.ToHashSet();
@@ -72,7 +73,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
     public void Unverify()
     {
-        IsVerified = false;
+        Status = ArtistStatus.NotVerified;
         Bio = null;
         Avatar = null;
         Banner = null;
@@ -87,7 +88,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
     public void ChangeBio(string? bio)
     {
-        if (!IsVerified)
+        if (!Status.IsVerified)
         {
             throw new ArtistNotVerifiedDomainException("Only verified artists can have a bio.");
         }
@@ -103,7 +104,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
     public void ChangeAvatar(ArtistAvatarImage? avatar)
     {
-        if (!IsVerified)
+        if (!Status.IsVerified)
         {
             throw new ArtistNotVerifiedDomainException("Only verified artists can have an avatar.");
         }
@@ -113,7 +114,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
     public void ChangeBanner(ArtistBannerImage? banner)
     {
-        if (!IsVerified)
+        if (!Status.IsVerified)
         {
             throw new ArtistNotVerifiedDomainException("Only verified artists can have a banner.");
         }
@@ -123,7 +124,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
     public void AddGalleryImage(ArtistGalleryImage image)
     {
-        if (!IsVerified)
+        if (!Status.IsVerified)
         {
             throw new ArtistNotVerifiedDomainException("Only verified artists can have gallery images.");
         }
@@ -134,14 +135,40 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
     public void RemoveGalleryImage(ArtistGalleryImage image)
         => _gallery.Remove(image);
 
+    public void Ban()
+    {
+        if (Status.IsBanned)
+        {
+            return;
+        }
+
+        Status = ArtistStatus.Banned;
+        RaiseDomainEvent(new ArtistBannedDomainEvent(Id));
+    }
+
+    public void Unban()
+    {
+        if (!Status.IsBanned)
+        {
+            return;
+        }
+
+        Status = ArtistStatus.NotVerified;
+    }
+
     private Artist(
-        ArtistId id, string name, string? bio, bool isVerified, ArtistAvatarImage? avatar, ArtistBannerImage? banner,
+        ArtistId id,
+        string name,
+        string? bio,
+        ArtistStatus status,
+        ArtistAvatarImage? avatar,
+        ArtistBannerImage? banner,
         IEnumerable<ArtistGalleryImage> gallery)
         : base(id)
     {
         Name = name;
         Bio = bio;
-        IsVerified = isVerified;
+        Status = status;
         Avatar = avatar;
         Banner = banner;
         _gallery = gallery.ToHashSet();

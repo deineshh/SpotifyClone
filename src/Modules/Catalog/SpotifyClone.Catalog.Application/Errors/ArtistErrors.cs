@@ -26,7 +26,11 @@ public static class ArtistErrors
 
     public static readonly Error NotVerified = new(
         "Artist.NotVerified",
-        "The artist has not been verified yet.");
+        "The artist has not been verified.");
+
+    public static readonly Error InvalidStatus = new(
+        "Artist.InvalidStatus",
+        "The specified artist status is invalid.");
 
     public static readonly Error NotFound = CommonErrors.NotFound(
         "Artist", "Artist");

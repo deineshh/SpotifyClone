@@ -29,8 +29,9 @@ internal sealed class ArtistEfCoreConfiguration : IEntityTypeConfiguration<Artis
             .HasColumnName("bio")
             .HasMaxLength(ArtistBioRules.MaxLength);
 
-        builder.Property(x => x.IsVerified)
-            .HasColumnName("is_verified")
+        builder.Property(x => x.Status)
+            .HasColumnName("status")
+            .HasConversion(CatalogEfCoreValueConverters.ArtistStatusConverter)
             .IsRequired();
 
         builder.OwnsOne(x => x.Avatar, avatarBuilder =>

@@ -32,7 +32,7 @@ internal sealed class TrackEfCoreReadService(
                 .Where(a => t.MainArtists.Contains(a.Id))
                 .Select(a => new ArtistSummaryResponse(
                     a.Name,
-                    a.IsVerified,
+                    a.Status.Value,
                     a.Avatar == null ? null : new ImageMetadataDetailsResult(
                         a.Avatar.ImageId.Value,
                         a.Avatar.Metadata.Width,
@@ -44,7 +44,7 @@ internal sealed class TrackEfCoreReadService(
                 .Where(a => t.FeaturedArtists.Contains(a.Id))
                 .Select(a => new ArtistSummaryResponse(
                     a.Name,
-                    a.IsVerified,
+                    a.Status.Value,
                     a.Avatar == null ? null : new ImageMetadataDetailsResult(
                         a.Avatar.ImageId.Value,
                         a.Avatar.Metadata.Width,

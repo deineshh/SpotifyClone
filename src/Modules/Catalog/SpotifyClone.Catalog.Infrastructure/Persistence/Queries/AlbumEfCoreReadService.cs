@@ -35,7 +35,7 @@ internal sealed class AlbumEfCoreReadService(
                 .Where(artist => a.MainArtists.Contains(artist.Id))
                 .Select(artist => new ArtistSummaryResponse(
                     artist.Name,
-                    artist.IsVerified,
+                    artist.Status.Value,
                     artist.Avatar == null ? null : new ImageMetadataDetailsResult(
                         artist.Avatar.ImageId.Value,
                         artist.Avatar.Metadata.Width,

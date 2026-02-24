@@ -52,6 +52,7 @@ public sealed class CatalogDomainExceptionMapper : IDomainExceptionMapper
             InvalidArtistGalleryImageDomainException => ArtistErrors.InvalidGalleryImage,
             InvalidArtistNameDomainException => ArtistErrors.InvalidName,
             InvalidArtistBioDomainException => ArtistErrors.InvalidBio,
+            InvalidArtistStatusDomainException => ArtistErrors.InvalidStatus,
             ArtistNotVerifiedDomainException => ArtistErrors.NotVerified,
 
             // Genre

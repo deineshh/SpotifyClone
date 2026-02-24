@@ -1,4 +1,5 @@
 ﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.ValueObjects;
 using SpotifyClone.Shared.Kernel.IDs;
 
@@ -12,6 +13,10 @@ public interface ITrackRepository
 
     Task<IEnumerable<Track>> GetAllByAlbumAsync(
         AlbumId albumId,
+        CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<Track>> GetAllByMainArtistAsync(
+        ArtistId albumId,
         CancellationToken cancellationToken = default);
 
     Task<IEnumerable<Track>> GetByIdsAsync(

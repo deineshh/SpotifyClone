@@ -4,9 +4,11 @@ using SpotifyClone.Api.Contracts.v1.Catalog.Artists.Create;
 using SpotifyClone.Api.Contracts.v1.Catalog.Artists.LinkNewAvatar;
 using SpotifyClone.Api.Contracts.v1.Catalog.Artists.LinkNewBanner;
 using SpotifyClone.Api.Mappers;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.Ban;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Create;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewAvatar;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewBanner;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.Unban;
 using SpotifyClone.Catalog.Application.Features.Artists.Queries;
 using SpotifyClone.Catalog.Application.Features.Artists.Queries.GetDetails;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -128,6 +130,58 @@ public sealed class ArtistsController(IMediator mediator)
                 request.ImageHeight,
                 request.ImageFileType,
                 request.ImageSizeInBytes),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Ban Artist")]
+    [EndpointDescription("Bans an artist and unpublishes all it's releases (albums & tracks).")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> BanArtist(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<BanArtistCommandResult> result = await Mediator.Send(
+            new BanArtistCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Unban Artist")]
+    [EndpointDescription("Unbans an artist but not publishes back it's releases (albums & tracks).")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPost("{id:guid}/unban")]
+    public async Task<ActionResult> UnbanArtist(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UnbanArtistCommandResult> result = await Mediator.Send(
+            new UnbanArtistCommand(id),
             cancellationToken);
         if (result.IsFailure)
         {

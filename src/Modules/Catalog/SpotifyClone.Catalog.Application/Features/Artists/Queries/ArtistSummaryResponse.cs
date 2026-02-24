@@ -4,5 +4,5 @@ namespace SpotifyClone.Catalog.Application.Features.Artists.Queries;
 
 public sealed record ArtistSummaryResponse(
     string Name,
-    bool IsVerified,
+    string Status,
     ImageMetadataDetailsResult? Avatar);

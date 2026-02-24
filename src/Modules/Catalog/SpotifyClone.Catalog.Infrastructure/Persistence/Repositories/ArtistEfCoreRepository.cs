@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
 
@@ -18,7 +19,16 @@ internal sealed class ArtistEfCoreRepository(CatalogAppDbContext context)
     public async Task<Artist?> GetByIdAsync(
         ArtistId id,
         CancellationToken cancellationToken = default)
-        => await _artists.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+        => await _artists.FirstOrDefaultAsync(
+            a => a.Id == id && a.Status != ArtistStatus.Banned,
+            cancellationToken);
+
+    public async Task<Artist?> GetBannedByIdAsync(
+        ArtistId id,
+        CancellationToken cancellationToken = default)
+        => await _artists.FirstOrDefaultAsync(
+            a => a.Id == id && a.Status == ArtistStatus.Banned,
+            cancellationToken);
 
     public async Task<bool> Exists(
         ArtistId id,

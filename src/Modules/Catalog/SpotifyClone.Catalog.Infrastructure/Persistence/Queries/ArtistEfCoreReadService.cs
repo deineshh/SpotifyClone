@@ -21,7 +21,7 @@ internal sealed class ArtistEfCoreReadService(
         .Select(a => new ArtistDetailsResponse(
             a.Name,
             a.Bio,
-            a.IsVerified,
+            a.Status.Value,
             a.Avatar == null ? null : new ImageMetadataDetailsResult(
                 a.Avatar.ImageId.Value,
                 a.Avatar.Metadata.Width,

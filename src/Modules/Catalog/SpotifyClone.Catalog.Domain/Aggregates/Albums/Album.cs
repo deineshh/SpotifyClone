@@ -90,7 +90,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     {
         if (!Status.IsPublished)
         {
-            throw new AlbumNotPublishedDomainException("Cannot unpublish album which is not published.");
+            return;
         }
 
         ReleaseDate = null;

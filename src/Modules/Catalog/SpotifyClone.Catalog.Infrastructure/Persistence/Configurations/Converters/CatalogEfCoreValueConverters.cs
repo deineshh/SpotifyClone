@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects;
@@ -55,4 +56,8 @@ internal static class CatalogEfCoreValueConverters
     public static readonly ValueConverter<AlbumStatus, string> AlbumStatusConverter = new(
         s => s.Value,
         v => AlbumStatus.From(v));
+
+    public static readonly ValueConverter<ArtistStatus, string> ArtistStatusConverter = new(
+        s => s.Value,
+        v => ArtistStatus.From(v));
 }
