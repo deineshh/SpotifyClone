@@ -28,6 +28,10 @@ public static class ArtistErrors
         "Artist.NotVerified",
         "The artist has not been verified.");
 
+    public static readonly Error CannotVerify = new(
+        "Artist.CannotVerify",
+        "Artist cannot be verified.");
+
     public static readonly Error Banned = new(
         "Artist.Banned",
         "The specified artist is banned.");

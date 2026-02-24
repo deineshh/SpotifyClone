@@ -1,13 +1,18 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SpotifyClone.Api.Contracts.v1.Catalog.Artists.AddGalleryImage;
 using SpotifyClone.Api.Contracts.v1.Catalog.Artists.Create;
+using SpotifyClone.Api.Contracts.v1.Catalog.Artists.EditProfile;
 using SpotifyClone.Api.Contracts.v1.Catalog.Artists.LinkNewAvatar;
 using SpotifyClone.Api.Contracts.v1.Catalog.Artists.LinkNewBanner;
 using SpotifyClone.Api.Mappers;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.AddGalleryImage;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Ban;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Create;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.EditProfile;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewAvatar;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewBanner;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.RemoveGalleryImageFromArtist;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Unban;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Unverify;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Verify;
@@ -79,7 +84,7 @@ public sealed class ArtistsController(IMediator mediator)
         return Ok(result.Value);
     }
 
-    [EndpointSummary("Link Artist to new Avatar image")]
+    [EndpointSummary("Link Artist to new avatar image")]
     [EndpointDescription("Links an Artist to a new Avatar image.")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -112,7 +117,7 @@ public sealed class ArtistsController(IMediator mediator)
         return NoContent();
     }
 
-    [EndpointSummary("Link Artist to new Banner image")]
+    [EndpointSummary("Link Artist to new banner image")]
     [EndpointDescription("Links an Artist to a new Banner image.")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -236,6 +241,96 @@ public sealed class ArtistsController(IMediator mediator)
     {
         Result<UnverifyArtistCommandResult> result = await Mediator.Send(
             new UnverifyArtistCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Edit Artist profile")]
+    [EndpointDescription("Edits an Artist's profile info.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult> EditArtistProfile(
+        [FromRoute] Guid id,
+        [FromBody] EditArtistProfileRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<EditArtistProfileCommandResult> result = await Mediator.Send(
+            new EditArtistProfileCommand(
+                id,
+                request.Name,
+                request.Bio),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Add gallery image to Artist")]
+    [EndpointDescription("Adds a gallery image to a verified artist.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpPost("{id:guid}/gallery")]
+    public async Task<ActionResult> AddGalleryImageToArtist(
+        [FromRoute] Guid id,
+        [FromBody] AddGalleryImageToArtistRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<AddGalleryImageToArtistCommandResult> result = await Mediator.Send(
+            new AddGalleryImageToArtistCommand(
+                id,
+                request.ImageId,
+                request.ImageWidth,
+                request.ImageHeight,
+                request.ImageFileType,
+                request.ImageSizeInBytes),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Remove gallery image from Artist")]
+    [EndpointDescription("Removes a gallery image from a verified artist.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("{id:guid}/gallery/{imageId:guid}")]
+    public async Task<ActionResult> AddGalleryImageToArtist(
+        [FromRoute] Guid id,
+        [FromRoute] Guid imageId,
+        CancellationToken cancellationToken = default)
+    {
+        Result<RemoveGalleryImageFromArtistCommandResult> result = await Mediator.Send(
+            new RemoveGalleryImageFromArtistCommand(id, imageId),
             cancellationToken);
         if (result.IsFailure)
         {

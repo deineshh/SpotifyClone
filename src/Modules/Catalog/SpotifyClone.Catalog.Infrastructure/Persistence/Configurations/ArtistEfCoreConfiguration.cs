@@ -97,8 +97,9 @@ internal sealed class ArtistEfCoreConfiguration : IEntityTypeConfiguration<Artis
         builder.OwnsMany(x => x.Gallery, galleryBuilder =>
         {
             galleryBuilder.ToTable("artist_gallery_images");
-
             galleryBuilder.WithOwner().HasForeignKey("ArtistId");
+
+            galleryBuilder.HasKey("ArtistId", "ImageId");
 
             galleryBuilder.Property<ArtistId>("ArtistId")
                 .HasColumnName("artist_id");

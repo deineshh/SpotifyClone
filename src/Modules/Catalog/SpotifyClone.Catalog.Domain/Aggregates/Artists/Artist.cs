@@ -4,19 +4,22 @@ using SpotifyClone.Catalog.Domain.Aggregates.Artists.Exceptions;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.Rules;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
+using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Catalog.Domain.Aggregates.Artists;
 
 public sealed class Artist : AggregateRoot<ArtistId, Guid>
 {
-    private readonly HashSet<ArtistGalleryImage> _gallery = [];
+    private const short MaxGalleryImages = 125;
+
+    private readonly List<ArtistGalleryImage> _gallery = [];
 
     public string Name { get; private set; } = null!;
     public string? Bio { get; private set; }
     public ArtistStatus Status { get; private set; } = null!;
     public ArtistAvatarImage? Avatar { get; private set; }
     public ArtistBannerImage? Banner { get; private set; }
-    public IReadOnlySet<ArtistGalleryImage> Gallery => _gallery.AsReadOnly();
+    public IReadOnlyCollection<ArtistGalleryImage> Gallery => _gallery.AsReadOnly();
 
     public static Artist Create(ArtistId id, string name)
     {
@@ -48,6 +51,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         ArgumentNullException.ThrowIfNull(banner);
 
         ThrowIfBanned("Cannot link a new banner image to a banned artist.");
+        ThrowIfNotVerified("Cannot link a new banner image to a non-verified artist.");
 
         if (Banner is not null)
         {
@@ -66,6 +70,11 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         if (Status.IsVerified)
         {
             return;
+        }
+
+        if (Avatar is null)
+        {
+            throw new CannotVerifyArtistDomainException("An artist must have an avatar image to be verified.");
         }
 
         Status = ArtistStatus.Verified;
@@ -94,6 +103,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
     public void UpdateBio(string? bio)
     {
         ThrowIfBanned("Cannot update the bio of a banned artist.");
+        ThrowIfNotVerified("Cannot update the bio of a non-verified artist.");
 
         if (!Status.IsVerified)
         {
@@ -112,20 +122,36 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
     public void AddGalleryImage(ArtistGalleryImage image)
     {
         ThrowIfBanned("Cannot add a gallery image to a banned artist.");
+        ThrowIfNotVerified("Cannot add a new gallery image to a non-verified artist.");
 
         if (!Status.IsVerified)
         {
             throw new ArtistNotVerifiedDomainException("Only verified artists can have gallery images.");
         }
 
+        if (_gallery.Contains(image))
+        {
+            return;
+        }
+
+        if (_gallery.Count >= MaxGalleryImages)
+        {
+            throw new InvalidArtistGalleryImageDomainException(
+                $"Artist cannot have more than {MaxGalleryImages} gallery images.");
+        }
+
         _gallery.Add(image);
+        RaiseDomainEvent(new GalleryImageAddedToArtistDomainEvent(image.ImageId));
     }
 
-    public void RemoveGalleryImage(ArtistGalleryImage image)
+    public void RemoveGalleryImage(ImageId imageId)
     {
-        ThrowIfBanned("Cannot remove a gallery image from a banned artist.");
+        ArtistGalleryImage? image = _gallery.FirstOrDefault(i => i.ImageId == imageId)
+            ?? throw new InvalidArtistGalleryImageDomainException(
+                "Gallery image was not found in artist");
 
         _gallery.Remove(image);
+        RaiseDomainEvent(new GalleryImageRemovedFromArtistDomainEvent(image.ImageId));
     }
 
     public void Ban()
@@ -157,6 +183,14 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         }
     }
 
+    private void ThrowIfNotVerified(string message)
+    {
+        if (!Status.IsVerified)
+        {
+            throw new ArtistNotVerifiedDomainException(message);
+        }
+    }
+
     private Artist(
         ArtistId id,
         string name,
@@ -164,7 +198,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         ArtistStatus status,
         ArtistAvatarImage? avatar,
         ArtistBannerImage? banner,
-        IEnumerable<ArtistGalleryImage> gallery)
+        IReadOnlyCollection<ArtistGalleryImage> gallery)
         : base(id)
     {
         Name = name;
@@ -172,7 +206,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         Status = status;
         Avatar = avatar;
         Banner = banner;
-        _gallery = gallery.ToHashSet();
+        _gallery = gallery.ToList();
     }
 
     private Artist()
