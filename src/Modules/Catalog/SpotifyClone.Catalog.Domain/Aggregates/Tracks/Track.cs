@@ -176,6 +176,8 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
     public void Publish(DateTimeOffset releaseDate)
     {
+        releaseDate = releaseDate.ToUniversalTime();
+
         if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException("This track has been already published.");
@@ -191,7 +193,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             throw new InvalidTrackReleaseDateDomainException("Track release date cannot be in the past.");
         }
 
-        ReleaseDate = releaseDate.ToUniversalTime();
+        ReleaseDate = releaseDate;
         Status = TrackStatus.Published;
     }
 
@@ -232,6 +234,8 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
     public void RescheduleRelease(DateTimeOffset releaseDate)
     {
+        releaseDate = releaseDate.ToUniversalTime();
+
         if (!Status.IsPublished)
         {
             throw new TrackNotPublishedDomainException("Cannot reschedule the release of an unpublished track.");
@@ -248,7 +252,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             throw new InvalidTrackReleaseDateDomainException("Track release date cannot be in the past.");
         }
 
-        ReleaseDate = releaseDate.ToUniversalTime();
+        ReleaseDate = releaseDate;
     }
 
     public void MarkAsExplicit()

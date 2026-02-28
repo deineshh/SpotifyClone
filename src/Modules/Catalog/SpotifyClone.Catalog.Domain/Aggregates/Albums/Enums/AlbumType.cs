@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.Exceptions;
+﻿using System.Text.RegularExpressions;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums.Exceptions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
 namespace SpotifyClone.Catalog.Domain.Aggregates.Albums.Enums;
@@ -45,12 +46,12 @@ public sealed record AlbumType : ValueObject
     }
 
     public static AlbumType From(string value)
-        => value.ToLowerInvariant() switch
+        => Regex.Replace(value.Trim().ToLowerInvariant(), @"[^0-9A-Za-z]", string.Empty) switch
     {
         "single" => Single,
         "empty" => Empty,
-        "extended_play" => ExtendedPlay,
-        "long_play" => LongPlay,
+        "extendedplay" => ExtendedPlay,
+        "longplay" => LongPlay,
         _ => throw new InvalidAlbumTypeDomainException($"Invalid album type: {value}.")
     };
 }

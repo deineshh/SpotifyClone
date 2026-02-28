@@ -91,15 +91,13 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
 
         Response.Cookies.Append("refreshToken", loginResultData.RefreshToken, _cookieOptions);
 
-        return Created(
-            uri: new Uri($"/api/auth/register/{registrationResult.Value}"),
-            value: new RegisterUserResponse(
-                registrationResultData.UserId,
-                registrationResultData.Email,
-                registrationResultData.DisplayName,
-                registrationResultData.BirthDate,
-                registrationResultData.Gender,
-                loginResultData.AccessToken));
+        return Ok(new RegisterUserResponse(
+            registrationResultData.UserId,
+            registrationResultData.Email,
+            registrationResultData.DisplayName,
+            registrationResultData.BirthDate,
+            registrationResultData.Gender,
+            loginResultData.AccessToken));
     }
 
     [HttpPost("login")]

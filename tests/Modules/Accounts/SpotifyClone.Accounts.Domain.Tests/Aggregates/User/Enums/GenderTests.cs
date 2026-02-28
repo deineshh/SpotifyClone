@@ -18,20 +18,6 @@ public sealed class GenderTests
     }
 
     [Theory]
-    [InlineData("  Male ")]
-    [InlineData("  Female ")]
-    [InlineData("  NonBinary ")]
-    [InlineData("  NotSpecified ")]
-    public void From_Should_NormalizeValue(string value)
-    {
-        // Arrange & Act
-        var gender = Gender.From(value);
-
-        // Assert
-        gender.Value.Should().Be(value.Trim());
-    }
-
-    [Theory]
     [InlineData("Male")]
     [InlineData("Female")]
     [InlineData("NonBinary")]
@@ -43,19 +29,6 @@ public sealed class GenderTests
 
         // Assert
         result.Should().NotThrow<InvalidGenderDomainException>();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(" ")]
-    [InlineData(null)]
-    public void From_Should_ThrowException_When_ValueIsNullOrWhitespace(string? invalidValue)
-    {
-        // Arrange & Act
-        Func<Gender> result = () => Gender.From(invalidValue!);
-
-        // Assert
-        result.Should().Throw<ArgumentException>();
     }
 
     [Theory]

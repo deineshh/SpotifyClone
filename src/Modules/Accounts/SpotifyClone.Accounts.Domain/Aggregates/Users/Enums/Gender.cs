@@ -1,22 +1,16 @@
-﻿using SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
+﻿using System.Text.RegularExpressions;
+using SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
 namespace SpotifyClone.Accounts.Domain.Aggregates.Users.Enums;
 
 public sealed record Gender : ValueObject
 {
-    public static readonly Gender Male = new("Male");
-    public static readonly Gender Female = new("Female");
-    public static readonly Gender NonBinary = new("NonBinary");
-    public static readonly Gender NotSpecified = new("NotSpecified");
-
-    private static readonly HashSet<string> Supported =
-    [
-        "Male",
-        "Female",
-        "NonBinary",
-        "NotSpecified"
-    ];
+    public static readonly Gender Male = new("male");
+    public static readonly Gender Female = new("female");
+    public static readonly Gender NonBinary = new("non_binary");
+    public static readonly Gender SomethingElse = new("something_else");
+    public static readonly Gender NotSpecified = new("not_specified");
 
     public string Value { get; }
 
@@ -24,16 +18,13 @@ public sealed record Gender : ValueObject
         => Value = value;
 
     public static Gender From(string value)
+    => Regex.Replace(value.Trim().ToLowerInvariant(), @"[^0-9A-Za-z]", string.Empty) switch
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(value);
-
-        string normalized = value.Trim();
-
-        if (!Supported.Contains(normalized))
-        {
-            throw new InvalidGenderDomainException($"Gender {normalized} is not supported.");
-        }
-
-        return new Gender(normalized);
-    }
+        "male" => Male,
+        "female" => Female,
+        "nonbinary" => NonBinary,
+        "somethingelse" => SomethingElse,
+        "notspecified" => NotSpecified,
+        _ => throw new InvalidGenderDomainException($"Gender {value} is not supported or invalid.")
+    };
 }

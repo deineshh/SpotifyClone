@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Artists.Exceptions;
+﻿using System.Text.RegularExpressions;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists.Exceptions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
 namespace SpotifyClone.Catalog.Domain.Aggregates.Artists.Enums;
@@ -18,9 +19,9 @@ public sealed record ArtistStatus : ValueObject
         => Value = value;
 
     public static ArtistStatus From(string value)
-        => value.ToLowerInvariant() switch
+        => Regex.Replace(value.Trim().ToLowerInvariant(), @"[^0-9A-Za-z]", string.Empty) switch
         {
-            "not_verified" => NotVerified,
+            "notverified" => NotVerified,
             "verified" => Verified,
             "banned" => Banned,
             _ => throw new InvalidArtistStatusDomainException($"Invalid artist status value: {value}")

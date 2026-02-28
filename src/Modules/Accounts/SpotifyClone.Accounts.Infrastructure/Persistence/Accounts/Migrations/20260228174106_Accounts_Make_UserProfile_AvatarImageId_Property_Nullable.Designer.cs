@@ -12,8 +12,8 @@ using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
 {
     [DbContext(typeof(AccountsAppDbContext))]
-    [Migration("20260210200536_Accounts_Add_OutboxMessages_Table")]
-    partial class Accounts_Add_OutboxMessages_Table
+    [Migration("20260228174106_Accounts_Make_UserProfile_AvatarImageId_Property_Nullable")]
+    partial class Accounts_Make_UserProfile_AvatarImageId_Property_Nullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -127,15 +127,14 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProcessedOn")
-                        .HasFilter("[ProcessedOnUtc] IS NULL");
+                    b.HasIndex("ProcessedOn");
 
                     b.ToTable("outbox_messages", "accounts");
                 });
 
             modelBuilder.Entity("SpotifyClone.Accounts.Domain.Aggregates.Users.UserProfile", b =>
                 {
-                    b.OwnsOne("SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects.AvatarImage", "AvatarImage", b1 =>
+                    b.OwnsOne("SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects.AvatarImage", "Avatar", b1 =>
                         {
                             b1.Property<Guid>("UserProfileId")
                                 .HasColumnType("uuid");
@@ -145,9 +144,6 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
                                 .HasColumnName("avatar_image_id");
 
                             b1.HasKey("UserProfileId");
-
-                            b1.HasIndex("ImageId")
-                                .IsUnique();
 
                             b1.ToTable("user_profiles", "accounts");
 
@@ -160,21 +156,20 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
                                         .HasColumnType("uuid");
 
                                     b2.Property<string>("FileType")
+                                        .IsRequired()
                                         .HasMaxLength(10)
                                         .HasColumnType("character varying(10)")
                                         .HasColumnName("avatar_file_type");
 
-                                    b2.Property<int?>("Height")
-                                        .HasMaxLength(750)
+                                    b2.Property<int>("Height")
                                         .HasColumnType("integer")
                                         .HasColumnName("avatar_height");
 
-                                    b2.Property<long?>("SizeInBytes")
+                                    b2.Property<long>("SizeInBytes")
                                         .HasColumnType("bigint")
                                         .HasColumnName("avatar_size_in_bytes");
 
-                                    b2.Property<int?>("Width")
-                                        .HasMaxLength(750)
+                                    b2.Property<int>("Width")
                                         .HasColumnType("integer")
                                         .HasColumnName("avatar_width");
 
@@ -186,11 +181,10 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
                                         .HasForeignKey("AvatarImageUserProfileId");
                                 });
 
-                            b1.Navigation("Metadata")
-                                .IsRequired();
+                            b1.Navigation("Metadata");
                         });
 
-                    b.Navigation("AvatarImage");
+                    b.Navigation("Avatar");
                 });
 #pragma warning restore 612, 618
         }

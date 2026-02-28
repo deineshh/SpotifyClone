@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
+﻿using System.Text.RegularExpressions;
+using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Exceptions;
 
 namespace SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.Enums;
@@ -19,7 +20,7 @@ public sealed record AudioAssetStatus : ValueObject
         => Value = value;
 
     public static AudioAssetStatus From(string value)
-        => value.ToLowerInvariant() switch
+        => Regex.Replace(value.ToLowerInvariant(), @"[^0-9A-Za-z]", string.Empty) switch
         {
             "uploading" => Uploading,
             "uploaded" => Uploaded,

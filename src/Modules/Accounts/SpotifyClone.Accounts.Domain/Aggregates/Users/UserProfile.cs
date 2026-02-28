@@ -12,7 +12,7 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
     public string DisplayName { get; private set; }
     public DateTimeOffset BirthDate { get; private set; }
     public Gender Gender { get; private set; }
-    public AvatarImage? AvatarImage { get; private set; }
+    public AvatarImage? Avatar { get; private set; }
 
     private UserProfile()
     {
@@ -27,12 +27,14 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
         DisplayName = displayName;
         BirthDate = birthDate;
         Gender = gender;
-        AvatarImage = avatarImage;
+        Avatar = avatarImage;
     }
 
     public static UserProfile Create(
         UserId id, string displayName, DateTimeOffset birthDate, Gender gender)
     {
+        birthDate = birthDate.ToUniversalTime();
+
         DisplayNameRules.Validate(displayName);
         BirthDateRules.Validate(birthDate);
 

@@ -7,14 +7,14 @@ public static class BirthDateRules
     public const short MinimumAge = 13;
     public const short MaximumAge = 120;
 
-    public static void Validate(DateTimeOffset birthDate)
+    public static void Validate(DateTimeOffset birthDateUniversal)
     {
-        if (birthDate > DateTimeOffset.UtcNow)
+        if (birthDateUniversal > DateTimeOffset.UtcNow)
         {
             throw new InvalidBirthDateDomainException("Birth date cannot be in the future.");
         }
 
-        int age = CalculateAge(birthDate);
+        int age = CalculateAge(birthDateUniversal);
 
         if (age < MinimumAge)
         {

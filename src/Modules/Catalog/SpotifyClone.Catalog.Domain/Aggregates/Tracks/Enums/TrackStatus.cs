@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Exceptions;
+﻿using System.Text.RegularExpressions;
+using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Exceptions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
 namespace SpotifyClone.Catalog.Domain.Aggregates.Tracks.Enums;
@@ -20,10 +21,10 @@ public sealed record TrackStatus : ValueObject
         => Value = value;
 
     public static TrackStatus From(string value)
-        => value.ToLowerInvariant() switch
+        => Regex.Replace(value.Trim().ToLowerInvariant(), @"[^0-9A-Za-z]", string.Empty) switch
         {
             "draft" => Draft,
-            "ready_to_publish" => ReadyToPublish,
+            "readytopublish" => ReadyToPublish,
             "published" => Published,
             "archived" => Archived,
             _ => throw new InvalidTrackStatusDomainException($"Invalid track status value: {value}")

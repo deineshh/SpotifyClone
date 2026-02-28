@@ -72,6 +72,8 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
 
     public void Publish(DateTimeOffset releaseDate)
     {
+        releaseDate = releaseDate.ToUniversalTime();
+
         if (Status.IsPublished)
         {
             throw new AlbumAlreadyPublishedDomainException("This album has been already published.");
@@ -87,7 +89,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new InvalidAlbumReleaseDateDomainException("Album release date cannot be in the past.");
         }
 
-        ReleaseDate = releaseDate.ToUniversalTime();
+        ReleaseDate = releaseDate;
         Status = AlbumStatus.Published;
 
         RaiseDomainEvent(new AlbumPublishedDomainEvent(Id, Tracks, releaseDate));
@@ -261,6 +263,8 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
 
     public void RescheduleRelease(DateTimeOffset releaseDate)
     {
+        releaseDate = releaseDate.ToUniversalTime();
+
         if (!Status.IsPublished)
         {
             throw new AlbumNotPublishedDomainException("Cannot reschedule the release of an unpublished album.");
@@ -277,7 +281,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new InvalidAlbumReleaseDateDomainException("Album release date cannot be in the past.");
         }
 
-        ReleaseDate = releaseDate.ToUniversalTime();
+        ReleaseDate = releaseDate;
         RaiseDomainEvent(new AlbumReleaseRescheduledDomainEvent(Id, releaseDate));
     }
 
