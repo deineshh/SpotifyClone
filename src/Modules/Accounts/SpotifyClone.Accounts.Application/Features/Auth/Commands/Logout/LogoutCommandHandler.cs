@@ -1,7 +1,8 @@
 ﻿using SpotifyClone.Accounts.Application.Abstractions;
-using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
+using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.Logout;
 
@@ -18,7 +19,7 @@ internal sealed class LogoutCommandHandler(
         CancellationToken cancellationToken)
     {
         Result revokeResult = await _unit.RefreshTokens.RevokeAllAsync(
-            _currentUser.UserId,
+            UserId.From(_currentUser.UserId),
             replacedByTokenHash: null,
             cancellationToken);
 

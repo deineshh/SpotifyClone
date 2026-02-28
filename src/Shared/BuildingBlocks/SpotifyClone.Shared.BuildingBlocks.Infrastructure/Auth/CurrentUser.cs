@@ -1,9 +1,8 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using SpotifyClone.Accounts.Application.Abstractions.Services;
-using SpotifyClone.Shared.Kernel.IDs;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
 
-namespace SpotifyClone.Accounts.Infrastructure.Auth;
+namespace SpotifyClone.Shared.BuildingBlocks.Infrastructure.Auth;
 
 internal sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUser
 {
@@ -12,7 +11,7 @@ internal sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : IC
     public bool IsAuthenticated =>
         _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated == true;
 
-    public UserId UserId
+    public Guid UserId
     {
         get
         {
@@ -22,7 +21,7 @@ internal sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : IC
                     .FindFirst(ClaimTypes.NameIdentifier))
                 ?? throw new UnauthorizedAccessException("User is not authenticated.");
 
-            return UserId.From(Guid.Parse(subClaim.Value));
+            return Guid.Parse(subClaim.Value);
         }
     }
 }

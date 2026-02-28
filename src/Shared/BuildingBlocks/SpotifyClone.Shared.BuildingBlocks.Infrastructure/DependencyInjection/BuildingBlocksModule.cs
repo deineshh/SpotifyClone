@@ -2,10 +2,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using SpotifyClone.Shared.BuildingBlocks.Application;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Behaviors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Configuration;
 using SpotifyClone.Shared.BuildingBlocks.Application.Email;
+using SpotifyClone.Shared.BuildingBlocks.Infrastructure.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.Messaging;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.Services;
 
@@ -32,6 +34,7 @@ public static class BuildingBlocksModule
 
         services.AddSingleton(sp => sp.GetRequiredService<IOptions<ApplicationSettings>>().Value);
 
+        services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IEmailSender, SmtpEmailSender>();
 
         services.AddTransient<IBackgroundJobService, HangfireJobService>();

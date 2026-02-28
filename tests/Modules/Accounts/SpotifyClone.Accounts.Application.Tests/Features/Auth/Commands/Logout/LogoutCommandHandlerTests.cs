@@ -1,8 +1,8 @@
 ﻿using Moq;
 using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Repositories;
-using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.Logout;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
@@ -35,7 +35,7 @@ public sealed class LogoutCommandHandlerTests
     public async Task Handle_Should_RevokeAllRefreshTokens_And_ReturnSuccess()
     {
         // Arrange
-        var userId = UserId.From(Guid.NewGuid());
+        var userId = Guid.NewGuid();
 
         _currentUserMock
             .Setup(c => c.UserId)
@@ -43,7 +43,7 @@ public sealed class LogoutCommandHandlerTests
 
         _refreshTokenRepoMock
             .Setup(r => r.RevokeAllAsync(
-                userId,
+                UserId.From(userId),
                 null,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
@@ -58,7 +58,7 @@ public sealed class LogoutCommandHandlerTests
 
         _refreshTokenRepoMock.Verify(
             r => r.RevokeAllAsync(
-                userId,
+                UserId.From(userId),
                 null,
                 It.IsAny<CancellationToken>()),
             Times.Once);

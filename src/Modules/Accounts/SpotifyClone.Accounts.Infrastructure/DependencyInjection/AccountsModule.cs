@@ -11,7 +11,6 @@ using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Behaviors;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
-using SpotifyClone.Accounts.Infrastructure.Auth;
 using SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
 using SpotifyClone.Accounts.Infrastructure.Auth.Sms;
 using SpotifyClone.Accounts.Infrastructure.Persistence;
@@ -69,7 +68,6 @@ public static class AccountsModule
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AccountsTransactionalPipelineBehavior<,>));
         services.AddTransient<ITokenHasher, Sha256TokenHasher>();
         services.AddTransient<ITokenService, JwtTokenService>();
-        services.AddTransient<ICurrentUser, CurrentUser>();
         services.AddTransient<IAccountVerificationService, IdentityAccountVerificationService>();
         services.AddTransient<ISmsSender, LoggerSmsSender>();
 
