@@ -10,19 +10,19 @@ namespace SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetDetails;
 internal sealed class GetTrackDetailsQueryHandler(
     ITrackReadService trackReadService,
     ILogger<GetTrackDetailsQueryHandler> logger)
-    : IQueryHandler<GetTrackDetailsQuery, TrackDetailsResponse>
+    : IQueryHandler<GetTrackDetailsQuery, TrackDetails>
 {
     private readonly ITrackReadService _trackReadService = trackReadService;
     private readonly ILogger<GetTrackDetailsQueryHandler> _logger = logger;
 
-    public async Task<Result<TrackDetailsResponse>> Handle(
+    public async Task<Result<TrackDetails>> Handle(
         GetTrackDetailsQuery request,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "Getting Track info {TrackId}", request.TrackId);
 
-        TrackDetailsResponse? track = await _trackReadService.GetDetailsAsync(
+        TrackDetails? track = await _trackReadService.GetDetailsAsync(
             TrackId.From(request.TrackId),
             cancellationToken);
 
@@ -31,7 +31,7 @@ internal sealed class GetTrackDetailsQueryHandler(
             _logger.LogWarning(
                 "Track {TrackId} not found", request.TrackId);
 
-            return Result.Failure<TrackDetailsResponse>(TrackErrors.NotFound);
+            return Result.Failure<TrackDetails>(TrackErrors.NotFound);
         }
 
         return track;

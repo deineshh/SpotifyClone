@@ -53,14 +53,21 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             throw new AlbumAlreadyPublishedDomainException("Cannot link a new cover to a published album.");
         }
 
-        if (Cover is not null)
-        {
-            RaiseDomainEvent(new AlbumUnlinkedFromCoverImageDomainEvent(Cover.ImageId));
-            Cover = null;
-        }
+        TryUnlinkCover();
 
         Cover = cover;
         RaiseDomainEvent(new AlbumLinkedToCoverImageDomainEvent(Cover.ImageId));
+    }
+
+    public void TryUnlinkCover()
+    {
+        if (Cover is null)
+        {
+            return;
+        }
+
+        RaiseDomainEvent(new AlbumUnlinkedFromCoverImageDomainEvent(Cover.ImageId));
+        Cover = null;
     }
 
     public void Publish(DateTimeOffset releaseDate)
@@ -291,6 +298,8 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         {
             RaiseDomainEvent(new AlbumDeletedDomainEvent(Id));
         }
+
+        TryUnlinkCover();
     }
 
     internal void MarkAsDraft()

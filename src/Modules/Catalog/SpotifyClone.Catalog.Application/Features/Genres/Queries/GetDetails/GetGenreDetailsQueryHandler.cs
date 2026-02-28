@@ -10,19 +10,19 @@ namespace SpotifyClone.Catalog.Application.Features.Genres.Queries.GetDetails;
 internal sealed class GetGenreDetailsQueryHandler(
     IGenreReadService genreReadService,
     ILogger<GetGenreDetailsQueryHandler> logger)
-    : IQueryHandler<GetGenreDetailsQuery, GenreDetailsResponse>
+    : IQueryHandler<GetGenreDetailsQuery, GenreDetails>
 {
     private readonly IGenreReadService _genreReadService = genreReadService;
     private readonly ILogger<GetGenreDetailsQueryHandler> _logger = logger;
 
-    public async Task<Result<GenreDetailsResponse>> Handle(
+    public async Task<Result<GenreDetails>> Handle(
         GetGenreDetailsQuery request,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "Getting Genre info {GenreId}", request.GenreId);
 
-        GenreDetailsResponse? genre = await _genreReadService.GetDetailsAsync(
+        GenreDetails? genre = await _genreReadService.GetDetailsAsync(
             GenreId.From(request.GenreId),
             cancellationToken);
 
@@ -31,7 +31,7 @@ internal sealed class GetGenreDetailsQueryHandler(
             _logger.LogWarning(
                 "Genre {GenreId} not found", request.GenreId);
 
-            return Result.Failure<GenreDetailsResponse>(GenreErrors.NotFound);
+            return Result.Failure<GenreDetails>(GenreErrors.NotFound);
         }
 
         return genre;

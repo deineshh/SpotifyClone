@@ -4,4 +4,4 @@ namespace SpotifyClone.Catalog.Application.Features.Moods.Queries.GetDetails;
 
 public sealed record GetMoodDetailsQuery(
     Guid MoodId)
-    : IQuery<MoodDetailsResponse>;
+    : IQuery<MoodDetails>;

@@ -24,7 +24,7 @@ internal sealed class LinkNewAvatarToArtistCommandHandler(
             cancellationToken);
         if (artist is null)
         {
-            return Result.Failure<LinkNewAvatarToArtistCommandResult>(AlbumErrors.NotFound);
+            return Result.Failure<LinkNewAvatarToArtistCommandResult>(ArtistErrors.NotFound);
         }
 
         artist.LinkNewAvatar(new ArtistAvatarImage(

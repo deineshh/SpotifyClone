@@ -10,19 +10,19 @@ namespace SpotifyClone.Catalog.Application.Features.Moods.Queries.GetDetails;
 internal sealed class GetMoodDetailsQueryHandler(
     IMoodReadService moodReadService,
     ILogger<GetMoodDetailsQueryHandler> logger)
-    : IQueryHandler<GetMoodDetailsQuery, MoodDetailsResponse>
+    : IQueryHandler<GetMoodDetailsQuery, MoodDetails>
 {
     private readonly IMoodReadService _moodReadService = moodReadService;
     private readonly ILogger<GetMoodDetailsQueryHandler> _logger = logger;
 
-    public async Task<Result<MoodDetailsResponse>> Handle(
+    public async Task<Result<MoodDetails>> Handle(
         GetMoodDetailsQuery request,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "Getting Mood info {MoodId}", request.MoodId);
 
-        MoodDetailsResponse? mood = await _moodReadService.GetDetailsAsync(
+        MoodDetails? mood = await _moodReadService.GetDetailsAsync(
             MoodId.From(request.MoodId),
             cancellationToken);
 
@@ -31,7 +31,7 @@ internal sealed class GetMoodDetailsQueryHandler(
             _logger.LogWarning(
                 "Mood {MoodId} not found", request.MoodId);
 
-            return Result.Failure<MoodDetailsResponse>(MoodErrors.NotFound);
+            return Result.Failure<MoodDetails>(MoodErrors.NotFound);
         }
 
         return mood;

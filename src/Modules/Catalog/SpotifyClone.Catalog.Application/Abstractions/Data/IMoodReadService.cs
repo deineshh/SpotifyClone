@@ -5,7 +5,11 @@ namespace SpotifyClone.Catalog.Application.Abstractions.Data;
 
 public interface IMoodReadService
 {
-    Task<MoodDetailsResponse?> GetDetailsAsync(
+    Task<bool> ExistsAsync(
+        MoodId id,
+        CancellationToken cancellationToken = default);
+
+    Task<MoodDetails?> GetDetailsAsync(
         MoodId id,
         CancellationToken cancellationToken = default);
 }

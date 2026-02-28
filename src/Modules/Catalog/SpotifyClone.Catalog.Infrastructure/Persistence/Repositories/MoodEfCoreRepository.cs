@@ -15,6 +15,16 @@ internal sealed class MoodEfCoreRepository(CatalogAppDbContext context)
         CancellationToken cancellationToken = default)
         => await _moods.AddAsync(mood, cancellationToken);
 
+    public async Task<bool> Exists(
+        MoodId id,
+        CancellationToken cancellationToken = default)
+        => await _moods.AnyAsync(a => a.Id == id, cancellationToken);
+
+    public async Task<bool> Exists(
+        IEnumerable<MoodId> ids,
+        CancellationToken cancellationToken = default)
+        => await _moods.CountAsync(a => ids.Contains(a.Id), cancellationToken) == ids.Count();
+
     public async Task<Mood?> GetByIdAsync(
         MoodId id,
         CancellationToken cancellationToken = default)

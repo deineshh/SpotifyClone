@@ -2,6 +2,7 @@
 using SpotifyClone.Catalog.Application.Abstractions.Data;
 using SpotifyClone.Catalog.Application.Features.Artists.Queries;
 using SpotifyClone.Catalog.Application.Models;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
 
@@ -13,28 +14,35 @@ internal sealed class ArtistEfCoreReadService(
 {
     private readonly CatalogAppDbContext _context = context;
 
-    public async Task<ArtistDetailsResponse?> GetDetailsAsync(
+    public async Task<bool> ExistsAsync(
         ArtistId id,
         CancellationToken cancellationToken = default)
         => await _context.Artists
-        .Where(a => a.Id == id)
-        .Select(a => new ArtistDetailsResponse(
+        .AnyAsync(a => a.Status != ArtistStatus.Banned && a.Id == id, cancellationToken);
+
+    public async Task<ArtistDetails?> GetDetailsAsync(
+        ArtistId id,
+        CancellationToken cancellationToken = default)
+        => await _context.Artists
+        .Where(a => a.Status != ArtistStatus.Banned && a.Id == id)
+        .Select(a => new ArtistDetails(
+            a.Id.Value,
             a.Name,
             a.Bio,
             a.Status.Value,
-            a.Avatar == null ? null : new ImageMetadataDetailsResult(
+            a.Avatar == null ? null : new ImageMetadataDetails(
                 a.Avatar.ImageId.Value,
                 a.Avatar.Metadata.Width,
                 a.Avatar.Metadata.Height,
                 a.Avatar.Metadata.FileType.Value,
                 a.Avatar.Metadata.SizeInBytes),
-            a.Banner == null ? null : new ImageMetadataDetailsResult(
+            a.Banner == null ? null : new ImageMetadataDetails(
                 a.Banner.ImageId.Value,
                 a.Banner.Metadata.Width,
                 a.Banner.Metadata.Height,
                 a.Banner.Metadata.FileType.Value,
                 a.Banner.Metadata.SizeInBytes),
-            a.Gallery.Select(img => new ImageMetadataDetailsResult(
+            a.Gallery.Select(img => new ImageMetadataDetails(
                 img.ImageId!.Value,
                 img.Metadata.Width,
                 img.Metadata.Height,

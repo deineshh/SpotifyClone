@@ -117,6 +117,18 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
                 "Cannot mark track as ready to publish because there's no audio file linked to it.");
         }
 
+        if (_genres.Count <= 0)
+        {
+            throw new InvalidTrackGenresDomainException(
+                "A track must have at least one genre.");
+        }
+
+        if (_moods.Count <= 0)
+        {
+            throw new InvalidTrackMoodsDomainException(
+                "A track must have at least one mood.");
+        }
+
         Status = TrackStatus.ReadyToPublish;
         RaiseDomainEvent(new TrackMarkedAsReadyToPublishDomainEvent(AlbumId));
     }

@@ -13,14 +13,21 @@ internal sealed class MoodEfCoreReadService(
 {
     private readonly CatalogAppDbContext _context = context;
 
-    public Task<MoodDetailsResponse?> GetDetailsAsync(
+    public async Task<bool> ExistsAsync(
+        MoodId id,
+        CancellationToken cancellationToken = default)
+        => await _context.Moods
+        .AnyAsync(m => m.Id == id, cancellationToken);
+
+    public Task<MoodDetails?> GetDetailsAsync(
         MoodId id,
         CancellationToken cancellationToken = default)
         => _context.Moods
         .Where(m => m.Id == id)
-        .Select(m => new MoodDetailsResponse(
+        .Select(m => new MoodDetails(
+            m.Id.Value,
             m.Name,
-            new ImageMetadataDetailsResult(
+            m.Cover == null ? null : new ImageMetadataDetails(
                 m.Cover.ImageId.Value,
                 m.Cover.Metadata.Width,
                 m.Cover.Metadata.Height,

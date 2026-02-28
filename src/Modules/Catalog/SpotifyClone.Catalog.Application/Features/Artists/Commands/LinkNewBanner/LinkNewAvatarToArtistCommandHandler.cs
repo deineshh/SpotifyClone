@@ -24,7 +24,7 @@ internal sealed class LinkNewBannerToArtistCommandHandler(
             cancellationToken);
         if (artist is null)
         {
-            return Result.Failure<LinkNewBannerToArtistCommandResult>(AlbumErrors.NotFound);
+            return Result.Failure<LinkNewBannerToArtistCommandResult>(ArtistErrors.NotFound);
         }
 
         artist.LinkNewBanner(new ArtistBannerImage(

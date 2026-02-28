@@ -59,16 +59,16 @@ public sealed class TracksController(IMediator mediator)
 
     [EndpointSummary("Get Track Details")]
     [EndpointDescription("Returns all the necessary Track details.")]
-    [ProducesResponseType(typeof(TrackDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(TrackDetails), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<TrackDetailsResponse>> GetTrackDetails(
+    public async Task<ActionResult<TrackDetails>> GetTrackDetails(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
-        Result<TrackDetailsResponse> result = await Mediator.Send(
+        Result<TrackDetails> result = await Mediator.Send(
             new GetTrackDetailsQuery(id),
             cancellationToken);
         if (result.IsFailure)

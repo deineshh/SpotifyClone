@@ -15,6 +15,16 @@ internal sealed class GenreEfCoreRepository(CatalogAppDbContext context)
         CancellationToken cancellationToken = default)
         => await _genres.AddAsync(genre, cancellationToken);
 
+    public async Task<bool> Exists(
+        GenreId id,
+        CancellationToken cancellationToken = default)
+        => await _genres.AnyAsync(a => a.Id == id, cancellationToken);
+
+    public async Task<bool> Exists(
+        IEnumerable<GenreId> ids,
+        CancellationToken cancellationToken = default)
+        => await _genres.CountAsync(a => ids.Contains(a.Id), cancellationToken) == ids.Count();
+
     public async Task<Genre?> GetByIdAsync(
         GenreId id,
         CancellationToken cancellationToken = default)

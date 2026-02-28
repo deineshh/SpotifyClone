@@ -5,6 +5,7 @@ using SpotifyClone.Catalog.Application.Features.Artists.Queries;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
 using SpotifyClone.Catalog.Application.Models;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
 
 namespace SpotifyClone.Catalog.Infrastructure.Persistence.Queries;
@@ -15,17 +16,18 @@ internal sealed class AlbumEfCoreReadService(
 {
     private readonly CatalogAppDbContext _context = context;
 
-    public async Task<AlbumDetailsResponse?> GetDetailsAsync(
+    public async Task<AlbumDetails?> GetDetailsAsync(
         AlbumId id,
         CancellationToken cancellationToken = default)
         => await _context.Albums
         .Where(a => a.Id == id)
-        .Select(a => new AlbumDetailsResponse(
+        .Select(a => new AlbumDetails(
+            a.Id.Value,
             a.Title,
             a.ReleaseDate,
             a.Status.Value,
             a.Type.Value,
-            a.Cover == null ? null : new ImageMetadataDetailsResult(
+            a.Cover == null ? null : new ImageMetadataDetails(
                 a.Cover.ImageId.Value,
                 a.Cover.Metadata.Width,
                 a.Cover.Metadata.Height,
@@ -33,10 +35,11 @@ internal sealed class AlbumEfCoreReadService(
                 a.Cover.Metadata.SizeInBytes),
             _context.Artists
                 .Where(artist => a.MainArtists.Contains(artist.Id))
-                .Select(artist => new ArtistSummaryResponse(
+                .Select(artist => new ArtistSummary(
+                    artist.Id.Value,
                     artist.Name,
                     artist.Status.Value,
-                    artist.Avatar == null ? null : new ImageMetadataDetailsResult(
+                    artist.Avatar == null ? null : new ImageMetadataDetails(
                         artist.Avatar.ImageId.Value,
                         artist.Avatar.Metadata.Width,
                         artist.Avatar.Metadata.Height,
@@ -45,7 +48,8 @@ internal sealed class AlbumEfCoreReadService(
                 ).ToList(),
             _context.Tracks
                 .Where(t => a.Tracks.Contains(t.Id))
-                .Select(t => new TrackSummaryResponse(
+                .Select(t => new TrackSummary(
+                    t.Id.Value,
                     t.Title,
                     t.Duration,
                     t.ReleaseDate,
@@ -55,4 +59,24 @@ internal sealed class AlbumEfCoreReadService(
                     t.AlbumId == null ? null : t.AlbumId.Value))
                 .ToList()))
         .SingleOrDefaultAsync(cancellationToken);
+
+    public async Task<IEnumerable<AlbumSummary>> GetAllByArtistIdAsync(
+        ArtistId artistId,
+        CancellationToken cancellationToken = default)
+        => await _context.Albums
+        .Where(a =>
+            a.MainArtists.Any(a => a.Value == artistId.Value))
+        .Select(a => new AlbumSummary(
+            a.Id.Value,
+            a.Title,
+            a.ReleaseDate,
+            a.Status.Value,
+            a.Type.Value,
+            a.Cover == null ? null : new ImageMetadataDetails(
+                a.Cover.ImageId.Value,
+                a.Cover.Metadata.Width,
+                a.Cover.Metadata.Height,
+                a.Cover.Metadata.FileType.Value,
+                a.Cover.Metadata.SizeInBytes)))
+        .ToListAsync(cancellationToken);
 }

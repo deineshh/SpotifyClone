@@ -40,6 +40,22 @@ internal sealed class CreateTrackCommandHandler(
             return Result.Failure<CreateTrackCommandResult>(ArtistErrors.NotFound);
         }
 
+        bool genresExist = await _unit.Genres.Exists(
+            request.Genres.Select(g => GenreId.From(g)),
+            cancellationToken);
+        if (!genresExist)
+        {
+            return Result.Failure<CreateTrackCommandResult>(GenreErrors.NotFound);
+        }
+
+        bool moodsExist = await _unit.Moods.Exists(
+            request.Moods.Select(g => MoodId.From(g)),
+            cancellationToken);
+        if (!moodsExist)
+        {
+            return Result.Failure<CreateTrackCommandResult>(MoodErrors.NotFound);
+        }
+
         var track = Track.Create(
             trackId,
             request.Title,

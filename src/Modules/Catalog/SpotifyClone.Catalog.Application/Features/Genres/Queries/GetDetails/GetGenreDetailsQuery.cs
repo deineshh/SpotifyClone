@@ -4,4 +4,4 @@ namespace SpotifyClone.Catalog.Application.Features.Genres.Queries.GetDetails;
 
 public sealed record GetGenreDetailsQuery(
     Guid GenreId)
-    : IQuery<GenreDetailsResponse>;
+    : IQuery<GenreDetails>;

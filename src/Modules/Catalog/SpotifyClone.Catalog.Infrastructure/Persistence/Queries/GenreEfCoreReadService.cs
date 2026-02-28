@@ -13,14 +13,21 @@ internal sealed class GenreEfCoreReadService(
 {
     private readonly CatalogAppDbContext _context = context;
 
-    public async Task<GenreDetailsResponse?> GetDetailsAsync(
+    public async Task<bool> ExistsAsync(
+        GenreId id,
+        CancellationToken cancellationToken = default)
+        => await _context.Genres
+        .AnyAsync(g => g.Id == id, cancellationToken);
+
+    public async Task<GenreDetails?> GetDetailsAsync(
         GenreId id,
         CancellationToken cancellationToken = default)
         => await _context.Genres
         .Where(g => g.Id == id)
-        .Select(g => new GenreDetailsResponse(
+        .Select(g => new GenreDetails(
+            g.Id.Value,
             g.Name,
-            new ImageMetadataDetailsResult(
+            g.Cover == null ? null : new ImageMetadataDetails(
                 g.Cover.ImageId.Value,
                 g.Cover.Metadata.Width,
                 g.Cover.Metadata.Height,

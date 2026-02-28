@@ -52,57 +52,72 @@ Base URL: `/api/v1`
 
 | Method   | Endpoint                                | Description                  | Request Body                        | Response                             |
 | :------- | :-------------------------------------- | :--------------------------- | :---------------------------------- | :----------------------------------- |
-| `POST`   | `/catalog/tracks`                       | Create a new track draft     | `CreateTrackRequest`                | `CreateTrackResponse`                |
-| `POST`   | `/catalog/tracks/publish`               | Publish a new track          | `PublishTrackRequest`               | -                                    |
-| `POST`   | `/catalog/tracks/unpublish`             | Unpublish a new track        | -                                   | -                                    |
-| `POST`   | `/catalog/tracks/unlink-audio-file`     | Unlink track from audio file | -                                   | -                                    |
-| `GET`    | `/catalog/tracks/{trackId}`             | Get track details            | -                                   | `TrackDetailsResponse`               |
-| `DELETE` | `/catalog/tracks/{trackId}`             | Delete a track               | -                                   | -                                    |
-| `PATCH`  | `/catalog/tracks/{trackId}/correct-title`|Correct track title          | `CorrectTrackTitleRequest`          | -                                    |
-| `PATCH`  | `/catalog/tracks/{trackId}/reschedule-release`|Reschedule track release| `RescheduleTrackReleaseRequest`     | -                                    |
-| `POST`   | `/catalog/tracks/{trackId}/explicit`    | Mark track as explicit       | -                                   | -                                    |
-| `DELETE` | `/catalog/tracks/{trackId}/explicit`    | Unmark track as not explicit | -                                   | -                                    |
+| `POST`   | `/tracks`                               | Create a new track           | `CreateTrackRequest`                | `CreateTrackResponse`                |
+| `GET`    | `/tracks/{id}`                          | Get track details            | -                                   | `TrackDetails`                       |
+| `DELETE` | `/tracks/{id}`                          | Delete a track               | -                                   | -                                    |
+| `POST`   | `/tracks/unlink-audio-file`             | Unlink track from audio file | -                                   | -                                    |
+| `PATCH`  | `/tracks/{id}/correct-title`            | Correct track title          | `CorrectTrackTitleRequest`          | -                                    |
+| `POST`   | `/tracks/{id}/explicit`                 | Mark track as explicit       | -                                   | -                                    |
+| `DELETE` | `/tracks/{id}/explicit`                 | Unmark track as explicit     | -                                   | -                                    |
 
 ### Albums
 
 | Method   | Endpoint                                | Description                   | Request Body                      | Response                            |
 | :------- | :-------------------------------------- | :---------------------------- | :-------------------------------- | :---------------------------------- |
-| `GET`    | `/catalog/albums/{albumId}`             | Get album details             | -                                 | `GetAlbumDetailsResponse`           |
-| `GET`    | `/catalog/albums/{albumId}`             | Get album details             | -                                 | `GetAlbumDetailsResponse`           |
-| `GET`    | `/catalog/albums/{albumId}/tracks`      | Get album details with tracks | -                                 | `GetAlbumDetailsWithTracksResponse` |
-| `POST`   | `/catalog/albums`                       | Publish a new album           | `PublishAlbumRequest`             | `PublishAlbumResponse`              |
-| `DELETE` | `/catalog/albums/{albumId}`             | Unpublish/Delete an album     | -                                 | `UnpublishAlbumResponse`            |
-| `PATCH`  | `/catalog/albums/{albumId}/title`       | Rename album                  | `RenameAlbumRequest`              | `RenameAlbumResponse`               |
-| `PATCH`  | `/catalog/albums/{albumId}/description` | Change album description      | `ChangeAlbumDescriptionRequest`   | `ChangeAlbumDescriptionResponse`    |
-| `PUT`    | `/catalog/albums/{albumId}/cover`       | Change album cover image      | `ChangeAlbumCoverRequest`         | `ChangeAlbumCoverResponse`          |
-| `GET`    | `/catalog/artists/{artistId}/albums`    | List artist's albums          | `ListArtistAlbumsRequest` (Query) | `ListArtistAlbumsResponse`          |
+| `POST`   | `/albums`                               | Create album                  | `CreateAlbumRequest`              | `CreateAlbumResponse`               |
+| `GET`    | `/albums/{id}`                          | Get album details             | -                                 | `AlbumDetails`                      |
+| `DELETE` | `/albums/{id}`                          | Delete an album               | -                                 | -                                   |
+| `PUT`    | `/albums/{id}/cover`                    | Link album to new cover image | `LinkAlbumToNewCoverImageRequest` | -                                   |
+| `POST`   | `/albums/{id}/publish`                  | Publish album                 | `PublishAlbumRequest`             | -                                   |
+| `DELETE` | `/albums/{id}/publish`                  | Unpublish album               | `UnpublishAlbumRequest`           | -                                   |
+| `POST`   | `/albums/{id}/tracks`                   | Add track to album            | `AddTrackToAlbumRequest`          | -                                   |
+| `DELETE` | `/albums/{id}/tracks/{trackId}`         | Remove track from album       | `RemoveTrackFromAlbumRequest`     | -                                   |
+| `POST`   | `/albums/{id}/tracks/{tId}/move`        | Move track in album           | `MoveTrackInAlbumRequest`         | -                                   |
+| `PATCH`  | `/albums/{id}/title`                    | Correct album title           | `CorrectAlbumTitleRequest`        | -                                   |
+| `PATCH`  | `/albums/{id}/release`                  | Reschedule album release      | `RescheduleAlbumReleaseRequest`   | -                                   |
 
 ### Artists
 
-| Method   | Endpoint                                   | Description                | Request Body                      | Response                           |
-| :------- | :----------------------------------------- | :------------------------- | :-------------------------------- | :--------------------------------- |
-| `GET`    | `/catalog/artists/{artistId}`              | Get artist details         | -                                 | `GetArtistDetailsResponse`         |
-| `POST`   | `/catalog/artists`                         | Register a new artist      | `RegisterArtistRequest`           | `RegisterArtistResponse`           |
-| `DELETE` | `/catalog/artists/{artistId}`              | Delete an artist           | -                                 | `DeleteArtistResponse`             |
-| `PATCH`  | `/catalog/artists/{artistId}/name`         | Rename artist              | `RenameArtistRequest`             | `RenameArtistResponse`             |
-| `PATCH`  | `/catalog/artists/{artistId}/bio`          | Change artist bio          | `ChangeArtistBioRequest`          | `ChangeArtistBioResponse`          |
-| `PUT`    | `/catalog/artists/{artistId}/avatar`       | Change artist avatar       | `ChangeArtistAvatarRequest`       | `ChangeArtistAvatarResponse`       |
-| `PUT`    | `/catalog/artists/{artistId}/banner`       | Change artist banner       | `ChangeArtistBannerRequest`       | `ChangeArtistBannerResponse`       |
-| `PUT`    | `/catalog/artists/{artistId}/gallery`      | Update artist gallery      | `UpdateArtistGalleryRequest`      | `UpdateArtistGalleryResponse`      |
-| `PATCH`  | `/catalog/artists/{artistId}/verification` | Update verification status | `UpdateArtistVerificationRequest` | `UpdateArtistVerificationResponse` |
-| `GET`    | `/catalog/artists`                         | List artists               | `ListArtistRequest` (Query)       | `ListArtistResponse`               |
+| Method   | Endpoint                                | Description                      | Request Body                      | Response                     |
+| :------- | :-------------------------------------- | :-------------------------       | :-------------------------------- | :--------------------------- |
+| `POST`   | `/artists`                              | Create a new artist              | `CreateArtistRequest`             | `CreateArtistResponse`       |
+| `GET`    | `/artists/{id}`                         | Get artist details               | -                                 | `ArtistDetails`              |
+| `GET`    | `/artists/{id}/albums`                  | List artist's albums             | -                                 | `ArtistAlbumsList`           |
+| `PUT`    | `/artists/{id}/avatar`                  | Link artist to new avatar        | `LinkArtistToNewAvatarRequest`    | -                            |
+| `DELETE` | `/artists/{id}/avatar`                  | Unlink artist from avatar        | -                                 | -                            |
+| `PUT`    | `/artists/{id}/banner`                  | Link artist to new banner        | `LinkArtistToNewBannerRequest`    | -                            |
+| `DELETE` | `/artists/{id}/banner`                  | Unlink artist from banner        | -                                 | -                            |
+| `DELETE` | `/artists/{id}`                         | Ban an artist                    | -                                 | -                            |
+| `POST`   | `/artists/{id}/unban`                   | Unban an artist                  | -                                 | -                            |
+| `POST`   | `/artists/{id}/verify`                  | Verify an artist                 | -                                 | -                            |
+| `DELETE` | `/artists/{id}/verify`                  | Unverify an artist               | -                                 | -                            |
+| `PUT`    | `/artists/{id}`                         | Edit artist profile info         | `EditArtistProfileRequest`        | -                            |
+| `POST`   | `/artists/{id}/gallery`                 | Add gallery image to artist      | `AddGalleryImageToArtistRequest`  | -                            |
+| `DELETE` | `/artists/{id}/gallery/{imageId}`       | Remove gallery image from artist | -                                 | -                            |
 
 ### Genres
 
 | Method   | Endpoint                                | Description              | Request Body                    | Response                         |
 | :------- | :-------------------------------------- | :----------------------- | :------------------------------ | :------------------------------- |
-| `GET`    | `/catalog/genres/{genreId}`             | Get genre details        | -                               | `GetGenreDetailsResponse`        |
-| `POST`   | `/catalog/genres`                       | Create a new genre       | `CreateGenreRequest`            | `CreateGenreResponse`            |
-| `DELETE` | `/catalog/genres/{genreId}`             | Delete a genre           | -                               | `DeleteGenreResponse`            |
-| `PATCH`  | `/catalog/genres/{genreId}/name`        | Rename genre             | `RenameGenreRequest`            | `RenameGenreResponse`            |
-| `PATCH`  | `/catalog/genres/{genreId}/description` | Change genre description | `ChangeGenreDescriptionRequest` | `ChangeGenreDescriptionResponse` |
-| `PUT`    | `/catalog/genres/{genreId}/cover`       | Change genre cover       | `ChangeGenreCoverRequest`       | `ChangeGenreCoverResponse`       |
-| `GET`    | `/catalog/genres`                       | List genres              | `ListGenreRequest` (Query)      | `ListGenreResponse`              |
+| `POST`   | `/genres`                               | Create a new genre       | `CreateGenreRequest`            | `CreateGenreResponse`            |
+| `GET`    | `/genres`                               | List genres              | -                               | `GenreList`                      |
+| `GET`    | `/genres/{id}`                          | Get genre details        | -                               | `GenreDetails`                   |
+| `DELETE` | `/genres/{id}`                          | Delete a genre           | -                               | -                                |
+| `PATCH`  | `/genres/{id}/name`                     | Rename genre             | `RenameGenreRequest`            | -                                |
+| `PATCH`  | `/genres/{id}/description`              | Update genre description | `UpdateGenreDescriptionRequest` | -                                |
+| `PUT`    | `/genres/{id}/cover`                    | Link genre to new cover  | `LinkGenreToNewCoverRequest`    | -                                |
+
+### Moods
+
+| Method   | Endpoint                                | Description              | Request Body                    | Response                         |
+| :------- | :-------------------------------------- | :----------------------- | :------------------------------ | :------------------------------- |
+| `POST`   | `/moods`                                | Create a new mood        | `CreateMoodRequest`             | `CreateMoodResponse`             |
+| `GET`    | `/moods`                                | List moods               | -                               | `MoodList`                       |
+| `GET`    | `/moods/{id}`                           | Get mood details         | -                               | `MoodDetails`                    |
+| `DELETE` | `/moods/{id}`                           | Delete a mood            | -                               | -                                |
+| `PATCH`  | `/moods/{id}/name`                      | Rename mood              | `RenameMoodRequest`             | -                                |
+| `PATCH`  | `/moods/{id}/description`               | Update mood description  | `UpdateMoodDescriptionRequest`  | -                                |
+| `PUT`    | `/moods/{id}/cover`                     | Link mood to new cover   | `LinkMoodToNewCoverRequest`     | -                                |
 
 ---
 

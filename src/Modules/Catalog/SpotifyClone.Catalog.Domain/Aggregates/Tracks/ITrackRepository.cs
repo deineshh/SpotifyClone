@@ -1,5 +1,7 @@
 ﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.ValueObjects;
 using SpotifyClone.Shared.Kernel.IDs;
 
@@ -13,6 +15,14 @@ public interface ITrackRepository
 
     Task<IEnumerable<Track>> GetAllByAlbumAsync(
         AlbumId albumId,
+        CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<Track>> GetAllByGenreAsync(
+        GenreId genreId,
+        CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<Track>> GetAllByMoodAsync(
+        MoodId moodId,
         CancellationToken cancellationToken = default);
 
     Task<IEnumerable<Track>> GetAllByMainArtistAsync(

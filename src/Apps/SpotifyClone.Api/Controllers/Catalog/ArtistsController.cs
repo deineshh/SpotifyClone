@@ -6,6 +6,8 @@ using SpotifyClone.Api.Contracts.v1.Catalog.Artists.EditProfile;
 using SpotifyClone.Api.Contracts.v1.Catalog.Artists.LinkNewAvatar;
 using SpotifyClone.Api.Contracts.v1.Catalog.Artists.LinkNewBanner;
 using SpotifyClone.Api.Mappers;
+using SpotifyClone.Catalog.Application.Features.Albums.Queries;
+using SpotifyClone.Catalog.Application.Features.Albums.Queries.GetAllByArtist;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.AddGalleryImage;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Ban;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Create;
@@ -14,6 +16,8 @@ using SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewAvatar;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewBanner;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.RemoveGalleryImageFromArtist;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Unban;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.UnlinkAvatar;
+using SpotifyClone.Catalog.Application.Features.Artists.Commands.UnlinkBanner;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Unverify;
 using SpotifyClone.Catalog.Application.Features.Artists.Commands.Verify;
 using SpotifyClone.Catalog.Application.Features.Artists.Queries;
@@ -60,16 +64,16 @@ public sealed class ArtistsController(IMediator mediator)
 
     [EndpointSummary("Get Artist Details")]
     [EndpointDescription("Returns all the necessary Artist details.")]
-    [ProducesResponseType(typeof(ArtistDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ArtistDetails), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<ArtistDetailsResponse>> GetArtistDetails(
+    public async Task<ActionResult<ArtistDetails>> GetArtistDetails(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
-        Result<ArtistDetailsResponse> result = await Mediator.Send(
+        Result<ArtistDetails> result = await Mediator.Send(
             new GetArtistDetailsQuery(id),
             cancellationToken);
         if (result.IsFailure)
@@ -84,8 +88,34 @@ public sealed class ArtistsController(IMediator mediator)
         return Ok(result.Value);
     }
 
+    [EndpointSummary("Get all Artist's albums")]
+    [EndpointDescription("Returns all Albums owned by a certain Artist.")]
+    [ProducesResponseType(typeof(ArtistDetails), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpGet("{id:guid}/albums")]
+    public async Task<ActionResult<AlbumList>> GetAlbumsByArtistDetails(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<AlbumList> result = await Mediator.Send(
+            new GetAllAlbumsByArtistQuery(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(result.Value);
+    }
+
     [EndpointSummary("Link Artist to new avatar image")]
-    [EndpointDescription("Links an Artist to a new Avatar image.")]
+    [EndpointDescription("Links an Artist to a new avatar image.")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -117,8 +147,34 @@ public sealed class ArtistsController(IMediator mediator)
         return NoContent();
     }
 
+    [EndpointSummary("Unlink Artist from avatar image")]
+    [EndpointDescription("Unlinks an Artist from it's avatar image.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("{id:guid}/avatar")]
+    public async Task<ActionResult> UnlinkAvatarImage(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UnlinkAvatarFromArtistCommandResult> result = await Mediator.Send(
+            new UnlinkAvatarFromArtistCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
     [EndpointSummary("Link Artist to new banner image")]
-    [EndpointDescription("Links an Artist to a new Banner image.")]
+    [EndpointDescription("Links an Artist to a new banner image.")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -137,6 +193,32 @@ public sealed class ArtistsController(IMediator mediator)
                 request.ImageHeight,
                 request.ImageFileType,
                 request.ImageSizeInBytes),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Unlink Artist from banner image")]
+    [EndpointDescription("Unlinks an Artist from it's banner image.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("{id:guid}/banner")]
+    public async Task<ActionResult> UnlinkBannerImage(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UnlinkBannerFromArtistCommandResult> result = await Mediator.Send(
+            new UnlinkBannerFromArtistCommand(id),
             cancellationToken);
         if (result.IsFailure)
         {
@@ -260,7 +342,7 @@ public sealed class ArtistsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPut("{id:guid}")]
+    [HttpPut("{id:guid}/profile")]
     public async Task<ActionResult> EditArtistProfile(
         [FromRoute] Guid id,
         [FromBody] EditArtistProfileRequest request,

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SpotifyClone.Api.Contracts.v1.Catalog.Albums.AddTrackToAlbum;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.CorrectTitle;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.Create;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.LinkNewCover;
@@ -62,16 +63,16 @@ public sealed class AlbumsController(IMediator mediator)
 
     [EndpointSummary("Get Album Details")]
     [EndpointDescription("Returns all the necessary Album details.")]
-    [ProducesResponseType(typeof(AlbumDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AlbumDetails), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<AlbumDetailsResponse>> GetAlbumDetails(
+    public async Task<ActionResult<AlbumDetails>> GetAlbumDetails(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
-        Result<AlbumDetailsResponse> result = await Mediator.Send(
+        Result<AlbumDetails> result = await Mediator.Send(
             new GetAlbumDetailsQuery(id),
             cancellationToken);
         if (result.IsFailure)
@@ -206,14 +207,16 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPost("{id:guid}/tracks/{trackId:guid}")]
+    [HttpPost("{id:guid}/tracks")]
     public async Task<ActionResult> AddTrackToAlbum(
         [FromRoute] Guid id,
-        [FromRoute] Guid trackId,
+        [FromBody] AddTrackToAlbumRequest request,
         CancellationToken cancellationToken = default)
     {
         Result<AddTrackToAlbumCommandResult> result = await Mediator.Send(
-            new AddTrackToAlbumCommand(id, trackId),
+            new AddTrackToAlbumCommand(
+                id,
+                request.TrackId),
             cancellationToken);
         if (result.IsFailure)
         {
@@ -260,7 +263,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPut("{id:guid}/tracks/{trackId:guid}/move")]
+    [HttpPost("{id:guid}/tracks/{trackId:guid}/move")]
     public async Task<ActionResult> MoveTrackInAlbum(
         [FromRoute] Guid id,
         [FromRoute] Guid trackId,
@@ -319,7 +322,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPut("{id:guid}/release")]
+    [HttpPatch("{id:guid}/release")]
     public async Task<ActionResult> RescheduleAlbumRelease(
         [FromRoute] Guid id,
         [FromBody] RescheduleAlbumReleaseRequest request,

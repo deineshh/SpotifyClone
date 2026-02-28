@@ -10,19 +10,19 @@ namespace SpotifyClone.Catalog.Application.Features.Albums.Queries.GetDetails;
 internal sealed class GetAlbumDetailsQueryHandler(
     IAlbumReadService albumReadService,
     ILogger<GetAlbumDetailsQueryHandler> logger)
-    : IQueryHandler<GetAlbumDetailsQuery, AlbumDetailsResponse>
+    : IQueryHandler<GetAlbumDetailsQuery, AlbumDetails>
 {
     private readonly IAlbumReadService _albumReadService = albumReadService;
     private readonly ILogger<GetAlbumDetailsQueryHandler> _logger = logger;
 
-    public async Task<Result<AlbumDetailsResponse>> Handle(
+    public async Task<Result<AlbumDetails>> Handle(
         GetAlbumDetailsQuery request,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "Getting Album info {AlbumId}", request.AlbumId);
 
-        AlbumDetailsResponse? album = await _albumReadService.GetDetailsAsync(
+        AlbumDetails? album = await _albumReadService.GetDetailsAsync(
             AlbumId.From(request.AlbumId),
             cancellationToken);
 
@@ -31,7 +31,7 @@ internal sealed class GetAlbumDetailsQueryHandler(
             _logger.LogWarning(
                 "Album {AlbumId} not found", request.AlbumId);
 
-            return Result.Failure<AlbumDetailsResponse>(AlbumErrors.NotFound);
+            return Result.Failure<AlbumDetails>(AlbumErrors.NotFound);
         }
 
         return album;

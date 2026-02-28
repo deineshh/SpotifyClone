@@ -36,11 +36,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
         ThrowIfBanned("Cannot link a new avatar image to a banned artist.");
 
-        if (Avatar is not null)
-        {
-            RaiseDomainEvent(new ArtistUnlinkedFromAvatarImageDomainEvent(Avatar.ImageId));
-            Avatar = null;
-        }
+        UnlinkAvatarIfExists();
 
         Avatar = avatar;
         RaiseDomainEvent(new ArtistLinkedToAvatarImageDomainEvent(Avatar.ImageId));
@@ -53,14 +49,32 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         ThrowIfBanned("Cannot link a new banner image to a banned artist.");
         ThrowIfNotVerified("Cannot link a new banner image to a non-verified artist.");
 
-        if (Banner is not null)
-        {
-            RaiseDomainEvent(new ArtistUnlinkedFromBannerImageDomainEvent(Banner.ImageId));
-            Banner = null;
-        }
+        UnlinkBannerIfExists();
 
         Banner = banner;
         RaiseDomainEvent(new ArtistLinkedToBannerImageDomainEvent(Banner.ImageId));
+    }
+
+    public void UnlinkAvatarIfExists()
+    {
+        if (Avatar is null)
+        {
+            return;
+        }
+
+        RaiseDomainEvent(new ArtistUnlinkedFromAvatarImageDomainEvent(Avatar.ImageId));
+        Avatar = null;
+    }
+
+    public void UnlinkBannerIfExists()
+    {
+        if (Banner is null)
+        {
+            return;
+        }
+
+        RaiseDomainEvent(new ArtistUnlinkedFromBannerImageDomainEvent(Banner.ImageId));
+        Banner = null;
     }
 
     public void Verify()

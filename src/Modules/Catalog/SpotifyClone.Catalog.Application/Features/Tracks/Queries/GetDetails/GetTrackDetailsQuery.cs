@@ -4,4 +4,4 @@ namespace SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetDetails;
 
 public sealed record GetTrackDetailsQuery(
     Guid TrackId)
-    : IQuery<TrackDetailsResponse>;
+    : IQuery<TrackDetails>;

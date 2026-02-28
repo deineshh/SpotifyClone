@@ -5,7 +5,11 @@ namespace SpotifyClone.Catalog.Application.Abstractions.Data;
 
 public interface IArtistReadService
 {
-    Task<ArtistDetailsResponse?> GetDetailsAsync(
+    Task<bool> ExistsAsync(
+        ArtistId id,
+        CancellationToken cancellationToken = default);
+
+    Task<ArtistDetails?> GetDetailsAsync(
         ArtistId id,
         CancellationToken cancellationToken = default);
 }

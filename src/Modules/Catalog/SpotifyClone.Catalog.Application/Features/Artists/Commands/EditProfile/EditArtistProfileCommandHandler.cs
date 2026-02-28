@@ -26,7 +26,11 @@ internal sealed class EditArtistProfileCommandHandler(
         }
 
         artist.Rename(request.Name);
-        artist.UpdateBio(request.Bio);
+
+        if (request.Bio is not null)
+        {
+            artist.UpdateBio(request.Bio);
+        }
 
         return new EditArtistProfileCommandResult();
     }
