@@ -1,0 +1,21 @@
+﻿using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
+using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects;
+using SpotifyClone.Shared.Kernel.IDs;
+
+namespace SpotifyClone.Catalog.Application.Abstractions.Data;
+
+public interface ITrackReadService
+{
+    Task<TrackDetails?> GetDetailsAsync(
+        TrackId id,
+        CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<TrackSummary>> GetAllByGenreIdAsync(
+        GenreId genreId,
+        CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<TrackSummary>> GetAllByMoodIdAsync(
+        MoodId moodId,
+        CancellationToken cancellationToken = default);
+}

@@ -1,5 +1,5 @@
-﻿using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+﻿using SpotifyClone.Accounts.Application.Abstractions;
 
 namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.Logout;
 
-public sealed record LogoutCommand : IPersistentCommand;
+public sealed record LogoutCommand : IAccountsPersistentCommand;

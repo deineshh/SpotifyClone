@@ -16,9 +16,9 @@ public interface IFileStorage
 
     Task SaveAudioFileAsync(Stream stream, string relativePath);
 
-    Task DeleteAudioFileAsync(string relativePath);
+    Task DeleteAudioFileAsync(string folderPath);
 
-    Task DeleteImageFileAsync(string relativePath);
+    Task DeleteImageFileAsync(string folderPath);
 
     Task DownloadAudioToLocalFileAsync(string objectName, string localPath);
 

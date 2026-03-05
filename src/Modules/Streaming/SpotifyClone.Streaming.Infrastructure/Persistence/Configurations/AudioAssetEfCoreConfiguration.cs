@@ -19,7 +19,8 @@ internal sealed class AudioAssetEfCoreConfiguration : IEntityTypeConfiguration<A
             .ValueGeneratedNever();
 
         builder.Property(x => x.Duration)
-            .HasColumnName("duration");
+            .HasColumnName("duration")
+            .IsRequired();
 
         builder.Property(x => x.Format)
             .HasColumnName("format")
@@ -29,13 +30,18 @@ internal sealed class AudioAssetEfCoreConfiguration : IEntityTypeConfiguration<A
         builder.Property(x => x.SizeInBytes)
             .HasColumnName("size_in_bytes");
 
-        builder.Property(x => x.IsReady)
-            .HasColumnName("is_ready")
+        builder.Property(x => x.Status)
+            .HasColumnName("status")
+            .HasConversion(StreamingEfCoreValueConverters.AudioAssetStatusConverter)
             .IsRequired();
 
         builder.Property(x => x.CreatedAt)
             .HasColumnName("created_at")
             .IsRequired();
+
+        builder.Property(x => x.TrackId)
+            .HasColumnName("track_id")
+            .HasConversion(StreamingEfCoreValueConverters.TrackIdConverter);
 
         builder.Ignore(x => x.DomainEvents);
     }

@@ -1,11 +1,12 @@
-﻿using FluentAssertions;
+﻿using System.Collections.ObjectModel;
+using FluentAssertions;
 using Moq;
 using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Repositories;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
-using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefreshToken;
+using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
@@ -115,6 +116,10 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .Setup(x => x.GetUserInfoAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(identity));
 
+        _identity
+            .Setup(x => x.GetUserRolesAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success<IReadOnlyCollection<string>>(Array.Empty<string>()));
+
         _tokenService
             .Setup(x => x.GenerateAccessToken(
                 identity,
@@ -172,6 +177,10 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
         _identity
             .Setup(x => x.GetUserInfoAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(identity));
+
+        _identity
+            .Setup(x => x.GetUserRolesAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success<IReadOnlyCollection<string>>(Array.Empty<string>()));
 
         _tokenService
             .Setup(x => x.GenerateAccessToken(identity, It.IsAny<IReadOnlyCollection<string>>()))

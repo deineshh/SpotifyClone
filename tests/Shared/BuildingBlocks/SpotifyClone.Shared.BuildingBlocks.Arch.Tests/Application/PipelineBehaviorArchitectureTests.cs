@@ -18,26 +18,10 @@ public sealed class PipelineBehaviorArchitectureTests
         TestResult result = Types.InAssembly(applicationAssembly)
             .That()
             .Inherit(typeof(IPipelineBehavior<,>))
+            .And()
+            .AreNotAbstract()
             .Should()
             .BeSealed()
-            .GetResult();
-
-        // Assert
-        result.IsSuccessful.Should().BeTrue();
-    }
-
-    [Fact]
-    public void PipelineBehaviors_Should_NotBeAbstract()
-    {
-        // Arrange
-        Assembly applicationAssembly = typeof(ExceptionHandlingPipelineBehavior<,>).Assembly;
-
-        // Act
-        TestResult result = Types.InAssembly(applicationAssembly)
-            .That()
-            .Inherit(typeof(IPipelineBehavior<,>))
-            .Should()
-            .NotBeAbstract()
             .GetResult();
 
         // Assert
@@ -54,6 +38,8 @@ public sealed class PipelineBehaviorArchitectureTests
         TestResult result = Types.InAssembly(applicationAssembly)
             .That()
             .Inherit(typeof(IPipelineBehavior<,>))
+            .And()
+            .AreNotAbstract()
             .Should()
             .HaveNameEndingWith("PipelineBehavior")
             .GetResult();
@@ -72,6 +58,8 @@ public sealed class PipelineBehaviorArchitectureTests
         TestResult result = Types.InAssembly(applicationAssembly)
             .That()
             .HaveNameEndingWith("PipelineBehavior")
+            .And()
+            .AreNotAbstract()
             .Should()
             .ImplementInterface(typeof(IPipelineBehavior<,>))
             .GetResult();

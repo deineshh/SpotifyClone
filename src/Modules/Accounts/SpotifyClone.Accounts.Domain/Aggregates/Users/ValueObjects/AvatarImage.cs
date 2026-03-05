@@ -8,17 +8,12 @@ namespace SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
 
 public sealed record AvatarImage : ValueObject
 {
-    public const int MaxWidth = 1024;
-    public const int MaxHeight = 1024;
+    public const int MaxWidth = 750;
+    public const int MaxHeight = 750;
+    public const long MaxSizeInBytes = 4_000_000;
 
-    public ImageMetadata Metadata { get; init; }
-    public ImageId ImageId { get; init; }
-
-    private AvatarImage()
-    {
-        Metadata = null!;
-        ImageId = null!;
-    }
+    public ImageMetadata Metadata { get; init; } = null!;
+    public ImageId ImageId { get; init; } = null!;
 
     public AvatarImage(
         ImageId imageId,
@@ -27,7 +22,6 @@ public sealed record AvatarImage : ValueObject
         ImageFileType fileType,
         long sizeInBytes)
     {
-        ArgumentNullException.ThrowIfNull(imageId);
         ArgumentNullException.ThrowIfNull(fileType);
 
         if (width != height)
@@ -35,12 +29,23 @@ public sealed record AvatarImage : ValueObject
             throw new InvalidAvatarImageDomainException("Avatar image must be square.");
         }
 
-        if (!fileType.SupportsTransparency)
+        if (width > MaxWidth || height > MaxHeight)
         {
-            throw new InvalidAvatarImageDomainException("Avatar image must support transparency.");
+            throw new InvalidAvatarImageDomainException(
+                $"Avatar image dimensions exceed maximum allowed size of {MaxWidth}x{MaxHeight} pixels.");
         }
 
+        if (sizeInBytes > MaxSizeInBytes)
+        {
+            throw new InvalidAvatarImageDomainException(
+                $"Avatar image size exceeds maximum allowed size of {MaxSizeInBytes} bytes.");
+        }
+
+        Metadata = new ImageMetadata(width, height, fileType, sizeInBytes);
         ImageId = imageId;
-        Metadata = new ImageMetadata(width, height, MaxWidth, MaxHeight, fileType, sizeInBytes);
+    }
+
+    private AvatarImage()
+    {
     }
 }

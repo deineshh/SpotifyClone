@@ -19,6 +19,9 @@ internal static class AvatarImageEfCoreConfiguration
 
         builder.OwnsOne(a => a.Metadata, metadata => metadata.Configure());
 
+        builder.HasIndex(a => a.ImageId)
+            .IsUnique();
+
         return builder;
     }
 }

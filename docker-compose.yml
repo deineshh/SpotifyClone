@@ -22,7 +22,7 @@ services:
       ConnectionStrings__MainDb: Host=postgres;Port=5432;Database=spotifyclone_dev;Username=postgres;Password=postgres
       ConnectionStrings__Redis: redis:6379
     ports:
-      - "8080:8080"
+      - "5000:8080"
     volumes:
       - audio_data:/app/wwwroot/audio
       - temp_data:/app/wwwroot/temp

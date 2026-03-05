@@ -11,4 +11,11 @@ public interface IAudioAssetRepository
     Task AddAsync(
         AudioAsset audioAsset,
         CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<AudioAsset>> GetAllInvalidAsync(
+        CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(
+        AudioAsset audioAsset,
+        CancellationToken cancellationToken = default);
 }

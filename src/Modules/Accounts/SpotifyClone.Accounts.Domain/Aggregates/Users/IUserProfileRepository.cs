@@ -4,8 +4,8 @@ namespace SpotifyClone.Accounts.Domain.Aggregates.Users;
 
 public interface IUserProfileRepository
 {
-    Task<UserProfile?> GetByUserIdAsync(
-        UserId userId,
+    Task<UserProfile?> GetByIdAsync(
+        UserId id,
         CancellationToken cancellationToken = default);
 
     Task AddAsync(

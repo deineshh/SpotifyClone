@@ -14,18 +14,25 @@ public abstract class EfCoreUnitOfWorkBase<TDbContext>(
     protected TDbContext DbContext { get; } = dbContext;
     protected IPublisher Publisher { get; } = publisher;
 
-    public virtual async Task<int> Commit(CancellationToken cancellationToken = default)
+    public virtual async Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
-        var domainEntities = DbContext.ChangeTracker
-            .Entries<IHasDomainEvents>()
-            .Where(x => x.Entity.DomainEvents.Count != 0)
-            .ToList();
+        var domainEvents = DbContext.ChangeTracker
+        .Entries<IHasDomainEvents>()
+        .Select(x => x.Entity)
+        .SelectMany(x => {
+            var events = x.DomainEvents.ToList();
+            x.ClearDomainEvents();
+            return events;
+        }).ToList();
 
-        var domainEvents = domainEntities
-            .SelectMany(x => x.Entity.DomainEvents)
-            .ToList();
+        // Domain events are not stored for now
 
-        domainEntities.ForEach(x => x.Entity.ClearDomainEvents());
+        //var outboxMessages = domainEvents.Select(domainEvent => new OutboxMessage(
+        //    domainEvent.GetType().Name,
+        //    JsonSerializer.Serialize(domainEvent, domainEvent.GetType())))
+        //.ToList();
+
+        //DbContext.Set<OutboxMessage>().AddRange(outboxMessages);
 
         int result = await DbContext.SaveChangesAsync(cancellationToken);
 

@@ -2,5 +2,6 @@
 
 public sealed record UploadAudioAssetRequest
 {
-    public required IFormFile File { get; set; }
+    public required Guid TrackId { get; init; }
+    public required IFormFile File { get; init; }
 }

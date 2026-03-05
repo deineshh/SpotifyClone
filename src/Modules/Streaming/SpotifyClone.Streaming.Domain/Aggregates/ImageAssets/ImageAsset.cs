@@ -8,25 +8,14 @@ public sealed class ImageAsset : AggregateRoot<ImageId, Guid>
 {
     public ImageMetadata? Metadata { get; private set; }
     public bool IsReady { get; private set; }
+    public int LinkCount { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
-
-    private ImageAsset()
-    {
-    }
-
-    private ImageAsset(ImageId id, ImageMetadata? metadata, bool isReady, DateTimeOffset createdAt)
-        : base(id)
-    {
-        Metadata = metadata;
-        IsReady = isReady;
-        CreatedAt = createdAt;
-    }
 
     public static ImageAsset Create(ImageId id, bool isReady, ImageMetadata? metadata)
     {
         ArgumentNullException.ThrowIfNull(id);
 
-        return new ImageAsset(id, metadata, isReady, DateTimeOffset.UtcNow);
+        return new ImageAsset(id, metadata, isReady, 0, DateTimeOffset.UtcNow);
     }
 
     public void MarkAsReady(ImageMetadata metadata)
@@ -40,7 +29,34 @@ public sealed class ImageAsset : AggregateRoot<ImageId, Guid>
 
         Metadata = metadata;
         IsReady = true;
+    }
 
-        // Raise domain events if needed
+    public void AddLink()
+        => LinkCount++;
+
+    public void RemoveLink()
+    {
+        if (LinkCount > 0)
+        {
+            LinkCount--;
+        }
+    }
+
+    private ImageAsset(
+        ImageId id,
+        ImageMetadata? metadata,
+        bool isReady,
+        int linkCount,
+        DateTimeOffset createdAt)
+        : base(id)
+    {
+        Metadata = metadata;
+        IsReady = isReady;
+        LinkCount = linkCount;
+        CreatedAt = createdAt;
+    }
+
+    private ImageAsset()
+    {
     }
 }

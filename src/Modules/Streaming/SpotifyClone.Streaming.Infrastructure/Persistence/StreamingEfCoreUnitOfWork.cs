@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence;
 using SpotifyClone.Streaming.Application.Abstractions;
+using SpotifyClone.Streaming.Application.Abstractions.Repositories;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
 using SpotifyClone.Streaming.Domain.Aggregates.ImageAssets;
 using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
@@ -11,10 +12,12 @@ internal sealed class StreamingEfCoreUnitOfWork(
     StreamingAppDbContext context,
     IAudioAssetRepository audioAssets,
     IImageAssetRepository imageAssets,
+    IOutboxRepository outbox,
     IPublisher publisher)
     : EfCoreUnitOfWorkBase<StreamingAppDbContext>(context, publisher),
     IStreamingUnitOfWork
 {
     public IAudioAssetRepository AudioAssets => audioAssets;
     public IImageAssetRepository ImageAssets => imageAssets;
+    public IOutboxRepository OutboxMessages => outbox;
 }

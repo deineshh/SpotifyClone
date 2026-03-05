@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
-using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Application.Errors;
+using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
@@ -159,7 +159,7 @@ internal sealed class IdentityService : IIdentityService
     public async Task<Result<Guid>> CreateUserAsync(
         string email,
         string password,
-        CancellationToken cancellationToken = default)
+        params string[] roles)
     {
         var user = new ApplicationUser
         {
@@ -168,13 +168,22 @@ internal sealed class IdentityService : IIdentityService
             Email = email
         };
 
-        IdentityResult result =
+        IdentityResult createResult =
             await _userManager.CreateAsync(user, password);
-
-        if (!result.Succeeded)
+        if (!createResult.Succeeded)
         {
             return Result.Failure<Guid>(
-                IdentityErrorsToApplicationErrors(result.Errors));
+                IdentityErrorsToApplicationErrors(createResult.Errors));
+        }
+
+        foreach (string role in roles)
+        {
+            IdentityResult assignRoleResult = await _userManager.AddToRoleAsync(user, role);
+            if (!assignRoleResult.Succeeded)
+            {
+                return Result.Failure<Guid>(
+                    IdentityErrorsToApplicationErrors(createResult.Errors));
+            }
         }
 
         return user.Id;

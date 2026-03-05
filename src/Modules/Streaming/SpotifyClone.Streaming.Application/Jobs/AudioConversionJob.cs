@@ -20,7 +20,10 @@ public sealed class AudioConversionJob(
     private readonly IFileStorage _storage = storage;
     private readonly ILogger<AudioConversionJob> _logger = logger;
 
-    public async Task ProcessAsync(string fileName, Guid audioId)
+    public async Task ProcessAsync(
+        string fileName,
+        Guid audioId,
+        CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Starting background conversion for {AudioId}", audioId);
 
@@ -90,19 +93,19 @@ public sealed class AudioConversionJob(
             throw new Exception($"Failed to get metadata from {audioId}");
         }
 
-        AudioAsset? audioAsset = await _unit.AudioAssets.GetByIdAsync(AudioAssetId.From(audioId));
+        AudioAsset? audioAsset = await _unit.AudioAssets.GetByIdAsync(AudioAssetId.From(audioId), cancellationToken);
         if (audioAsset is null)
         {
             _logger.LogError("Audio asset not found for {AudioId}", audioId);
             throw new Exception($"Audio asset not found for {audioId}");
         }
 
-        audioAsset.MarkAsReady(
+        audioAsset.MarkAsUploaded(
             metadata.Duration,
             AudioFormat.From(metadata.Format),
             metadata.SizeInBytes);
 
-        await _unit.Commit();
+        await _unit.CommitAsync(cancellationToken);
 
         _logger.LogInformation("Job finished successfully for {AudioId}", audioId);
     }

@@ -1,9 +1,6 @@
-﻿namespace SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
+﻿using SpotifyClone.Accounts.Domain.Exceptions;
 
-public sealed class InvalidBirthDateDomainException : AccountsDomainExceptionBase
-{
-    public InvalidBirthDateDomainException(string message)
-        : base(message)
-    {
-    }
-}
+namespace SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
+
+public sealed class InvalidBirthDateDomainException(string message)
+    : AccountsDomainExceptionBase(message);

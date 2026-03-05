@@ -27,5 +27,9 @@ public sealed class RegisterUserCommandValidator
         RuleFor(x => x.Gender)
             .NotNull().WithMessage("Gender is required.")
             .NotEmpty().WithMessage("Gender is required.");
+
+        RuleFor(x => x.Role)
+            .NotNull().WithMessage("Role is required.")
+            .NotEmpty().WithMessage("Role is required.");
     }
 }

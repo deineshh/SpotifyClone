@@ -23,6 +23,42 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("SpotifyClone.Shared.BuildingBlocks.Application.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<string>("Error")
+                        .HasColumnType("text")
+                        .HasColumnName("error");
+
+                    b.Property<DateTimeOffset>("OccurredOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occured_on");
+
+                    b.Property<DateTimeOffset?>("ProcessedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_on");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProcessedOn");
+
+                    b.ToTable("outbox_messages", "streaming");
+                });
+
             modelBuilder.Entity("SpotifyClone.Streaming.Domain.Aggregates.AudioAssets.AudioAsset", b =>
                 {
                     b.Property<Guid>("Id")
@@ -33,7 +69,7 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<TimeSpan?>("Duration")
+                    b.Property<TimeSpan>("Duration")
                         .HasColumnType("interval")
                         .HasColumnName("duration");
 
@@ -42,13 +78,18 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("format");
 
-                    b.Property<bool>("IsReady")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_ready");
-
                     b.Property<long?>("SizeInBytes")
                         .HasColumnType("bigint")
                         .HasColumnName("size_in_bytes");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("TrackId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("track_id");
 
                     b.HasKey("Id");
 
@@ -69,6 +110,10 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_ready");
 
+                    b.Property<int>("LinkCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("link_count");
+
                     b.HasKey("Id");
 
                     b.ToTable("image_assets", "streaming");
@@ -86,15 +131,15 @@ namespace SpotifyClone.Streaming.Infrastructure.Persistence.Migrations
                                 .HasColumnType("character varying(10)")
                                 .HasColumnName("metadata_file_type");
 
-                            b1.Property<int?>("Height")
+                            b1.Property<int>("Height")
                                 .HasColumnType("integer")
                                 .HasColumnName("metadata_height");
 
-                            b1.Property<long?>("SizeInBytes")
+                            b1.Property<long>("SizeInBytes")
                                 .HasColumnType("bigint")
                                 .HasColumnName("metadata_size_in_bytes");
 
-                            b1.Property<int?>("Width")
+                            b1.Property<int>("Width")
                                 .HasColumnType("integer")
                                 .HasColumnName("metadata_width");
 

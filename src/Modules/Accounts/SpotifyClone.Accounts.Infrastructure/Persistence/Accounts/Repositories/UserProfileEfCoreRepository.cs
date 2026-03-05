@@ -11,10 +11,10 @@ internal sealed class UserProfileEfCoreRepository(
 {
     private readonly DbSet<UserProfile> _users = context.UserProfiles;
 
-    public async Task<UserProfile?> GetByUserIdAsync(
-        UserId userId,
+    public async Task<UserProfile?> GetByIdAsync(
+        UserId id,
         CancellationToken cancellationToken = default)
-        => await _users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+        => await _users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
     public async Task AddAsync(
         UserProfile user,

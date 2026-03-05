@@ -1,4 +1,4 @@
-﻿using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
+﻿using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Application.Abstractions.Services;

@@ -11,14 +11,14 @@ internal static class AccountsEfCoreValueConverters
     public static readonly StronglyTypedIdEfCoreConverter<UserId, Guid> UserIdConverter = new(
         v => UserId.From(v));
 
+    public static readonly StronglyTypedIdEfCoreConverter<ImageId, Guid> ImageIdConverter = new(
+        v => ImageId.From(v));
+
     public static readonly ValueConverter<Gender, string> GenderConverter = new(
         g => g.Value,
         v => Gender.From(v));
 
-    public static readonly StronglyTypedIdEfCoreConverter<ImageId, Guid> ImageIdConverter = new(
-        v => ImageId.From(v));
-
-    public static readonly ValueConverter<ImageFileType?, string> ImageFileTypeConverter = new(
-        t => t == null ? string.Empty : t.Value,
+    public static readonly ValueConverter<ImageFileType, string> ImageFileTypeConverter = new(
+        t => t.Value,
         v => ImageFileType.From(v));
 }

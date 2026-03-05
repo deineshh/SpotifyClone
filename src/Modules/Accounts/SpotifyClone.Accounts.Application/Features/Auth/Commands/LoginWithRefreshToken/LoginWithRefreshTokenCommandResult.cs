@@ -2,4 +2,5 @@
 
 public sealed record LoginWithRefreshTokenCommandResult(
     string AccessToken,
+    DateTimeOffset ExpiresAt,
     string RefreshToken);

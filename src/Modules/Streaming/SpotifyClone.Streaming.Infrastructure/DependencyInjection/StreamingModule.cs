@@ -1,6 +1,8 @@
 using FluentValidation;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +10,9 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
 using SpotifyClone.Streaming.Application;
 using SpotifyClone.Streaming.Application.Abstractions;
+using SpotifyClone.Streaming.Application.Abstractions.Repositories;
 using SpotifyClone.Streaming.Application.Abstractions.Services;
+using SpotifyClone.Streaming.Application.Behaviors;
 using SpotifyClone.Streaming.Application.Errors;
 using SpotifyClone.Streaming.Application.Jobs;
 using SpotifyClone.Streaming.Domain.Aggregates.AudioAssets;
@@ -48,14 +52,38 @@ public static class StreamingModule
         services.AddScoped<IStreamingUnitOfWork, StreamingEfCoreUnitOfWork>();
         services.AddScoped<IAudioAssetRepository, AudioAssetEfCoreRepository>();
         services.AddScoped<IImageAssetRepository, ImageAssetEfCoreRepository>();
+        services.AddScoped<IOutboxRepository, OutboxEfCoreRepository>();
         services.AddScoped<IMediaService, FfmpegMediaService>();
         services.AddScoped<IFileStorage, MinioFileStorage>();
         services.AddScoped<IDomainExceptionMapper, StreamingDomainExceptionMapper>();
 
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(StreamingTransactionalPipelineBehavior<,>));
         services.AddTransient<AudioConversionJob>();
+        services.AddTransient<ImageConversionJob>();
+        services.AddTransient<MarkAudioAssetAsOrphanedJob>();
+        services.AddTransient<AudioAssetCleanupJob>();
+        services.AddTransient<ImageAssetCleanupJob>();
 
         services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.SectionName));
 
         return services;
+    }
+
+    public static void UseStreamingModule(this IApplicationBuilder app)
+    {
+        IRecurringJobManager recurringJobManager =
+            app.ApplicationServices.GetRequiredService<IRecurringJobManager>();
+
+        recurringJobManager.AddOrUpdate<AudioAssetCleanupJob>(
+            "streaming-audio-asset-cleanup",
+            job => job.ProcessAsync(),
+            Cron.HourInterval(6)
+        );
+
+        recurringJobManager.AddOrUpdate<ImageAssetCleanupJob>(
+            "streaming-image-asset-cleanup",
+            job => job.ProcessAsync(),
+            Cron.HourInterval(6)
+        );
     }
 }

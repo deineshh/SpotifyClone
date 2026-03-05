@@ -13,19 +13,23 @@ internal static class ImageMetadataEfCoreConfiguration
     {
         builder.Property(m => m.Width)
             .HasColumnName("avatar_width")
-            .HasMaxLength(AvatarImage.MaxWidth);
+            .HasMaxLength(AvatarImage.MaxWidth)
+            .IsRequired();
 
         builder.Property(m => m.Height)
             .HasColumnName("avatar_height")
-            .HasMaxLength(AvatarImage.MaxHeight);
+            .HasMaxLength(AvatarImage.MaxHeight)
+            .IsRequired();
 
         builder.Property(m => m.FileType)
             .HasConversion(AccountsEfCoreValueConverters.ImageFileTypeConverter)
             .HasColumnName("avatar_file_type")
-            .HasMaxLength(10);
+            .HasMaxLength(10)
+            .IsRequired(false);
 
         builder.Property(m => m.SizeInBytes)
-            .HasColumnName("avatar_size_in_bytes");
+            .HasColumnName("avatar_size_in_bytes")
+            .IsRequired();
 
         return builder;
     }

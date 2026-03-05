@@ -12,9 +12,9 @@ public static class MediaErrors
         "Media.MediaStreamNotFound",
         "No media stream found in file.");
 
-    public static readonly Error MediaFileNotFound = CommonErrors.NotFound(
+    public static readonly Error MediaAssetNotFound = CommonErrors.NotFound(
         "Media",
-        "Media file");
+        "Media asset");
 
     public static readonly Error ConversionFailed = new(
         "Media.ConversionFailed",
@@ -40,7 +40,15 @@ public static class MediaErrors
         "Media.InvalidAudioDuration",
         "The duration of the audio file is invalid.");
 
+    public static readonly Error InvalidStatus = new(
+        "Media.InvalidStatus",
+        "The status of the audio file is invalid.");
+
     public static readonly Error InvalidImageMetadata = new(
         "Media.InvalidImageMetadata",
         "Image metadata is invalid.");
+
+    public static readonly Error TrackNotLinkedToAudio = new(
+        "Media.TrackNotLinkedToAudio",
+        "A Track must be linked to Audio Asset to perform this operation.");
 }

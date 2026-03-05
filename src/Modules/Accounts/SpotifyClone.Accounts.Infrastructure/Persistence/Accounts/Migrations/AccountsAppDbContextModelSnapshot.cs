@@ -93,9 +93,45 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
                     b.ToTable("refresh_tokens", "accounts");
                 });
 
+            modelBuilder.Entity("SpotifyClone.Shared.BuildingBlocks.Application.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<string>("Error")
+                        .HasColumnType("text")
+                        .HasColumnName("error");
+
+                    b.Property<DateTimeOffset>("OccurredOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occured_on");
+
+                    b.Property<DateTimeOffset?>("ProcessedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_on");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProcessedOn");
+
+                    b.ToTable("outbox_messages", "accounts");
+                });
+
             modelBuilder.Entity("SpotifyClone.Accounts.Domain.Aggregates.Users.UserProfile", b =>
                 {
-                    b.OwnsOne("SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects.AvatarImage", "AvatarImage", b1 =>
+                    b.OwnsOne("SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects.AvatarImage", "Avatar", b1 =>
                         {
                             b1.Property<Guid>("UserProfileId")
                                 .HasColumnType("uuid");
@@ -117,21 +153,20 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
                                         .HasColumnType("uuid");
 
                                     b2.Property<string>("FileType")
+                                        .IsRequired()
                                         .HasMaxLength(10)
                                         .HasColumnType("character varying(10)")
                                         .HasColumnName("avatar_file_type");
 
-                                    b2.Property<int?>("Height")
-                                        .HasMaxLength(1024)
+                                    b2.Property<int>("Height")
                                         .HasColumnType("integer")
                                         .HasColumnName("avatar_height");
 
-                                    b2.Property<long?>("SizeInBytes")
+                                    b2.Property<long>("SizeInBytes")
                                         .HasColumnType("bigint")
                                         .HasColumnName("avatar_size_in_bytes");
 
-                                    b2.Property<int?>("Width")
-                                        .HasMaxLength(1024)
+                                    b2.Property<int>("Width")
                                         .HasColumnType("integer")
                                         .HasColumnName("avatar_width");
 
@@ -143,11 +178,10 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
                                         .HasForeignKey("AvatarImageUserProfileId");
                                 });
 
-                            b1.Navigation("Metadata")
-                                .IsRequired();
+                            b1.Navigation("Metadata");
                         });
 
-                    b.Navigation("AvatarImage");
+                    b.Navigation("Avatar");
                 });
 #pragma warning restore 612, 618
         }

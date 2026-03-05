@@ -19,7 +19,10 @@ public sealed class ImageConversionJob(
     private readonly IFileStorage _storage = storage;
     private readonly ILogger<ImageConversionJob> _logger = logger;
 
-    public async Task ProcessAsync(string fileName, Guid imageId)
+    public async Task ProcessAsync(
+        string fileName,
+        Guid imageId,
+        CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Starting background conversion for {ImageId}", imageId);
 
@@ -80,7 +83,7 @@ public sealed class ImageConversionJob(
             throw new Exception($"Failed to get metadata from {imageId}");
         }
 
-        ImageAsset? imageAsset = await _unit.ImageAssets.GetByIdAsync(ImageId.From(imageId));
+        ImageAsset? imageAsset = await _unit.ImageAssets.GetByIdAsync(ImageId.From(imageId), cancellationToken);
         if (imageAsset is null)
         {
             _logger.LogError("Image asset not found for {ImageId}", imageId);
@@ -90,12 +93,10 @@ public sealed class ImageConversionJob(
         imageAsset.MarkAsReady(new(
             metadata.Width,
             metadata.Height,
-            2048,
-            2048,
             ImageFileType.From(metadata.FileType),
             metadata.SizeInBytes));
 
-        await _unit.Commit();
+        await _unit.CommitAsync(cancellationToken);
 
         _logger.LogInformation("Job finished successfully for {ImageId}", imageId);
     }

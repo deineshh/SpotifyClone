@@ -5,6 +5,12 @@
 
 #### Static code analysis rule customizations
 
+# CA1873: Avoid potentially expensive logging
+dotnet_diagnostic.CA1873.severity = suggestion
+
+# CA1720: Identifier contains type name
+dotnet_diagnostic.CA1720.severity = suggestion
+
 # CA1849: Call async methods when in an async method
 dotnet_diagnostic.CA1849.severity = suggestion
 

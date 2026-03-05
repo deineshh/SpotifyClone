@@ -1,9 +1,6 @@
-﻿namespace SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
+﻿using SpotifyClone.Accounts.Domain.Exceptions;
 
-public sealed class InvalidAvatarImageDomainException : AccountsDomainExceptionBase
-{
-    public InvalidAvatarImageDomainException(string message)
-        : base(message)
-    {
-    }
-}
+namespace SpotifyClone.Accounts.Domain.Aggregates.Users.Exceptions;
+
+public sealed class InvalidAvatarImageDomainException(string message)
+    : AccountsDomainExceptionBase(message);

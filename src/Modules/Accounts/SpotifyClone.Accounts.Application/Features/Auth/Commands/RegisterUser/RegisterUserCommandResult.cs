@@ -5,4 +5,5 @@ public sealed record RegisterUserCommandResult(
     string Email,
     string DisplayName,
     DateTimeOffset BirthDate,
-    string Gender);
+    string Gender,
+    string Role);

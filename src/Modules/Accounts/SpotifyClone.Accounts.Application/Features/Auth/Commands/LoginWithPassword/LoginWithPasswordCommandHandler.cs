@@ -1,6 +1,6 @@
 ﻿using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
-using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
+using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
@@ -25,15 +25,20 @@ internal sealed class LoginWithPasswordCommandHandler(
             request.Email,
             request.Password,
             cancellationToken);
-
         if (identityResult.IsFailure)
         {
             return Result.Failure<LoginWithPasswordCommandResult>(identityResult.Errors);
         }
+        Result<IReadOnlyCollection<string>> rolesResult = await _identity.GetUserRolesAsync(
+            identityResult.Value.UserId, cancellationToken);
+        if (rolesResult.IsFailure)
+        {
+            return Result.Failure<LoginWithPasswordCommandResult>(rolesResult.Errors);
+        }
 
         UserId userId = identityResult.Value.UserId;
 
-        AccessToken accessToken = _tokenService.GenerateAccessToken(identityResult.Value, ["User"]);
+        AccessToken accessToken = _tokenService.GenerateAccessToken(identityResult.Value, rolesResult.Value);
         RefreshTokenEnvelope refreshToken = _tokenService.GenerateRefreshToken(userId);
         string refreshTokenHash = _tokenHasher.Hash(refreshToken.RawToken);
 
@@ -52,6 +57,7 @@ internal sealed class LoginWithPasswordCommandHandler(
 
         return Result.Success(new LoginWithPasswordCommandResult(
             accessToken.RawToken,
+            accessToken.ExpiresAt,
             refreshToken.RawToken));
     }
 }

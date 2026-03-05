@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
+using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
@@ -38,7 +38,7 @@ public interface IIdentityService
     Task<Result<Guid>> CreateUserAsync(
         string email,
         string password,
-        CancellationToken cancellationToken = default);
+        params string[] roles);
 
     Task<Result> DeleteUserAsync(Guid id);
 

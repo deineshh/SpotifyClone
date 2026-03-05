@@ -8,6 +8,9 @@ public interface IImageAssetRepository
         ImageId id,
         CancellationToken cancellationToken = default);
 
+    Task<IEnumerable<ImageAsset>> GetAllInvalidAsync(
+        CancellationToken cancellationToken = default);
+
     Task AddAsync(
         ImageAsset imageAsset,
         CancellationToken cancellationToken = default);

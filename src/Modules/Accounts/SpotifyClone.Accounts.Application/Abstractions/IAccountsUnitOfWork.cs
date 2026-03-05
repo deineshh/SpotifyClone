@@ -8,4 +8,5 @@ public interface IAccountsUnitOfWork : IUnitOfWork
 {
     IUserProfileRepository UserProfiles { get; }
     IRefreshTokenRepository RefreshTokens { get; }
+    IOutboxRepository OutboxMessages { get; }
 }
