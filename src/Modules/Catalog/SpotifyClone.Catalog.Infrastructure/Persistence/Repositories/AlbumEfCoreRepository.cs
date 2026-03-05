@@ -29,6 +29,7 @@ internal sealed class AlbumEfCoreRepository(CatalogAppDbContext context)
         CancellationToken cancellationToken = default)
         => await _albums
             .Where(a => a.MainArtists.Any(id => id.Value == artistId.Value))
+            .Include("_tracks")
             .ToListAsync(cancellationToken);
 
     public async Task DeleteAsync(

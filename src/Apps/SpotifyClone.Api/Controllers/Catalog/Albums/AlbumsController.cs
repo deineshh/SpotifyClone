@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.AddTrackToAlbum;
 using SpotifyClone.Api.Contracts.v1.Catalog.Albums.CorrectTitle;
@@ -20,20 +21,48 @@ using SpotifyClone.Catalog.Application.Features.Albums.Commands.RescheduleReleas
 using SpotifyClone.Catalog.Application.Features.Albums.Commands.UnpublishAlbum;
 using SpotifyClone.Catalog.Application.Features.Albums.Queries;
 using SpotifyClone.Catalog.Application.Features.Albums.Queries.GetDetails;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
-namespace SpotifyClone.Api.Controllers.Catalog;
+namespace SpotifyClone.Api.Controllers.Catalog.Albums;
 
 [Tags("Catalog Module")]
 [Route("api/v1/albums")]
 public sealed class AlbumsController(IMediator mediator)
     : ApiController(mediator)
 {
+    [EndpointSummary("Get Album Details")]
+    [EndpointDescription("Returns all the necessary Album details.")]
+    [ProducesResponseType(typeof(AlbumDetails), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [AllowAnonymous]
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<AlbumDetails>> GetDetails(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<AlbumDetails> result = await Mediator.Send(
+            new GetAlbumDetailsQuery(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(result.Value);
+    }
     [EndpointSummary("Create Album")]
     [EndpointDescription("Creates an Album in a Draft state.")]
     [ProducesResponseType(typeof(CreateAlbumResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpPost]
     public async Task<ActionResult<CreateAlbumResponse>> CreateAlbum(
         [FromBody] CreateAlbumRequest request,
@@ -55,36 +84,10 @@ public sealed class AlbumsController(IMediator mediator)
 
         CreateAlbumCommandResult createResultData = createResult.Value;
 
-        return CreatedAtAction(nameof(GetAlbumDetails),
+        return CreatedAtAction(nameof(GetDetails),
             new { id = createResultData.AlbumId },
             new CreateAlbumResponse(
                 createResultData.AlbumId));
-    }
-
-    [EndpointSummary("Get Album Details")]
-    [EndpointDescription("Returns all the necessary Album details.")]
-    [ProducesResponseType(typeof(AlbumDetails), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<AlbumDetails>> GetAlbumDetails(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        Result<AlbumDetails> result = await Mediator.Send(
-            new GetAlbumDetailsQuery(id),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return Ok(result.Value);
     }
 
     [EndpointSummary("Delete Album")]
@@ -93,6 +96,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult> DeleteAlbum(
         [FromRoute] Guid id,
@@ -119,6 +123,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpPut("{id:guid}/cover")]
     public async Task<ActionResult> LinkNewCoverImage(
         [FromRoute] Guid id,
@@ -152,6 +157,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpPost("{id:guid}/publish")]
     public async Task<ActionResult> PublishAlbum(
         [FromRoute] Guid id,
@@ -181,6 +187,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpPost("{id:guid}/unpublish")]
     public async Task<ActionResult> UnpublishAlbum(
         [FromRoute] Guid id,
@@ -207,6 +214,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpPost("{id:guid}/tracks")]
     public async Task<ActionResult> AddTrackToAlbum(
         [FromRoute] Guid id,
@@ -236,6 +244,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpDelete("{id:guid}/tracks/{trackId:guid}")]
     public async Task<ActionResult> RemoveTrackFromAlbum(
         [FromRoute] Guid id,
@@ -263,6 +272,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpPost("{id:guid}/tracks/{trackId:guid}/move")]
     public async Task<ActionResult> MoveTrackInAlbum(
         [FromRoute] Guid id,
@@ -292,6 +302,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpPatch("{id:guid}/title")]
     public async Task<ActionResult> CorrectAlbumTitle(
         [FromRoute] Guid id,
@@ -322,6 +333,7 @@ public sealed class AlbumsController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpPatch("{id:guid}/release")]
     public async Task<ActionResult> RescheduleAlbumRelease(
         [FromRoute] Guid id,

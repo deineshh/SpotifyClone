@@ -4,6 +4,7 @@ using SpotifyClone.Catalog.Application.Features.Albums.Queries;
 using SpotifyClone.Catalog.Application.Features.Artists.Queries;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
 using SpotifyClone.Catalog.Application.Models;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
@@ -65,6 +66,27 @@ internal sealed class AlbumEfCoreReadService(
         CancellationToken cancellationToken = default)
         => await _context.Albums
         .Where(a =>
+            a.MainArtists.Any(a => a.Value == artistId.Value))
+        .Select(a => new AlbumSummary(
+            a.Id.Value,
+            a.Title,
+            a.ReleaseDate,
+            a.Status.Value,
+            a.Type.Value,
+            a.Cover == null ? null : new ImageMetadataDetails(
+                a.Cover.ImageId.Value,
+                a.Cover.Metadata.Width,
+                a.Cover.Metadata.Height,
+                a.Cover.Metadata.FileType.Value,
+                a.Cover.Metadata.SizeInBytes)))
+        .ToListAsync(cancellationToken);
+
+    public async Task<IEnumerable<AlbumSummary>> GetAllPublishedByArtistIdAsync(
+        ArtistId artistId,
+        CancellationToken cancellationToken = default)
+        => await _context.Albums
+        .Where(a =>
+            a.Status.Value == AlbumStatus.Published.Value &&
             a.MainArtists.Any(a => a.Value == artistId.Value))
         .Select(a => new AlbumSummary(
             a.Id.Value,

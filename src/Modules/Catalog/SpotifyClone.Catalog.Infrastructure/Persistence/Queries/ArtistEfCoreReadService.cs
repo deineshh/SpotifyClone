@@ -29,6 +29,7 @@ internal sealed class ArtistEfCoreReadService(
             a.Id.Value,
             a.Name,
             a.Bio,
+            a.OwnerId.Value,
             a.Status.Value,
             a.Avatar == null ? null : new ImageMetadataDetails(
                 a.Avatar.ImageId.Value,
@@ -50,4 +51,38 @@ internal sealed class ArtistEfCoreReadService(
                 img.Metadata.SizeInBytes
             )).ToList()))
         .SingleOrDefaultAsync(cancellationToken);
+
+    public async Task<IEnumerable<ArtistDetails>> GetAllDetailsByIdsAsync(
+        IEnumerable<ArtistId> artistIds,
+        CancellationToken cancellationToken = default)
+        => await _context.Artists
+        .Where(a =>
+            a.Status.Value != ArtistStatus.Banned.Value &&
+            artistIds.Any(id => id.Value == a.Id.Value))
+        .Select(a => new ArtistDetails(
+            a.Id.Value,
+            a.Name,
+            a.Bio,
+            a.OwnerId.Value,
+            a.Status.Value,
+            a.Avatar == null ? null : new ImageMetadataDetails(
+                a.Avatar.ImageId.Value,
+                a.Avatar.Metadata.Width,
+                a.Avatar.Metadata.Height,
+                a.Avatar.Metadata.FileType.Value,
+                a.Avatar.Metadata.SizeInBytes),
+            a.Banner == null ? null : new ImageMetadataDetails(
+                a.Banner.ImageId.Value,
+                a.Banner.Metadata.Width,
+                a.Banner.Metadata.Height,
+                a.Banner.Metadata.FileType.Value,
+                a.Banner.Metadata.SizeInBytes),
+            a.Gallery.Select(img => new ImageMetadataDetails(
+                img.ImageId!.Value,
+                img.Metadata.Width,
+                img.Metadata.Height,
+                img.Metadata.FileType.Value,
+                img.Metadata.SizeInBytes
+            ))))
+        .ToListAsync(cancellationToken);
 }

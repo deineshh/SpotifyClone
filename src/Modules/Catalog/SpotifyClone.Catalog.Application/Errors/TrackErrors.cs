@@ -64,6 +64,10 @@ public static class TrackErrors
         "Track.AlreadyAttachedToAnAlbum",
         "The specified track is already attached to an album.");
 
+    public static readonly Error NotOwned = new(
+        "Track.NotOwned",
+        "Track is not owned by the current user.");
+
     public static readonly Error NotFound = CommonErrors.NotFound(
         "Track", "Track");
 }

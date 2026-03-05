@@ -10,10 +10,10 @@ internal sealed class GenreEfCoreRepository(CatalogAppDbContext context)
 {
     private readonly DbSet<Genre> _genres = context.Genres;
 
-    public async Task AddAsync(
-        Genre genre,
+    public async Task<bool> IsNameUniqueAsync(
+        string name,
         CancellationToken cancellationToken = default)
-        => await _genres.AddAsync(genre, cancellationToken);
+        => !await _genres.AnyAsync(a => a.Name == name, cancellationToken);
 
     public async Task<bool> Exists(
         GenreId id,
@@ -34,4 +34,9 @@ internal sealed class GenreEfCoreRepository(CatalogAppDbContext context)
         Genre genre,
         CancellationToken cancellationToken = default)
         => _genres.Remove(genre);
+
+    public async Task AddAsync(
+        Genre genre,
+        CancellationToken cancellationToken = default)
+        => await _genres.AddAsync(genre, cancellationToken);
 }

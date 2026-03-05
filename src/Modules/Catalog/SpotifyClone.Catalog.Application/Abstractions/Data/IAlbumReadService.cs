@@ -13,4 +13,8 @@ public interface IAlbumReadService
     Task<IEnumerable<AlbumSummary>> GetAllByArtistIdAsync(
         ArtistId artistId,
         CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<AlbumSummary>> GetAllPublishedByArtistIdAsync(
+        ArtistId artistId,
+        CancellationToken cancellationToken = default);
 }

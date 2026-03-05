@@ -117,9 +117,6 @@ else
 
 WebApplication app = builder.Build();
 
-app.UseCatalogModule();
-app.UseStreamingModule();
-
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".m3u8"] = "application/vnd.apple.mpegurl";
 provider.Mappings[".mpd"] = "application/dash+xml";
@@ -181,5 +178,9 @@ if (app.Environment.IsDevelopment())
             .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
     );
 }
+
+await app.UseAccountsModule();
+app.UseCatalogModule();
+app.UseStreamingModule();
 
 await app.RunAsync();

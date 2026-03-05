@@ -3,6 +3,8 @@ using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.Enums;
 using SpotifyClone.Shared.Kernel.IDs;
@@ -10,10 +12,12 @@ using SpotifyClone.Shared.Kernel.IDs;
 namespace SpotifyClone.Catalog.Application.Features.Artists.Commands.LinkNewBanner;
 
 internal sealed class LinkNewBannerToArtistCommandHandler(
-    ICatalogUnitOfWork unit)
+    ICatalogUnitOfWork unit,
+    ICurrentUser currentUser)
     : ICommandHandler<LinkNewBannerToArtistCommand, LinkNewBannerToArtistCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
+    private readonly ICurrentUser _currentUser = currentUser;
 
     public async Task<Result<LinkNewBannerToArtistCommandResult>> Handle(
         LinkNewBannerToArtistCommand request,
@@ -25,6 +29,12 @@ internal sealed class LinkNewBannerToArtistCommandHandler(
         if (artist is null)
         {
             return Result.Failure<LinkNewBannerToArtistCommandResult>(ArtistErrors.NotFound);
+        }
+
+        if ((!_currentUser.IsAuthenticated || _currentUser.Id != artist.OwnerId.Value) &&
+            !_currentUser.IsInRole(UserRoles.Admin))
+        {
+            return Result.Failure<LinkNewBannerToArtistCommandResult>(ArtistErrors.NotOwned);
         }
 
         artist.LinkNewBanner(new ArtistBannerImage(

@@ -10,10 +10,10 @@ internal sealed class MoodEfCoreRepository(CatalogAppDbContext context)
 {
     private readonly DbSet<Mood> _moods = context.Moods;
 
-    public async Task AddAsync(
-        Mood mood,
+    public async Task<bool> IsNameUniqueAsync(
+        string name,
         CancellationToken cancellationToken = default)
-        => await _moods.AddAsync(mood, cancellationToken);
+        => !await _moods.AnyAsync(a => a.Name == name, cancellationToken);
 
     public async Task<bool> Exists(
         MoodId id,
@@ -34,4 +34,9 @@ internal sealed class MoodEfCoreRepository(CatalogAppDbContext context)
         Mood mood,
         CancellationToken cancellationToken = default)
         => _moods.Remove(mood);
+
+    public async Task AddAsync(
+        Mood mood,
+        CancellationToken cancellationToken = default)
+        => await _moods.AddAsync(mood, cancellationToken);
 }

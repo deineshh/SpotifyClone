@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Moods.Create;
 using SpotifyClone.Api.Contracts.v1.Catalog.Moods.LinkNewCover;
@@ -9,17 +10,15 @@ using SpotifyClone.Catalog.Application.Features.Moods.Commands.Delete;
 using SpotifyClone.Catalog.Application.Features.Moods.Commands.LinkNewCover;
 using SpotifyClone.Catalog.Application.Features.Moods.Commands.Rename;
 using SpotifyClone.Catalog.Application.Features.Moods.Commands.UnlinkCover;
-using SpotifyClone.Catalog.Application.Features.Moods.Queries;
-using SpotifyClone.Catalog.Application.Features.Moods.Queries.GetDetails;
-using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
-using SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetAllByMood;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
-namespace SpotifyClone.Api.Controllers.Catalog;
+namespace SpotifyClone.Api.Controllers.Catalog.Moods;
 
 [Tags("Catalog Module")]
-[Route("api/v1/moods")]
-public sealed class MoodsController(IMediator mediator)
+[Route("api/v1/admin/moods")]
+[Authorize(Roles = UserRoles.Admin)]
+public sealed class MoodsAdminController(IMediator mediator)
     : ApiController(mediator)
 {
     [EndpointSummary("Create Mood")]
@@ -46,62 +45,11 @@ public sealed class MoodsController(IMediator mediator)
 
         CreateMoodCommandResult createResultData = createResult.Value;
 
-        return CreatedAtAction(nameof(GetMoodDetails),
-            new { id = createResultData.MoodId },
-            new CreateMoodResponse(
-                createResultData.MoodId));
-    }
-
-    [EndpointSummary("Get Mood Details")]
-    [EndpointDescription("Returns all the necessary Mood details.")]
-    [ProducesResponseType(typeof(MoodDetails), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<MoodDetails>> GetMoodDetails(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        Result<MoodDetails> result = await Mediator.Send(
-            new GetMoodDetailsQuery(id),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return Ok(result.Value);
-    }
-
-    [EndpointSummary("Get all Tracks by a Mood")]
-    [EndpointDescription("Returns all Tracks by a specific Mood.")]
-    [ProducesResponseType(typeof(TrackList), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpGet("{id:guid}/tracks")]
-    public async Task<ActionResult<TrackList>> GetAllTracksByMoodDetails(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        Result<TrackList> result = await Mediator.Send(
-            new GetAllTracksByMoodQuery(id),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return Ok(result.Value);
+        return CreatedAtAction(
+            actionName: nameof(MoodsController.GetMoodDetails),
+            controllerName: "Moods",
+            routeValues: new { id = createResultData.MoodId },
+            value: new CreateMoodResponse(createResultData.MoodId));
     }
 
     [EndpointSummary("Link Mood to new cover image")]

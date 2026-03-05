@@ -1,10 +1,11 @@
-﻿using FluentAssertions;
+﻿using System.Security.Principal;
+using FluentAssertions;
 using Moq;
 using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
-using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
+using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
@@ -60,6 +61,10 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .Setup(x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(identityInfo));
 
+        _identityMock
+            .Setup(x => x.GetUserRolesAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success<IReadOnlyCollection<string>>(Array.Empty<string>()));
+
         _tokenServiceMock
             .Setup(x => x.GenerateAccessToken(identityInfo, It.IsAny<IReadOnlyCollection<string>>()))
             .Returns(new AccessToken("accessToken", DateTimeOffset.UtcNow.AddMinutes(5)));
@@ -104,6 +109,10 @@ public sealed class LoginWithPasswordCommandHandlerTests
         _identityMock
             .Setup(x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(identityInfo));
+
+        _identityMock
+            .Setup(x => x.GetUserRolesAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success<IReadOnlyCollection<string>>(Array.Empty<string>()));
 
         _tokenServiceMock
             .Setup(x => x.GenerateAccessToken(identityInfo, It.IsAny<IReadOnlyCollection<string>>()))
@@ -167,6 +176,10 @@ public sealed class LoginWithPasswordCommandHandlerTests
         _identityMock
             .Setup(x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(identityInfo));
+
+        _identityMock
+            .Setup(x => x.GetUserRolesAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success<IReadOnlyCollection<string>>(Array.Empty<string>()));
 
         _tokenServiceMock
             .Setup(x => x.GenerateAccessToken(identityInfo, It.IsAny<IReadOnlyCollection<string>>()))

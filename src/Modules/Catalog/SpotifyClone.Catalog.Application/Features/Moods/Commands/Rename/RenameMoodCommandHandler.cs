@@ -24,6 +24,11 @@ internal sealed class RenameMoodCommandHandler(
             return Result.Failure<RenameMoodCommandResult>(MoodErrors.NotFound);
         }
 
+        if (await _unit.Moods.IsNameUniqueAsync(request.Name, cancellationToken))
+        {
+            return Result.Failure<RenameMoodCommandResult>(MoodErrors.InvalidName);
+        }
+
         mood.Rename(request.Name);
 
         return new RenameMoodCommandResult();

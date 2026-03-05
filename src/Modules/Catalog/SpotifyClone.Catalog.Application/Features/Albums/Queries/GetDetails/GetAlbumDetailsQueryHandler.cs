@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using SpotifyClone.Catalog.Application.Abstractions.Data;
+﻿using SpotifyClone.Catalog.Application.Abstractions.Data;
 using SpotifyClone.Catalog.Application.Errors;
+using SpotifyClone.Catalog.Application.Features.Artists.Queries;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Queries;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
@@ -9,28 +12,33 @@ namespace SpotifyClone.Catalog.Application.Features.Albums.Queries.GetDetails;
 
 internal sealed class GetAlbumDetailsQueryHandler(
     IAlbumReadService albumReadService,
-    ILogger<GetAlbumDetailsQueryHandler> logger)
+    IArtistReadService artistReadService,
+    ICurrentUser currentUser)
     : IQueryHandler<GetAlbumDetailsQuery, AlbumDetails>
 {
     private readonly IAlbumReadService _albumReadService = albumReadService;
-    private readonly ILogger<GetAlbumDetailsQueryHandler> _logger = logger;
+    private readonly IArtistReadService _artistReadService = artistReadService;
+    private readonly ICurrentUser _currentUser = currentUser;
 
     public async Task<Result<AlbumDetails>> Handle(
         GetAlbumDetailsQuery request,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "Getting Album info {AlbumId}", request.AlbumId);
-
         AlbumDetails? album = await _albumReadService.GetDetailsAsync(
             AlbumId.From(request.AlbumId),
             cancellationToken);
-
         if (album is null)
         {
-            _logger.LogWarning(
-                "Album {AlbumId} not found", request.AlbumId);
+            return Result.Failure<AlbumDetails>(AlbumErrors.NotFound);
+        }
 
+        IEnumerable<ArtistDetails> artists = await _artistReadService.GetAllDetailsByIdsAsync(
+            album.MainArtists.Select(a => ArtistId.From(a.Id)).ToList(),
+            cancellationToken);
+
+        if (album.Status != AlbumStatus.Published.Value
+            && (!_currentUser.IsAuthenticated || !artists.Any(a => a.OwnerId == _currentUser.Id)))
+        {
             return Result.Failure<AlbumDetails>(AlbumErrors.NotFound);
         }
 

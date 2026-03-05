@@ -2,6 +2,7 @@
 
 public interface ICurrentUser
 {
-    Guid UserId { get; }
+    Guid Id { get; }
     bool IsAuthenticated { get; }
+    bool IsInRole(string role);
 }

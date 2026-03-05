@@ -1,41 +1,46 @@
-﻿using Microsoft.Extensions.Logging;
-using SpotifyClone.Catalog.Application.Abstractions;
+﻿using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Catalog.Application.Features.Albums.Commands.UnpublishAlbum;
 
 internal sealed class UnpublishAlbumCommandHandler(
     ICatalogUnitOfWork unit,
-    AlbumTrackDomainService albumTrackDomainService,
-    ILogger<UnpublishAlbumCommandHandler> logger)
+    ICurrentUser currentUser,
+    AlbumTrackDomainService albumTrackDomainService)
     : ICommandHandler<UnpublishAlbumCommand, UnpublishAlbumCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
+    private readonly ICurrentUser _currentUser = currentUser;
     private readonly AlbumTrackDomainService _albumTrackDomainService = albumTrackDomainService;
-    private readonly ILogger<UnpublishAlbumCommandHandler> _logger = logger;
 
     public async Task<Result<UnpublishAlbumCommandResult>> Handle(
         UnpublishAlbumCommand request,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "Publishing Album {Id}", request.AlbumId);
-
         Album? album = await _unit.Albums.GetByIdAsync(
             AlbumId.From(request.AlbumId),
             cancellationToken);
-
         if (album is null)
         {
-            _logger.LogWarning(
-                "Album {Id} not found while publishing", request.AlbumId);
-
             return Result.Failure<UnpublishAlbumCommandResult>(AlbumErrors.NotFound);
+        }
+
+        IEnumerable<Artist> artists = await _unit.Artists.GetByIdsAsync(
+            album.MainArtists,
+            cancellationToken);
+
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value == _currentUser.Id)) &&
+            !_currentUser.IsInRole(UserRoles.Admin))
+        {
+            return Result.Failure<UnpublishAlbumCommandResult>(AlbumErrors.NotOwned);
         }
 
         album.Unpublish();

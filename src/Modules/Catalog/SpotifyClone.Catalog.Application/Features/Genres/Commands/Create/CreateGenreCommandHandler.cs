@@ -1,4 +1,5 @@
 ﻿using SpotifyClone.Catalog.Application.Abstractions;
+using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
@@ -16,6 +17,11 @@ internal sealed class CreateGenreCommandHandler(
         CreateGenreCommand request,
         CancellationToken cancellationToken)
     {
+        if (!await _unit.Genres.IsNameUniqueAsync(request.Name, cancellationToken))
+        {
+            return Result.Failure<CreateGenreCommandResult>(GenreErrors.InvalidName);
+        }
+
         var genre = Genre.Create(
             GenreId.From(Guid.NewGuid()),
             request.Name);

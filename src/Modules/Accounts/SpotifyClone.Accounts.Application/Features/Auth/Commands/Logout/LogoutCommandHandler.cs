@@ -19,7 +19,7 @@ internal sealed class LogoutCommandHandler(
         CancellationToken cancellationToken)
     {
         Result revokeResult = await _unit.RefreshTokens.RevokeAllAsync(
-            UserId.From(_currentUser.UserId),
+            UserId.From(_currentUser.Id),
             replacedByTokenHash: null,
             cancellationToken);
 

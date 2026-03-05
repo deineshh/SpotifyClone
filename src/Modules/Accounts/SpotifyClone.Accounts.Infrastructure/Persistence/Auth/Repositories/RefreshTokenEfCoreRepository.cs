@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Accounts.Application.Abstractions.Repositories;
-using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
 using SpotifyClone.Accounts.Application.Errors;
+using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;

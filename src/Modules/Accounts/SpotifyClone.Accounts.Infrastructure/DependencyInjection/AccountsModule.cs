@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using SpotifyClone.Accounts.Application.Abstractions.Repositories;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Behaviors;
 using SpotifyClone.Accounts.Application.Errors;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
 using SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
 using SpotifyClone.Accounts.Infrastructure.Auth.Sms;
@@ -17,12 +19,14 @@ using SpotifyClone.Accounts.Infrastructure.Persistence;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Repositories;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Auth;
+using SpotifyClone.Accounts.Infrastructure.Persistence.Auth.Initialization;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Auth.Repositories;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Services;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 
 namespace SpotifyClone.Accounts.Infrastructure.DependencyInjection;
 
@@ -52,6 +56,7 @@ public static class AccountsModule
             options.User.RequireUniqueEmail = true;
             options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultPhoneProvider;
         })
+            .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<IdentityAppDbContext>()
             .AddDefaultTokenProviders();
 
@@ -72,5 +77,55 @@ public static class AccountsModule
         services.AddTransient<ISmsSender, LoggerSmsSender>();
 
         return services;
+    }
+
+    public async static Task UseAccountsModule(this IApplicationBuilder app)
+    {
+        await IdentitySeeder.SeedRolesAsync(app.ApplicationServices);
+
+        using IServiceScope scope = app.ApplicationServices.CreateScope();
+        UserManager<ApplicationUser> userManager = scope.ServiceProvider
+            .GetRequiredService<UserManager<ApplicationUser>>();
+        ISender sender = scope.ServiceProvider
+            .GetRequiredService<ISender>();
+
+        const string adminEmail = "stopify@gmail.com";
+        ApplicationUser? existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+        if (existingAdmin is null)
+        {
+            await sender.Send(new RegisterUserCommand(
+                Email: adminEmail,
+                Password: "Admin_Password123",
+                DisplayName: "Stopify",
+                BirthDate: new DateTimeOffset(2007, 03, 04, 2, 0, 0, TimeSpan.Zero),
+                Gender: "male",
+                Role: UserRoles.Admin));
+        }
+
+        const string creator1Email = "stopifycreator@gmail.com";
+        ApplicationUser? existingCreator1 = await userManager.FindByEmailAsync(creator1Email);
+        if (existingCreator1 is null)
+        {
+            await sender.Send(new RegisterUserCommand(
+                Email: creator1Email,
+                Password: "Creator_Password123",
+                DisplayName: "The Creator",
+                BirthDate: new DateTimeOffset(new DateTime(2007, 03, 04, 2, 0, 0, DateTimeKind.Local)),
+                Gender: "male",
+                Role: UserRoles.Creator));
+        }
+
+        const string creator2Email = "stopifycreator2@gmail.com";
+        ApplicationUser? existingCreator2 = await userManager.FindByEmailAsync(creator2Email);
+        if (existingCreator2 is null)
+        {
+            await sender.Send(new RegisterUserCommand(
+                Email: creator2Email,
+                Password: "Creator_Password123",
+                DisplayName: "The Creator 2",
+                BirthDate: new DateTimeOffset(new DateTime(2007, 03, 04, 2, 0, 0, DateTimeKind.Local)),
+                Gender: "male",
+                Role: UserRoles.Creator));
+        }
     }
 }

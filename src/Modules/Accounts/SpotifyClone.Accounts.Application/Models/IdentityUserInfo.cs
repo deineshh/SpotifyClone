@@ -1,6 +1,6 @@
 ﻿using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Accounts.Application.Abstractions.Services.Models;
+namespace SpotifyClone.Accounts.Application.Models;
 
 public sealed record IdentityUserInfo(
     UserId UserId,

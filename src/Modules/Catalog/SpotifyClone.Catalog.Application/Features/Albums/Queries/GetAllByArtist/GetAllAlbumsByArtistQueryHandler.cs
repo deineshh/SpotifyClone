@@ -1,18 +1,23 @@
 ﻿using SpotifyClone.Catalog.Application.Abstractions.Data;
 using SpotifyClone.Catalog.Application.Errors;
+using SpotifyClone.Catalog.Application.Features.Artists.Queries;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Queries;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Catalog.Application.Features.Albums.Queries.GetAllByArtist;
 
 internal sealed class GetAllAlbumsByArtistQueryHandler(
     IArtistReadService artistReadService,
-    IAlbumReadService albumReadService)
+    IAlbumReadService albumReadService,
+    ICurrentUser currentUser)
     : IQueryHandler<GetAllAlbumsByArtistQuery, AlbumList>
 {
     private readonly IArtistReadService _artistReadService = artistReadService;
     private readonly IAlbumReadService _albumReadService = albumReadService;
+    private readonly ICurrentUser _currentUser = currentUser;
 
     public async Task<Result<AlbumList>> Handle(
         GetAllAlbumsByArtistQuery request,
@@ -20,15 +25,18 @@ internal sealed class GetAllAlbumsByArtistQueryHandler(
     {
         var artistId = ArtistId.From(request.ArtistId);
 
-        bool artistExists = await _artistReadService.ExistsAsync(
+        ArtistDetails? artist = await _artistReadService.GetDetailsAsync(
             artistId, cancellationToken);
-        if (!artistExists)
+        if (artist is null)
         {
             return Result.Failure<AlbumList>(ArtistErrors.NotFound);
         }
 
-        IEnumerable<AlbumSummary> albums = await _albumReadService.GetAllByArtistIdAsync(
-            artistId, cancellationToken);
+        IEnumerable<AlbumSummary> albums =
+            _currentUser.IsAuthenticated && artist.OwnerId == _currentUser.Id ||
+            _currentUser.IsInRole(UserRoles.Admin)
+            ? await _albumReadService.GetAllByArtistIdAsync(artistId, cancellationToken)
+            : await _albumReadService.GetAllPublishedByArtistIdAsync(artistId, cancellationToken);
 
         return new AlbumList(albums.ToList().AsReadOnly());
     }

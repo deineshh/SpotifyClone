@@ -19,7 +19,7 @@ internal sealed class ArtistBannedDomainEventHandler(
         ArtistBannedDomainEvent notification,
         CancellationToken cancellationToken)
     {
-        Artist? artist = await _unit.Artists.GetByIdAsync(
+        Artist? artist = await _unit.Artists.GetBannedByIdAsync(
             notification.ArtistId, cancellationToken);
         if (artist is null)
         {
@@ -35,7 +35,7 @@ internal sealed class ArtistBannedDomainEventHandler(
 
         foreach (Album album in albums)
         {
-            album.Unpublish();
+            album.RemoveMainArtist(artist.Id);
         }
 
         await _unit.CommitAsync(cancellationToken);

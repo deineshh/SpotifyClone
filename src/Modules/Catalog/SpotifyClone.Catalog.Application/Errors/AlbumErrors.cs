@@ -56,6 +56,10 @@ public static class AlbumErrors
         "Album.TrackNotFound",
         "Track was not found in the album.");
 
+    public static readonly Error NotOwned = new(
+        "Album.NotOwned",
+        "Album is not owned by the current user.");
+
     public static readonly Error NotFound = CommonErrors.NotFound(
         "Album", "Album");
 }

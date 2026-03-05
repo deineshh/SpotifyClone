@@ -1,4 +1,4 @@
-﻿namespace SpotifyClone.Accounts.Application.Abstractions.Services.Models;
+﻿namespace SpotifyClone.Accounts.Application.Models;
 
 public sealed record AccessToken(
     string RawToken,

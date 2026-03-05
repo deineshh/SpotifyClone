@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using SpotifyClone.Catalog.Application.Abstractions;
+﻿using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Application.Errors;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
@@ -10,29 +12,33 @@ namespace SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnlinkFromAu
 
 internal sealed class UnlinkTrackFromAudioFileCommandHandler(
     ICatalogUnitOfWork unit,
-    ILogger<UnlinkTrackFromAudioFileCommandHandler> logger)
+    ICurrentUser currentUser)
     : ICommandHandler<UnlinkTrackFromAudioFileCommand, UnlinkTrackFromAudioFileCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
-    private readonly ILogger<UnlinkTrackFromAudioFileCommandHandler> _logger = logger;
+    private readonly ICurrentUser _currentUser = currentUser;
 
     public async Task<Result<UnlinkTrackFromAudioFileCommandResult>> Handle(
         UnlinkTrackFromAudioFileCommand request,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "Unlinking Track {TrackId} from Audio File", request.TrackId);
-
         Track? track = await _unit.Tracks.GetByIdAsync(
             TrackId.From(request.TrackId),
             cancellationToken);
 
         if (track is null)
         {
-            _logger.LogWarning(
-                "Track {TrackId} not found while unlinking Track from Audio File", request.TrackId);
-
             return Result.Failure<UnlinkTrackFromAudioFileCommandResult>(TrackErrors.NotFound);
+        }
+
+        IEnumerable<Artist> artists = await _unit.Artists.GetByIdsAsync(
+            track.MainArtists,
+            cancellationToken);
+
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value == _currentUser.Id)) &&
+            !_currentUser.IsInRole(UserRoles.Admin))
+        {
+            return Result.Failure<UnlinkTrackFromAudioFileCommandResult>(AlbumErrors.NotOwned);
         }
 
         track.UnlinkAudioFile();

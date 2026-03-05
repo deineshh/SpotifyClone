@@ -14,9 +14,5 @@ public sealed class EditArtistProfileCommandValidator
         RuleFor(x => x.Name)
             .NotNull().WithMessage("Name is required.")
             .NotEmpty().WithMessage("Name is required.");
-
-        RuleFor(x => x.Bio)
-            .NotNull().WithMessage("Bio is required.")
-            .NotEmpty().WithMessage("Bio is required.");
     }
 }

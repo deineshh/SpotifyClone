@@ -4,6 +4,7 @@ using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
 using SpotifyClone.Accounts.Domain.Aggregates.Users.Enums;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
@@ -69,7 +70,8 @@ internal sealed class RegisterUserCommandHandler(
             request.Email,
             userProfile.DisplayName,
             userProfile.BirthDate,
-            userProfile.Gender.Value);
+            userProfile.Gender.Value,
+            request.Role);
     }
 
     private async Task<Result<Guid>> CreateIdentityUserAsync(
@@ -83,7 +85,7 @@ internal sealed class RegisterUserCommandHandler(
         }
 
         Result<Guid> createUserResult = await _identity.CreateUserAsync(
-            request.Email, request.Password, cancellationToken);
+            request.Email, request.Password, UserRoles.CalculateBy(request.Role));
 
         return createUserResult;
     }

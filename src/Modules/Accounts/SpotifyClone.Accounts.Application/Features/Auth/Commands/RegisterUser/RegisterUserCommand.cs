@@ -7,5 +7,6 @@ public sealed record RegisterUserCommand(
     string Password,
     string DisplayName,
     DateTimeOffset BirthDate,
-    string Gender)
+    string Gender,
+    string Role)
     : IAccountsPersistentCommand<RegisterUserCommandResult>;

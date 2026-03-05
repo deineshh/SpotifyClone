@@ -6,4 +6,5 @@ public sealed record RegisterUserResponse(
     string DisplayName,
     DateTimeOffset BirthDate,
     string Gender,
-    string AccessToken);
+    string AccessToken,
+    DateTimeOffset ExpiresAt);

@@ -4,6 +4,10 @@ namespace SpotifyClone.Catalog.Domain.Aggregates.Moods;
 
 public interface IMoodRepository
 {
+    Task<bool> IsNameUniqueAsync(
+        string name,
+        CancellationToken cancellationToken = default);
+
     Task<Mood?> GetByIdAsync(
         MoodId id,
         CancellationToken cancellationToken = default);

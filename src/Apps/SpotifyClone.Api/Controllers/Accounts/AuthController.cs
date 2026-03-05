@@ -18,6 +18,7 @@ using SpotifyClone.Api.Contracts.v1.Accounts.Auth.SendVerificationSms;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.VerifyEmail;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.VerifyPhoneNumber;
 using SpotifyClone.Api.Mappers;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Api.Controllers.Accounts;
@@ -38,7 +39,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     };
 
     [HttpPost("register")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<RegisterUserResponse>> RegisterUser(
         RegisterUserRequest request,
@@ -50,7 +51,8 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
                 request.Password,
                 request.DisplayName,
                 request.BirthDate,
-                request.Gender),
+                request.Gender,
+                UserRoles.Listener),
             cancellationToken);
         if (registrationResult.IsFailure)
         {
@@ -97,7 +99,8 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             registrationResultData.DisplayName,
             registrationResultData.BirthDate,
             registrationResultData.Gender,
-            loginResultData.AccessToken));
+            loginResultData.AccessToken,
+            loginResultData.ExpiresAt));
     }
 
     [HttpPost("login")]
@@ -125,7 +128,8 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
 
         return Ok(
             new LoginWithPasswordResponse(
-                result.Value.AccessToken));
+                result.Value.AccessToken,
+                result.Value.ExpiresAt));
     }
 
     [Authorize]
@@ -160,7 +164,8 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
 
         return Ok(
             new LoginWithRefreshTokenResponse(
-                result.Value.AccessToken));
+                result.Value.AccessToken,
+                result.Value.ExpiresAt));
     }
 
     [Authorize]

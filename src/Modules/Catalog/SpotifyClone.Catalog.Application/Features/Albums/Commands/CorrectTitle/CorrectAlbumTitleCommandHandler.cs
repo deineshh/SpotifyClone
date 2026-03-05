@@ -2,16 +2,21 @@
 using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Catalog.Application.Features.Albums.Commands.CorrectTitle;
 
 internal sealed class CorrectAlbumTitleCommandHandler(
-    ICatalogUnitOfWork unit)
+    ICatalogUnitOfWork unit,
+    ICurrentUser currentUser)
     : ICommandHandler<CorrectAlbumTitleCommand, CorrectAlbumTitleCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
+    private readonly ICurrentUser _currentUser = currentUser;
 
     public async Task<Result<CorrectAlbumTitleCommandResult>> Handle(
         CorrectAlbumTitleCommand request,
@@ -20,10 +25,19 @@ internal sealed class CorrectAlbumTitleCommandHandler(
         Album? album = await _unit.Albums.GetByIdAsync(
             AlbumId.From(request.AlbumId),
             cancellationToken);
-
         if (album is null)
         {
             return Result.Failure<CorrectAlbumTitleCommandResult>(AlbumErrors.NotFound);
+        }
+
+        IEnumerable<Artist> artists = await _unit.Artists.GetByIdsAsync(
+            album.MainArtists,
+            cancellationToken);
+
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value == _currentUser.Id)) &&
+            !_currentUser.IsInRole(UserRoles.Admin))
+        {
+            return Result.Failure<CorrectAlbumTitleCommandResult>(AlbumErrors.NotOwned);
         }
 
         album.CorrectTitle(request.Title);

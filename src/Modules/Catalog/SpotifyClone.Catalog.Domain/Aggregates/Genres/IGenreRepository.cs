@@ -4,6 +4,10 @@ namespace SpotifyClone.Catalog.Domain.Aggregates.Genres;
 
 public interface IGenreRepository
 {
+    Task<bool> IsNameUniqueAsync(
+        string name,
+        CancellationToken cancellationToken = default);
+
     Task<Genre?> GetByIdAsync(
         GenreId id,
         CancellationToken cancellationToken = default);

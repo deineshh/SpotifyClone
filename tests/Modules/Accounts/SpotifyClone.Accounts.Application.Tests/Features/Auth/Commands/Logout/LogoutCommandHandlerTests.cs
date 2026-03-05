@@ -38,7 +38,7 @@ public sealed class LogoutCommandHandlerTests
         var userId = Guid.NewGuid();
 
         _currentUserMock
-            .Setup(c => c.UserId)
+            .Setup(c => c.Id)
             .Returns(userId);
 
         _refreshTokenRepoMock

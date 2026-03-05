@@ -40,6 +40,10 @@ public static class ArtistErrors
         "Artist.InvalidStatus",
         "The specified artist status is invalid.");
 
+    public static readonly Error NotOwned = new(
+        "Artist.NotOwned",
+        "Artist is not owned by the current user.");
+
     public static readonly Error NotFound = CommonErrors.NotFound(
         "Artist", "Artist");
 }

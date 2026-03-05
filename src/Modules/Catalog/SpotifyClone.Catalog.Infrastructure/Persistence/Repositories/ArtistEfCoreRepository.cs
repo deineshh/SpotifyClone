@@ -23,6 +23,13 @@ internal sealed class ArtistEfCoreRepository(CatalogAppDbContext context)
             a => a.Id == id && a.Status != ArtistStatus.Banned,
             cancellationToken);
 
+    public async Task<IEnumerable<Artist>> GetByIdsAsync(
+        IEnumerable<ArtistId> ids,
+        CancellationToken cancellationToken = default)
+        => await _artists
+            .Where(a => ids.Contains(a.Id) && a.Status != ArtistStatus.Banned)
+            .ToListAsync(cancellationToken);
+
     public async Task<Artist?> GetBannedByIdAsync(
         ArtistId id,
         CancellationToken cancellationToken = default)

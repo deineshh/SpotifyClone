@@ -1,39 +1,74 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SpotifyClone.Api.Contracts.v1.Catalog.Genres.Create;
-using SpotifyClone.Api.Contracts.v1.Catalog.Genres.LinkNewCover;
-using SpotifyClone.Api.Contracts.v1.Catalog.Genres.Rename;
+using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.CorrectTitle;
+using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.Create;
 using SpotifyClone.Api.Mappers;
-using SpotifyClone.Catalog.Application.Features.Genres.Commands.Create;
-using SpotifyClone.Catalog.Application.Features.Genres.Commands.Delete;
-using SpotifyClone.Catalog.Application.Features.Genres.Commands.LinkNewCover;
-using SpotifyClone.Catalog.Application.Features.Genres.Commands.Rename;
-using SpotifyClone.Catalog.Application.Features.Genres.Commands.UnlinkCover;
-using SpotifyClone.Catalog.Application.Features.Genres.Queries;
-using SpotifyClone.Catalog.Application.Features.Genres.Queries.GetDetails;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.CorrectTitle;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Delete;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.MarkAsExplicit;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.MarkAsNotExplicit;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnlinkFromAudioFile;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
-using SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetAllByGenre;
+using SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetDetails;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
-namespace SpotifyClone.Api.Controllers.Catalog;
+namespace SpotifyClone.Api.Controllers.Catalog.Tracks;
 
 [Tags("Catalog Module")]
-[Route("api/v1/genres")]
-public sealed class GenresController(IMediator mediator)
+[Route("api/v1/tracks")]
+public sealed class TracksController(IMediator mediator)
     : ApiController(mediator)
 {
-    [EndpointSummary("Create Genre")]
-    [EndpointDescription("Creates a Genre without cover.")]
-    [ProducesResponseType(typeof(CreateGenreResponse), StatusCodes.Status201Created)]
+    [EndpointSummary("Get Track Details")]
+    [EndpointDescription("Returns all the necessary Track details.")]
+    [ProducesResponseType(typeof(TrackDetails), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPost]
-    public async Task<ActionResult<CreateGenreResponse>> CreateGenre(
-        [FromBody] CreateGenreRequest request,
+    [AllowAnonymous]
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<TrackDetails>> GetTrackDetails(
+        [FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
-        Result<CreateGenreCommandResult> createResult = await Mediator.Send(
-            new CreateGenreCommand(request.Name),
+        Result<TrackDetails> result = await Mediator.Send(
+            new GetTrackDetailsQuery(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(result.Value);
+    }
+
+    [EndpointSummary("Create Track")]
+    [EndpointDescription("Creates a Track in a Draft state.")]
+    [ProducesResponseType(typeof(CreateTrackResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
+    [HttpPost]
+    public async Task<ActionResult<CreateTrackResponse>> CreateTrack(
+        [FromBody] CreateTrackRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<CreateTrackCommandResult> createResult = await Mediator.Send(
+            new CreateTrackCommand(
+                request.Title,
+                request.ContainsExplicitContent,
+                request.AlbumId,
+                request.MainArtists,
+                request.FeaturedArtists,
+                request.Genres,
+                request.Moods),
             cancellationToken);
         if (createResult.IsFailure)
         {
@@ -44,86 +79,61 @@ public sealed class GenresController(IMediator mediator)
             return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
-        CreateGenreCommandResult createResultData = createResult.Value;
+        CreateTrackCommandResult createResultData = createResult.Value;
 
-        return CreatedAtAction(nameof(GetGenreDetails),
-            new { id = createResultData.GenreId },
-            new CreateGenreResponse(
-                createResultData.GenreId));
+        return CreatedAtAction(nameof(TracksController.GetTrackDetails),
+            new { id = createResultData.TrackId },
+            new CreateTrackResponse(
+                createResultData.TrackId));
     }
 
-    [EndpointSummary("Get Genre Details")]
-    [EndpointDescription("Returns all the necessary Genre details.")]
-    [ProducesResponseType(typeof(GenreDetails), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<GenreDetails>> GetGenreDetails(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        Result<GenreDetails> result = await Mediator.Send(
-            new GetGenreDetailsQuery(id),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return Ok(result.Value);
-    }
-
-    [EndpointSummary("Get all Tracks by a Genre")]
-    [EndpointDescription("Returns all Tracks by a specific Genre.")]
-    [ProducesResponseType(typeof(TrackList), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpGet("{id:guid}/tracks")]
-    public async Task<ActionResult<TrackList>> GetAllTracksByGenreDetails(
-        [FromRoute] Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        Result<TrackList> result = await Mediator.Send(
-            new GetAllTracksByGenreQuery(id),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return Ok(result.Value);
-    }
-
-    [EndpointSummary("Link Genre to new cover image")]
-    [EndpointDescription("Links a Genre to a new cover image.")]
+    [EndpointSummary("Unlink Audio file")]
+    [EndpointDescription("Unlinks the audio file from the Track if it's not yet published. " +
+        "The Track will return to a Draft state. The audio content will be permanently deleted. " +
+        "Note: This operation is eventually consistent; " +
+        "the physical file deletion happens in the background.")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPut("{id:guid}/cover")]
-    public async Task<ActionResult> LinkNewCoverImage(
+    [Authorize(Roles = UserRoles.Creator)]
+    [HttpPost("{id:guid}/unlink-audio-file")]
+    public async Task<ActionResult> UnlinkFromAudioFile(
         [FromRoute] Guid id,
-        [FromBody] LinkNewCoverToGenreRequest request,
         CancellationToken cancellationToken = default)
     {
-        Result<LinkNewCoverToGenreCommandResult> result = await Mediator.Send(
-            new LinkNewCoverToGenreCommand(
+        Result<UnlinkTrackFromAudioFileCommandResult> result = await Mediator.Send(
+            new UnlinkTrackFromAudioFileCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Correct Track title")]
+    [EndpointDescription("Corrects the track title.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
+    [HttpPatch("{id:guid}/title")]
+    public async Task<ActionResult> CorrectTrackTitle(
+        [FromRoute] Guid id,
+        [FromBody] CorrectTrackTitleRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<CorrectTrackTitleCommandResult> result = await Mediator.Send(
+            new CorrectTrackTitleCommand(
                 id,
-                request.ImageId,
-                request.ImageWidth,
-                request.ImageHeight,
-                request.ImageFileType,
-                request.ImageSizeInBytes),
+                request.Title),
             cancellationToken);
         if (result.IsFailure)
         {
@@ -137,19 +147,20 @@ public sealed class GenresController(IMediator mediator)
         return NoContent();
     }
 
-    [EndpointSummary("Unlink Genre from cover image")]
-    [EndpointDescription("Unlinks a Genre from it's cover image.")]
+    [EndpointSummary("Mark Track as Explicit")]
+    [EndpointDescription("Flags the track as containing explicit content.")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpDelete("{id:guid}/cover")]
-    public async Task<ActionResult> UnlinkCoverImage(
+    [Authorize(Roles = UserRoles.Creator)]
+    [HttpPost("{id:guid}/explicit")]
+    public async Task<ActionResult> MarkTrackAsExplicit(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
-        Result<UnlinkCoverFromGenreCommandResult> result = await Mediator.Send(
-            new UnlinkCoverFromGenreCommand(id),
+        Result<MarkTrackAsExplicitCommandResult> result = await Mediator.Send(
+            new MarkTrackAsExplicitCommand(id),
             cancellationToken);
         if (result.IsFailure)
         {
@@ -163,48 +174,48 @@ public sealed class GenresController(IMediator mediator)
         return NoContent();
     }
 
-    [EndpointSummary("Delete Genre")]
-    [EndpointDescription("Deletes a Genre, but also removes the link from the cover image asset and all tracks.")]
+    [EndpointSummary("Unmark Track as Explicit")]
+    [EndpointDescription("Flags the track as containing NO explicit content.")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
+    [HttpDelete("{id:guid}/explicit")]
+    public async Task<ActionResult> MarkTrackAsNotExplicit(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<MarkTrackAsNotExplicitCommandResult> result = await Mediator.Send(
+            new MarkTrackAsNotExplicitCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Delete Track")]
+    [EndpointDescription("Completely deletes a Track, " +
+        "unlinks the Audio asset from it and removes it from all albums and playlists.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
     [HttpDelete("{id:guid}")]
-    public async Task<ActionResult> DeleteGenre(
+    public async Task<ActionResult> DeleteTrack(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
-        Result<DeleteGenreCommandResult> result = await Mediator.Send(
-            new DeleteGenreCommand(id),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return NoContent();
-    }
-
-    [EndpointSummary("Rename Genre")]
-    [EndpointDescription("Renames a Genre.")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [HttpPatch("{id:guid}/name")]
-    public async Task<ActionResult> RenameGenre(
-        [FromRoute] Guid id,
-        [FromBody] RenameGenreRequest request,
-        CancellationToken cancellationToken = default)
-    {
-        Result<RenameGenreCommandResult> result = await Mediator.Send(
-            new RenameGenreCommand(
-                id,
-                request.Name),
+        Result<DeleteTrackCommandResult> result = await Mediator.Send(
+            new DeleteTrackCommand(id),
             cancellationToken);
         if (result.IsFailure)
         {

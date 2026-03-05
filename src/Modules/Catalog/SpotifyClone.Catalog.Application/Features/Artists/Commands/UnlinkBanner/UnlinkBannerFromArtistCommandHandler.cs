@@ -3,15 +3,19 @@ using SpotifyClone.Catalog.Application.Errors;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Catalog.Application.Features.Artists.Commands.UnlinkBanner;
 
 internal sealed class UnlinkBannerFromArtistCommandHandler(
-    ICatalogUnitOfWork unit)
+    ICatalogUnitOfWork unit,
+    ICurrentUser currentUser)
     : ICommandHandler<UnlinkBannerFromArtistCommand, UnlinkBannerFromArtistCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
+    private readonly ICurrentUser _currentUser = currentUser;
 
     public async Task<Result<UnlinkBannerFromArtistCommandResult>> Handle(
         UnlinkBannerFromArtistCommand request,
@@ -23,6 +27,12 @@ internal sealed class UnlinkBannerFromArtistCommandHandler(
         if (artist is null)
         {
             return Result.Failure<UnlinkBannerFromArtistCommandResult>(ArtistErrors.NotFound);
+        }
+
+        if ((!_currentUser.IsAuthenticated || _currentUser.Id != artist.OwnerId.Value) &&
+            !_currentUser.IsInRole(UserRoles.Admin))
+        {
+            return Result.Failure<UnlinkBannerFromArtistCommandResult>(ArtistErrors.NotOwned);
         }
 
         artist.UnlinkBannerIfExists();

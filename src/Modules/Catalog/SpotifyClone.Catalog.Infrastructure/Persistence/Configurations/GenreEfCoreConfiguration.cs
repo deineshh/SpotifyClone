@@ -23,6 +23,8 @@ internal sealed class GenreEfCoreConfiguration : IEntityTypeConfiguration<Genre>
             .HasColumnName("name")
             .HasMaxLength(GenreNameRules.MaxLength)
             .IsRequired();
+        builder.HasIndex(g => g.Name)
+            .IsUnique();
 
         builder.OwnsOne(x => x.Cover, coverBuilder =>
         {

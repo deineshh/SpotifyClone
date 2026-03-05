@@ -6,6 +6,7 @@ public sealed record ArtistDetails(
     Guid Id,
     string Name,
     string? Bio,
+    Guid OwnerId,
     string Status,
     ImageMetadataDetails? Avatar,
     ImageMetadataDetails? Banner,

@@ -23,6 +23,8 @@ internal sealed class MoodEfCoreConfiguration : IEntityTypeConfiguration<Mood>
             .HasColumnName("name")
             .HasMaxLength(MoodNameRules.MaxLength)
             .IsRequired();
+        builder.HasIndex(m => m.Name)
+            .IsUnique();
 
         builder.OwnsOne(x => x.Cover, coverBuilder =>
         {

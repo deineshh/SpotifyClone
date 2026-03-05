@@ -123,23 +123,16 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     {
         ArgumentNullException.ThrowIfNull(artistId);
 
-        if (Status.IsPublished)
-        {
-            throw new AlbumAlreadyPublishedDomainException(
-                "Cannot remove main artist from a published album.");
-        }
-
-        if (_mainArtists.Count <= 1)
-        {
-            throw new InvalidAlbumMainArtistsDomainException(
-                "An album must have at least one main artist.");
-        }
-
         if (!_mainArtists.Remove(artistId))
         {
             throw new MainArtistNotFoundInAlbumDomainException(
                 $"Cannot remove main artist '{artistId.Value}' from the album, " +
                 $"because it was not found in the album.");
+        }
+
+        if (_mainArtists.Count <= 0 && Status.IsPublished)
+        {
+            Unpublish();
         }
     }
 

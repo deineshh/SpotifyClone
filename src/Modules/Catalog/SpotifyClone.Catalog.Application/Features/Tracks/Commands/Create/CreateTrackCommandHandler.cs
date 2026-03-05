@@ -1,22 +1,28 @@
 ﻿using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Application.Errors;
+using SpotifyClone.Catalog.Application.Features.Albums.Commands.UnpublishAlbum;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;
 
 internal sealed class CreateTrackCommandHandler(
-    ICatalogUnitOfWork unit)
+    ICatalogUnitOfWork unit,
+    ICurrentUser currentUser)
     : ICommandHandler<CreateTrackCommand, CreateTrackCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
+    private readonly ICurrentUser _currentUser = currentUser;
 
     public async Task<Result<CreateTrackCommandResult>> Handle(
         CreateTrackCommand request,
@@ -38,6 +44,16 @@ internal sealed class CreateTrackCommandHandler(
         if (!artistsExist)
         {
             return Result.Failure<CreateTrackCommandResult>(ArtistErrors.NotFound);
+        }
+
+        IEnumerable<Artist> artists = await _unit.Artists.GetByIdsAsync(
+            request.MainArtists.Select(a => ArtistId.From(a)),
+            cancellationToken);
+
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value == _currentUser.Id)) &&
+            !_currentUser.IsInRole(UserRoles.Admin))
+        {
+            return Result.Failure<CreateTrackCommandResult>(AlbumErrors.NotOwned);
         }
 
         bool genresExist = await _unit.Genres.Exists(

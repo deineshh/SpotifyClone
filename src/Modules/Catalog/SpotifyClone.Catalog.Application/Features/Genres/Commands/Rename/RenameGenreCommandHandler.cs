@@ -24,6 +24,11 @@ internal sealed class RenameGenreCommandHandler(
             return Result.Failure<RenameGenreCommandResult>(GenreErrors.NotFound);
         }
 
+        if (!await _unit.Genres.IsNameUniqueAsync(request.Name, cancellationToken))
+        {
+            return Result.Failure<RenameGenreCommandResult>(GenreErrors.InvalidName);
+        }
+
         genre.Rename(request.Name);
 
         return new RenameGenreCommandResult();

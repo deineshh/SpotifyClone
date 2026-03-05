@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
-using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
+using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
 using SpotifyClone.Shared.Kernel.IDs;
 

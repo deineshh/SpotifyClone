@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
-using SpotifyClone.Accounts.Application.Abstractions.Services.Models;
+using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Infrastructure.Auth.Jwt;

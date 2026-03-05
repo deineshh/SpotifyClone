@@ -16,18 +16,20 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
     public string Name { get; private set; } = null!;
     public string? Bio { get; private set; }
+    public UserId OwnerId { get; private set; } = null!;
     public ArtistStatus Status { get; private set; } = null!;
     public ArtistAvatarImage? Avatar { get; private set; }
     public ArtistBannerImage? Banner { get; private set; }
     public IReadOnlyCollection<ArtistGalleryImage> Gallery => _gallery.AsReadOnly();
 
-    public static Artist Create(ArtistId id, string name)
+    public static Artist Create(ArtistId id, string name, UserId ownerId)
     {
         ArgumentNullException.ThrowIfNull(id);
+        ArgumentNullException.ThrowIfNull(ownerId);
 
         ArtistNameRules.Validate(name);
 
-        return new Artist(id, name, null, ArtistStatus.NotVerified, null, null, []);
+        return new Artist(id, name, null, ownerId, ArtistStatus.NotVerified, null, null, []);
     }
 
     public void LinkNewAvatar(ArtistAvatarImage avatar)
@@ -209,6 +211,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         ArtistId id,
         string name,
         string? bio,
+        UserId ownerId,
         ArtistStatus status,
         ArtistAvatarImage? avatar,
         ArtistBannerImage? banner,
@@ -217,6 +220,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
     {
         Name = name;
         Bio = bio;
+        OwnerId = ownerId;
         Status = status;
         Avatar = avatar;
         Banner = banner;

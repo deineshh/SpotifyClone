@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using SpotifyClone.Catalog.Application.Abstractions;
+﻿using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Application.Errors;
+using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
+using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
@@ -10,29 +12,32 @@ namespace SpotifyClone.Catalog.Application.Features.Tracks.Commands.Delete;
 
 internal sealed class DeleteTrackCommandHandler(
     ICatalogUnitOfWork unit,
-    ILogger<DeleteTrackCommandHandler> logger)
+    ICurrentUser currentUser)
     : ICommandHandler<DeleteTrackCommand, DeleteTrackCommandResult>
 {
     private readonly ICatalogUnitOfWork _unit = unit;
-    private readonly ILogger<DeleteTrackCommandHandler> _logger = logger;
+    private readonly ICurrentUser _currentUser = currentUser;
 
     public async Task<Result<DeleteTrackCommandResult>> Handle(
         DeleteTrackCommand request,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "Deleting Track {Id}", request.TrackId);
-
         Track? track = await _unit.Tracks.GetByIdAsync(
             TrackId.From(request.TrackId),
             cancellationToken);
-
         if (track is null)
         {
-            _logger.LogWarning(
-                "Track {Id} not found while deleting", request.TrackId);
-
             return Result.Failure<DeleteTrackCommandResult>(TrackErrors.NotFound);
+        }
+
+        IEnumerable<Artist> artists = await _unit.Artists.GetByIdsAsync(
+            track.MainArtists,
+            cancellationToken);
+
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value == _currentUser.Id)) &&
+            !_currentUser.IsInRole(UserRoles.Admin))
+        {
+            return Result.Failure<DeleteTrackCommandResult>(AlbumErrors.NotOwned);
         }
 
         track.PrepareForDeletion();

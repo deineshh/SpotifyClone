@@ -8,6 +8,10 @@ public interface IArtistRepository
         ArtistId id,
         CancellationToken cancellationToken = default);
 
+    Task<IEnumerable<Artist>> GetByIdsAsync(
+        IEnumerable<ArtistId> ids,
+        CancellationToken cancellationToken = default);
+
     Task<Artist?> GetBannedByIdAsync(
         ArtistId id,
         CancellationToken cancellationToken = default);
