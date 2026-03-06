@@ -39,7 +39,8 @@ internal sealed class CreateTrackCommandHandler(
 
         bool artistsExist = await _unit.Artists.Exists(
             request.MainArtists.Select(a => ArtistId.From(a))
-                .Concat(request.FeaturedArtists.Select(a => ArtistId.From(a))),
+                .Concat(request.FeaturedArtists.Select(a => ArtistId.From(a)))
+                .ToHashSet(),
             cancellationToken);
         if (!artistsExist)
         {
@@ -50,7 +51,7 @@ internal sealed class CreateTrackCommandHandler(
             request.MainArtists.Select(a => ArtistId.From(a)),
             cancellationToken);
 
-        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value == _currentUser.Id)) &&
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value != _currentUser.Id)) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<CreateTrackCommandResult>(AlbumErrors.NotOwned);

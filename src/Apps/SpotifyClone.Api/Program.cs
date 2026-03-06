@@ -14,6 +14,8 @@ using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
 using SpotifyClone.Catalog.Infrastructure.DependencyInjection;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
+using SpotifyClone.Playlists.Infrastructure.DependencyInjection;
+using SpotifyClone.Playlists.Infrastructure.Persistence.Database;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.DependencyInjection;
 using SpotifyClone.Streaming.Infrastructure.DependencyInjection;
 using SpotifyClone.Streaming.Infrastructure.Persistence.Database;
@@ -23,8 +25,9 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddBuildingBlocks(builder.Configuration);
 builder.Services.AddAccountsModule(builder.Configuration);
-builder.Services.AddStreamingModule(builder.Configuration);
 builder.Services.AddCatalogModule(builder.Configuration);
+builder.Services.AddStreamingModule(builder.Configuration);
+builder.Services.AddPlaylistsModule(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -163,6 +166,9 @@ if (app.Environment.IsDevelopment())
 
         CatalogAppDbContext catalogDb = services.GetRequiredService<CatalogAppDbContext>();
         await catalogDb.Database.MigrateAsync();
+
+        PlaylistsAppDbContext playlistsDb = services.GetRequiredService<PlaylistsAppDbContext>();
+        await playlistsDb.Database.MigrateAsync();
     }
 
     app.UseHttpsRedirection();
@@ -182,5 +188,6 @@ if (app.Environment.IsDevelopment())
 await app.UseAccountsModule();
 app.UseCatalogModule();
 app.UseStreamingModule();
+app.UsePlaylistsModule();
 
 await app.RunAsync();

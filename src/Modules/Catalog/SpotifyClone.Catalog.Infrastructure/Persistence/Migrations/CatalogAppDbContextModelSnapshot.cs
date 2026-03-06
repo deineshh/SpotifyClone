@@ -8,677 +8,711 @@ using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
 
 #nullable disable
 
-namespace SpotifyClone.Catalog.Infrastructure.Persistence.Migrations
+namespace SpotifyClone.Catalog.Infrastructure.Persistence.Migrations;
+
+[DbContext(typeof(CatalogAppDbContext))]
+partial class CatalogAppDbContextModelSnapshot : ModelSnapshot
 {
-    [DbContext(typeof(CatalogAppDbContext))]
-    partial class CatalogAppDbContextModelSnapshot : ModelSnapshot
+    protected override void BuildModel(ModelBuilder modelBuilder)
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
-        {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasDefaultSchema("catalog")
-                .HasAnnotation("ProductVersion", "10.0.2")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
-
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
+        modelBuilder
+            .HasDefaultSchema("catalog")
+            .HasAnnotation("ProductVersion", "10.0.3")
+            .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+        NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", b =>
+            {
+                b.Property<Guid>("Id")
+                    .HasColumnType("uuid")
+                    .HasColumnName("id");
 
-                    b.Property<DateTimeOffset?>("ReleaseDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("release_date");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("character varying(25)")
-                        .HasColumnName("title");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
+                b.Property<DateTimeOffset?>("ReleaseDate")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("release_date");
+
+                b.Property<string>("Status")
+                    .IsRequired()
+                    .HasColumnType("text")
+                    .HasColumnName("status");
+
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasMaxLength(25)
+                    .HasColumnType("character varying(25)")
+                    .HasColumnName("title");
+
+                b.Property<string>("Type")
+                    .IsRequired()
+                    .HasColumnType("text")
+                    .HasColumnName("type");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReleaseDate");
-
-                    b.ToTable("albums", "catalog");
-                });
-
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects.AlbumTrack", b =>
-                {
-                    b.Property<Guid>("album_id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("track_id");
-
-                    b.Property<int>("Position")
-                        .HasColumnType("integer")
-                        .HasColumnName("position");
-
-                    b.HasKey("album_id", "Id");
-
-                    b.HasIndex("album_id", "Position")
-                        .IsUnique();
-
-                    b.ToTable("album_tracks", "catalog");
-                });
-
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Artists.Artist", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Bio")
-                        .HasMaxLength(1500)
-                        .HasColumnType("character varying(1500)")
-                        .HasColumnName("bio");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)")
-                        .HasColumnName("name");
-
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("artists", "catalog");
-                });
-
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Genres.Genre", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)")
-                        .HasColumnName("name");
+                b.HasKey("Id");
+
+                b.HasIndex("ReleaseDate");
+
+                b.ToTable("albums", "catalog");
+            });
+
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities.AlbumTrack", b =>
+            {
+                b.Property<Guid>("album_id")
+                    .HasColumnType("uuid");
+
+                b.Property<Guid>("Id")
+                    .HasColumnType("uuid")
+                    .HasColumnName("track_id");
+
+                b.Property<int>("Position")
+                    .HasColumnType("integer")
+                    .HasColumnName("position");
+
+                b.HasKey("album_id", "Id");
+
+                b.HasIndex("album_id", "Position")
+                    .IsUnique();
+
+                b.ToTable("album_tracks", "catalog");
+            });
+
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Artists.Artist", b =>
+            {
+                b.Property<Guid>("Id")
+                    .HasColumnType("uuid")
+                    .HasColumnName("id");
+
+                b.Property<string>("Bio")
+                    .HasMaxLength(1500)
+                    .HasColumnType("character varying(1500)")
+                    .HasColumnName("bio");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(30)
+                    .HasColumnType("character varying(30)")
+                    .HasColumnName("name");
+
+                b.Property<Guid>("OwnerId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("owner_id");
+
+                b.Property<string>("Status")
+                    .IsRequired()
+                    .HasColumnType("text")
+                    .HasColumnName("status");
+
+                b.HasKey("Id");
+
+                b.ToTable("artists", "catalog");
+            });
+
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Genres.Genre", b =>
+            {
+                b.Property<Guid>("Id")
+                    .HasColumnType("uuid")
+                    .HasColumnName("id");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(30)
+                    .HasColumnType("character varying(30)")
+                    .HasColumnName("name");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
+                b.HasKey("Id");
+
+                b.HasIndex("Name")
+                    .IsUnique();
 
-                    b.ToTable("genres", "catalog");
-                });
+                b.ToTable("genres", "catalog");
+            });
 
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Moods.Mood", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Moods.Mood", b =>
+            {
+                b.Property<Guid>("Id")
+                    .HasColumnType("uuid")
+                    .HasColumnName("id");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)")
-                        .HasColumnName("name");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(30)
+                    .HasColumnType("character varying(30)")
+                    .HasColumnName("name");
+
+                b.HasKey("Id");
+
+                b.HasIndex("Name")
+                    .IsUnique();
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
+                b.ToTable("moods", "catalog");
+            });
+
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Tracks.Track", b =>
+            {
+                b.Property<Guid>("Id")
+                    .HasColumnType("uuid")
+                    .HasColumnName("id");
 
-                    b.ToTable("moods", "catalog");
-                });
+                b.Property<Guid?>("AlbumId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("album_id");
 
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Tracks.Track", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
+                b.Property<Guid?>("AudioFileId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("audio_file_id");
 
-                    b.Property<Guid?>("AlbumId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("album_id");
+                b.Property<bool>("ContainsExplicitContent")
+                    .HasColumnType("boolean")
+                    .HasColumnName("contains_explicit_content");
 
-                    b.Property<Guid?>("AudioFileId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("audio_file_id");
+                b.Property<TimeSpan?>("Duration")
+                    .HasColumnType("interval")
+                    .HasColumnName("duration");
 
-                    b.Property<bool>("ContainsExplicitContent")
-                        .HasColumnType("boolean")
-                        .HasColumnName("contains_explicit_content");
+                b.Property<DateTimeOffset?>("ReleaseDate")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("release_date");
 
-                    b.Property<TimeSpan?>("Duration")
-                        .HasColumnType("interval")
-                        .HasColumnName("duration");
+                b.Property<string>("Status")
+                    .IsRequired()
+                    .HasColumnType("text")
+                    .HasColumnName("status");
 
-                    b.Property<DateTimeOffset?>("ReleaseDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("release_date");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("character varying(128)")
+                    .HasColumnName("title");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
+                b.HasKey("Id");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("title");
+                b.HasIndex("AlbumId");
 
-                    b.HasKey("Id");
+                b.HasIndex("AudioFileId")
+                    .IsUnique();
 
-                    b.HasIndex("AlbumId");
+                b.ToTable("tracks", "catalog");
+            });
 
-                    b.HasIndex("AudioFileId")
-                        .IsUnique();
+        modelBuilder.Entity("SpotifyClone.Shared.BuildingBlocks.Application.Outbox.OutboxMessage", b =>
+            {
+                b.Property<Guid>("Id")
+                    .HasColumnType("uuid")
+                    .HasColumnName("id");
 
-                    b.ToTable("tracks", "catalog");
-                });
+                b.Property<string>("Content")
+                    .IsRequired()
+                    .HasColumnType("text")
+                    .HasColumnName("content");
 
-            modelBuilder.Entity("SpotifyClone.Shared.BuildingBlocks.Application.Outbox.OutboxMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
+                b.Property<string>("Error")
+                    .HasColumnType("text")
+                    .HasColumnName("error");
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("content");
+                b.Property<DateTimeOffset>("OccurredOn")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("occured_on");
 
-                    b.Property<string>("Error")
-                        .HasColumnType("text")
-                        .HasColumnName("error");
+                b.Property<DateTimeOffset?>("ProcessedOn")
+                    .HasColumnType("timestamp with time zone")
+                    .HasColumnName("processed_on");
 
-                    b.Property<DateTimeOffset>("OccurredOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("occured_on");
+                b.Property<string>("Type")
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnType("character varying(255)")
+                    .HasColumnName("type");
 
-                    b.Property<DateTimeOffset?>("ProcessedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("processed_on");
+                b.HasKey("Id");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("type");
+                b.HasIndex("ProcessedOn");
 
-                    b.HasKey("Id");
+                b.ToTable("outbox_messages", "catalog");
+            });
 
-                    b.HasIndex("ProcessedOn");
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", b =>
+            {
+                b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistId", "MainArtists", b1 =>
+                    {
+                        b1.Property<Guid>("Id")
+                            .ValueGeneratedOnAdd()
+                            .HasColumnType("uuid")
+                            .HasColumnName("id");
 
-                    b.ToTable("outbox_messages", "catalog");
-                });
+                        b1.Property<Guid>("AlbumId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("album_id");
 
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", b =>
-                {
-                    b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistId", "MainArtists", b1 =>
-                        {
-                            b1.Property<Guid>("AlbumId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("album_id");
+                        b1.Property<Guid>("Value")
+                            .HasColumnType("uuid")
+                            .HasColumnName("artist_id");
 
-                            b1.Property<Guid>("Value")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid")
-                                .HasColumnName("artist_id");
+                        b1.HasKey("Id");
 
-                            b1.HasKey("AlbumId", "Value");
+                        b1.HasIndex("AlbumId", "Value")
+                            .IsUnique();
 
-                            b1.ToTable("album_main_artists", "catalog");
+                        b1.ToTable("album_main_artists", "catalog");
 
-                            b1.WithOwner()
-                                .HasForeignKey("AlbumId");
-                        });
+                        b1.WithOwner()
+                            .HasForeignKey("AlbumId");
+                    });
 
-                    b.OwnsOne("SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects.AlbumCoverImage", "Cover", b1 =>
-                        {
-                            b1.Property<Guid>("AlbumId")
-                                .HasColumnType("uuid");
+                b.OwnsOne("SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects.AlbumCoverImage", "Cover", b1 =>
+                    {
+                        b1.Property<Guid>("AlbumId")
+                            .HasColumnType("uuid");
 
-                            b1.Property<Guid>("ImageId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("cover_image_id");
+                        b1.Property<Guid>("ImageId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("cover_image_id");
 
-                            b1.HasKey("AlbumId");
+                        b1.HasKey("AlbumId");
 
-                            b1.ToTable("albums", "catalog");
+                        b1.ToTable("albums", "catalog");
 
-                            b1.WithOwner()
-                                .HasForeignKey("AlbumId");
+                        b1.WithOwner()
+                            .HasForeignKey("AlbumId");
 
-                            b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
-                                {
-                                    b2.Property<Guid>("AlbumCoverImageAlbumId")
-                                        .HasColumnType("uuid");
+                        b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
+                            {
+                                b2.Property<Guid>("AlbumCoverImageAlbumId")
+                                    .HasColumnType("uuid");
 
-                                    b2.Property<string>("FileType")
-                                        .IsRequired()
-                                        .HasColumnType("text")
-                                        .HasColumnName("cover_metadata_file_type");
+                                b2.Property<string>("FileType")
+                                    .IsRequired()
+                                    .HasColumnType("text")
+                                    .HasColumnName("cover_metadata_file_type");
 
-                                    b2.Property<int>("Height")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("cover_metadata_height");
+                                b2.Property<int>("Height")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("cover_metadata_height");
 
-                                    b2.Property<long>("SizeInBytes")
-                                        .HasColumnType("bigint")
-                                        .HasColumnName("cover_metadata_size_in_bytes");
+                                b2.Property<long>("SizeInBytes")
+                                    .HasColumnType("bigint")
+                                    .HasColumnName("cover_metadata_size_in_bytes");
 
-                                    b2.Property<int>("Width")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("cover_metadata_width");
+                                b2.Property<int>("Width")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("cover_metadata_width");
 
-                                    b2.HasKey("AlbumCoverImageAlbumId");
+                                b2.HasKey("AlbumCoverImageAlbumId");
 
-                                    b2.ToTable("albums", "catalog");
+                                b2.ToTable("albums", "catalog");
 
-                                    b2.WithOwner()
-                                        .HasForeignKey("AlbumCoverImageAlbumId");
-                                });
+                                b2.WithOwner()
+                                    .HasForeignKey("AlbumCoverImageAlbumId");
+                            });
 
-                            b1.Navigation("Metadata")
-                                .IsRequired();
-                        });
+                        b1.Navigation("Metadata")
+                            .IsRequired();
+                    });
 
-                    b.Navigation("Cover");
+                b.Navigation("Cover");
 
-                    b.Navigation("MainArtists");
-                });
+                b.Navigation("MainArtists");
+            });
 
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects.AlbumTrack", b =>
-                {
-                    b.HasOne("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", null)
-                        .WithMany("_tracks")
-                        .HasForeignKey("album_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities.AlbumTrack", b =>
+            {
+                b.HasOne("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", null)
+                    .WithMany("_tracks")
+                    .HasForeignKey("album_id")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Artists.Artist", b =>
-                {
-                    b.OwnsOne("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistAvatarImage", "Avatar", b1 =>
-                        {
-                            b1.Property<Guid>("ArtistId")
-                                .HasColumnType("uuid");
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Artists.Artist", b =>
+            {
+                b.OwnsOne("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistAvatarImage", "Avatar", b1 =>
+                    {
+                        b1.Property<Guid>("ArtistId")
+                            .HasColumnType("uuid");
 
-                            b1.Property<Guid>("ImageId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("avatar_image_id");
+                        b1.Property<Guid>("ImageId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("avatar_image_id");
 
-                            b1.HasKey("ArtistId");
+                        b1.HasKey("ArtistId");
 
-                            b1.ToTable("artists", "catalog");
+                        b1.ToTable("artists", "catalog");
 
-                            b1.WithOwner()
-                                .HasForeignKey("ArtistId");
+                        b1.WithOwner()
+                            .HasForeignKey("ArtistId");
 
-                            b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
-                                {
-                                    b2.Property<Guid>("ArtistAvatarImageArtistId")
-                                        .HasColumnType("uuid");
+                        b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
+                            {
+                                b2.Property<Guid>("ArtistAvatarImageArtistId")
+                                    .HasColumnType("uuid");
 
-                                    b2.Property<string>("FileType")
-                                        .IsRequired()
-                                        .HasColumnType("text")
-                                        .HasColumnName("avatar_metadata_file_type");
+                                b2.Property<string>("FileType")
+                                    .IsRequired()
+                                    .HasColumnType("text")
+                                    .HasColumnName("avatar_metadata_file_type");
 
-                                    b2.Property<int>("Height")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("avatar_metadata_height");
+                                b2.Property<int>("Height")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("avatar_metadata_height");
 
-                                    b2.Property<long>("SizeInBytes")
-                                        .HasColumnType("bigint")
-                                        .HasColumnName("avatar_metadata_size_in_bytes");
+                                b2.Property<long>("SizeInBytes")
+                                    .HasColumnType("bigint")
+                                    .HasColumnName("avatar_metadata_size_in_bytes");
 
-                                    b2.Property<int>("Width")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("avatar_metadata_width");
+                                b2.Property<int>("Width")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("avatar_metadata_width");
 
-                                    b2.HasKey("ArtistAvatarImageArtistId");
+                                b2.HasKey("ArtistAvatarImageArtistId");
 
-                                    b2.ToTable("artists", "catalog");
+                                b2.ToTable("artists", "catalog");
 
-                                    b2.WithOwner()
-                                        .HasForeignKey("ArtistAvatarImageArtistId");
-                                });
+                                b2.WithOwner()
+                                    .HasForeignKey("ArtistAvatarImageArtistId");
+                            });
 
-                            b1.Navigation("Metadata")
-                                .IsRequired();
-                        });
+                        b1.Navigation("Metadata")
+                            .IsRequired();
+                    });
 
-                    b.OwnsOne("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistBannerImage", "Banner", b1 =>
-                        {
-                            b1.Property<Guid>("ArtistId")
-                                .HasColumnType("uuid");
+                b.OwnsOne("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistBannerImage", "Banner", b1 =>
+                    {
+                        b1.Property<Guid>("ArtistId")
+                            .HasColumnType("uuid");
 
-                            b1.Property<Guid>("ImageId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("banner_image_id");
+                        b1.Property<Guid>("ImageId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("banner_image_id");
 
-                            b1.HasKey("ArtistId");
+                        b1.HasKey("ArtistId");
 
-                            b1.ToTable("artists", "catalog");
+                        b1.ToTable("artists", "catalog");
 
-                            b1.WithOwner()
-                                .HasForeignKey("ArtistId");
+                        b1.WithOwner()
+                            .HasForeignKey("ArtistId");
 
-                            b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
-                                {
-                                    b2.Property<Guid>("ArtistBannerImageArtistId")
-                                        .HasColumnType("uuid");
+                        b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
+                            {
+                                b2.Property<Guid>("ArtistBannerImageArtistId")
+                                    .HasColumnType("uuid");
 
-                                    b2.Property<string>("FileType")
-                                        .HasColumnType("text")
-                                        .HasColumnName("banner_metadata_file_type");
+                                b2.Property<string>("FileType")
+                                    .HasColumnType("text")
+                                    .HasColumnName("banner_metadata_file_type");
 
-                                    b2.Property<int>("Height")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("banner_metadata_height");
+                                b2.Property<int>("Height")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("banner_metadata_height");
 
-                                    b2.Property<long>("SizeInBytes")
-                                        .HasColumnType("bigint")
-                                        .HasColumnName("banner_metadata_size_in_bytes");
+                                b2.Property<long>("SizeInBytes")
+                                    .HasColumnType("bigint")
+                                    .HasColumnName("banner_metadata_size_in_bytes");
 
-                                    b2.Property<int>("Width")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("banner_metadata_width");
+                                b2.Property<int>("Width")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("banner_metadata_width");
 
-                                    b2.HasKey("ArtistBannerImageArtistId");
+                                b2.HasKey("ArtistBannerImageArtistId");
 
-                                    b2.ToTable("artists", "catalog");
+                                b2.ToTable("artists", "catalog");
 
-                                    b2.WithOwner()
-                                        .HasForeignKey("ArtistBannerImageArtistId");
-                                });
+                                b2.WithOwner()
+                                    .HasForeignKey("ArtistBannerImageArtistId");
+                            });
 
-                            b1.Navigation("Metadata")
-                                .IsRequired();
-                        });
+                        b1.Navigation("Metadata")
+                            .IsRequired();
+                    });
 
-                    b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistGalleryImage", "Gallery", b1 =>
-                        {
-                            b1.Property<Guid>("ArtistId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("artist_id");
+                b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistGalleryImage", "Gallery", b1 =>
+                    {
+                        b1.Property<Guid>("ArtistId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("artist_id");
 
-                            b1.Property<Guid>("ImageId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("image_id");
+                        b1.Property<Guid>("ImageId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("image_id");
 
-                            b1.HasKey("ArtistId", "ImageId");
+                        b1.HasKey("ArtistId", "ImageId");
 
-                            b1.ToTable("artist_gallery_images", "catalog");
+                        b1.ToTable("artist_gallery_images", "catalog");
 
-                            b1.WithOwner()
-                                .HasForeignKey("ArtistId");
+                        b1.WithOwner()
+                            .HasForeignKey("ArtistId");
 
-                            b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
-                                {
-                                    b2.Property<Guid>("ArtistGalleryImageArtistId")
-                                        .HasColumnType("uuid");
+                        b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
+                            {
+                                b2.Property<Guid>("ArtistGalleryImageArtistId")
+                                    .HasColumnType("uuid");
 
-                                    b2.Property<Guid>("ArtistGalleryImageImageId")
-                                        .HasColumnType("uuid");
+                                b2.Property<Guid>("ArtistGalleryImageImageId")
+                                    .HasColumnType("uuid");
 
-                                    b2.Property<string>("FileType")
-                                        .IsRequired()
-                                        .HasColumnType("text")
-                                        .HasColumnName("metadata_file_type");
+                                b2.Property<string>("FileType")
+                                    .IsRequired()
+                                    .HasColumnType("text")
+                                    .HasColumnName("metadata_file_type");
 
-                                    b2.Property<int>("Height")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("metadata_height");
+                                b2.Property<int>("Height")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("metadata_height");
 
-                                    b2.Property<long>("SizeInBytes")
-                                        .HasColumnType("bigint")
-                                        .HasColumnName("metadata_size_in_bytes");
+                                b2.Property<long>("SizeInBytes")
+                                    .HasColumnType("bigint")
+                                    .HasColumnName("metadata_size_in_bytes");
 
-                                    b2.Property<int>("Width")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("metadata_width");
+                                b2.Property<int>("Width")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("metadata_width");
 
-                                    b2.HasKey("ArtistGalleryImageArtistId", "ArtistGalleryImageImageId");
+                                b2.HasKey("ArtistGalleryImageArtistId", "ArtistGalleryImageImageId");
 
-                                    b2.ToTable("artist_gallery_images", "catalog");
+                                b2.ToTable("artist_gallery_images", "catalog");
 
-                                    b2.WithOwner()
-                                        .HasForeignKey("ArtistGalleryImageArtistId", "ArtistGalleryImageImageId");
-                                });
+                                b2.WithOwner()
+                                    .HasForeignKey("ArtistGalleryImageArtistId", "ArtistGalleryImageImageId");
+                            });
 
-                            b1.Navigation("Metadata")
-                                .IsRequired();
-                        });
+                        b1.Navigation("Metadata")
+                            .IsRequired();
+                    });
 
-                    b.Navigation("Avatar");
+                b.Navigation("Avatar");
 
-                    b.Navigation("Banner");
+                b.Navigation("Banner");
 
-                    b.Navigation("Gallery");
-                });
+                b.Navigation("Gallery");
+            });
 
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Genres.Genre", b =>
-                {
-                    b.OwnsOne("SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects.GenreCoverImage", "Cover", b1 =>
-                        {
-                            b1.Property<Guid>("GenreId")
-                                .HasColumnType("uuid");
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Genres.Genre", b =>
+            {
+                b.OwnsOne("SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects.GenreCoverImage", "Cover", b1 =>
+                    {
+                        b1.Property<Guid>("GenreId")
+                            .HasColumnType("uuid");
 
-                            b1.Property<Guid>("ImageId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("cover_image_id");
+                        b1.Property<Guid>("ImageId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("cover_image_id");
 
-                            b1.HasKey("GenreId");
+                        b1.HasKey("GenreId");
 
-                            b1.ToTable("genres", "catalog");
+                        b1.ToTable("genres", "catalog");
 
-                            b1.WithOwner()
-                                .HasForeignKey("GenreId");
+                        b1.WithOwner()
+                            .HasForeignKey("GenreId");
 
-                            b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
-                                {
-                                    b2.Property<Guid>("GenreCoverImageGenreId")
-                                        .HasColumnType("uuid");
+                        b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
+                            {
+                                b2.Property<Guid>("GenreCoverImageGenreId")
+                                    .HasColumnType("uuid");
 
-                                    b2.Property<string>("FileType")
-                                        .IsRequired()
-                                        .HasColumnType("text")
-                                        .HasColumnName("cover_metadata_file_type");
+                                b2.Property<string>("FileType")
+                                    .IsRequired()
+                                    .HasColumnType("text")
+                                    .HasColumnName("cover_metadata_file_type");
 
-                                    b2.Property<int>("Height")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("cover_metadata_height");
+                                b2.Property<int>("Height")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("cover_metadata_height");
 
-                                    b2.Property<long>("SizeInBytes")
-                                        .HasColumnType("bigint")
-                                        .HasColumnName("cover_metadata_size_in_bytes");
+                                b2.Property<long>("SizeInBytes")
+                                    .HasColumnType("bigint")
+                                    .HasColumnName("cover_metadata_size_in_bytes");
 
-                                    b2.Property<int>("Width")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("cover_metadata_width");
+                                b2.Property<int>("Width")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("cover_metadata_width");
 
-                                    b2.HasKey("GenreCoverImageGenreId");
+                                b2.HasKey("GenreCoverImageGenreId");
 
-                                    b2.ToTable("genres", "catalog");
+                                b2.ToTable("genres", "catalog");
 
-                                    b2.WithOwner()
-                                        .HasForeignKey("GenreCoverImageGenreId");
-                                });
+                                b2.WithOwner()
+                                    .HasForeignKey("GenreCoverImageGenreId");
+                            });
 
-                            b1.Navigation("Metadata")
-                                .IsRequired();
-                        });
+                        b1.Navigation("Metadata")
+                            .IsRequired();
+                    });
 
-                    b.Navigation("Cover");
-                });
+                b.Navigation("Cover");
+            });
 
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Moods.Mood", b =>
-                {
-                    b.OwnsOne("SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects.MoodCoverImage", "Cover", b1 =>
-                        {
-                            b1.Property<Guid>("MoodId")
-                                .HasColumnType("uuid");
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Moods.Mood", b =>
+            {
+                b.OwnsOne("SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects.MoodCoverImage", "Cover", b1 =>
+                    {
+                        b1.Property<Guid>("MoodId")
+                            .HasColumnType("uuid");
 
-                            b1.Property<Guid>("ImageId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("cover_image_id");
+                        b1.Property<Guid>("ImageId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("cover_image_id");
 
-                            b1.HasKey("MoodId");
+                        b1.HasKey("MoodId");
 
-                            b1.ToTable("moods", "catalog");
+                        b1.ToTable("moods", "catalog");
 
-                            b1.WithOwner()
-                                .HasForeignKey("MoodId");
+                        b1.WithOwner()
+                            .HasForeignKey("MoodId");
 
-                            b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
-                                {
-                                    b2.Property<Guid>("MoodCoverImageMoodId")
-                                        .HasColumnType("uuid");
+                        b1.OwnsOne("SpotifyClone.Shared.Kernel.ValueObjects.ImageMetadata", "Metadata", b2 =>
+                            {
+                                b2.Property<Guid>("MoodCoverImageMoodId")
+                                    .HasColumnType("uuid");
 
-                                    b2.Property<string>("FileType")
-                                        .HasColumnType("text")
-                                        .HasColumnName("cover_metadata_file_type");
+                                b2.Property<string>("FileType")
+                                    .HasColumnType("text")
+                                    .HasColumnName("cover_metadata_file_type");
 
-                                    b2.Property<int>("Height")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("cover_metadata_height");
+                                b2.Property<int>("Height")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("cover_metadata_height");
 
-                                    b2.Property<long>("SizeInBytes")
-                                        .HasColumnType("bigint")
-                                        .HasColumnName("cover_metadata_size_in_bytes");
+                                b2.Property<long>("SizeInBytes")
+                                    .HasColumnType("bigint")
+                                    .HasColumnName("cover_metadata_size_in_bytes");
 
-                                    b2.Property<int>("Width")
-                                        .HasColumnType("integer")
-                                        .HasColumnName("cover_metadata_width");
+                                b2.Property<int>("Width")
+                                    .HasColumnType("integer")
+                                    .HasColumnName("cover_metadata_width");
 
-                                    b2.HasKey("MoodCoverImageMoodId");
+                                b2.HasKey("MoodCoverImageMoodId");
 
-                                    b2.ToTable("moods", "catalog");
+                                b2.ToTable("moods", "catalog");
 
-                                    b2.WithOwner()
-                                        .HasForeignKey("MoodCoverImageMoodId");
-                                });
+                                b2.WithOwner()
+                                    .HasForeignKey("MoodCoverImageMoodId");
+                            });
 
-                            b1.Navigation("Metadata")
-                                .IsRequired();
-                        });
+                        b1.Navigation("Metadata")
+                            .IsRequired();
+                    });
 
-                    b.Navigation("Cover");
-                });
+                b.Navigation("Cover");
+            });
 
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Tracks.Track", b =>
-                {
-                    b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects.GenreId", "Genres", b1 =>
-                        {
-                            b1.Property<Guid>("TrackId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("track_id");
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Tracks.Track", b =>
+            {
+                b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Genres.ValueObjects.GenreId", "Genres", b1 =>
+                    {
+                        b1.Property<Guid>("Id")
+                            .ValueGeneratedOnAdd()
+                            .HasColumnType("uuid")
+                            .HasColumnName("id");
 
-                            b1.Property<Guid>("Value")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid")
-                                .HasColumnName("genre_id");
+                        b1.Property<Guid>("TrackId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("track_id");
 
-                            b1.HasKey("TrackId", "Value");
+                        b1.Property<Guid>("Value")
+                            .HasColumnType("uuid")
+                            .HasColumnName("genre_id");
 
-                            b1.ToTable("track_genres", "catalog");
+                        b1.HasKey("Id");
 
-                            b1.WithOwner()
-                                .HasForeignKey("TrackId");
-                        });
+                        b1.HasIndex("TrackId", "Value")
+                            .IsUnique();
 
-                    b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects.MoodId", "Moods", b1 =>
-                        {
-                            b1.Property<Guid>("TrackId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("track_id");
+                        b1.ToTable("track_genres", "catalog");
 
-                            b1.Property<Guid>("Value")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid")
-                                .HasColumnName("mood_id");
+                        b1.WithOwner()
+                            .HasForeignKey("TrackId");
+                    });
 
-                            b1.HasKey("TrackId", "Value");
+                b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Moods.ValueObjects.MoodId", "Moods", b1 =>
+                    {
+                        b1.Property<Guid>("Id")
+                            .ValueGeneratedOnAdd()
+                            .HasColumnType("uuid")
+                            .HasColumnName("id");
 
-                            b1.ToTable("track_moods", "catalog");
+                        b1.Property<Guid>("TrackId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("track_id");
 
-                            b1.WithOwner()
-                                .HasForeignKey("TrackId");
-                        });
+                        b1.Property<Guid>("Value")
+                            .HasColumnType("uuid")
+                            .HasColumnName("mood_id");
 
-                    b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistId", "FeaturedArtists", b1 =>
-                        {
-                            b1.Property<Guid>("TrackId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("track_id");
+                        b1.HasKey("Id");
 
-                            b1.Property<Guid>("Value")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid")
-                                .HasColumnName("artist_id");
+                        b1.HasIndex("TrackId", "Value")
+                            .IsUnique();
 
-                            b1.HasKey("TrackId", "Value");
+                        b1.ToTable("track_moods", "catalog");
 
-                            b1.ToTable("track_featured_artists", "catalog");
+                        b1.WithOwner()
+                            .HasForeignKey("TrackId");
+                    });
 
-                            b1.WithOwner()
-                                .HasForeignKey("TrackId");
-                        });
+                b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistId", "FeaturedArtists", b1 =>
+                    {
+                        b1.Property<Guid>("Id")
+                            .ValueGeneratedOnAdd()
+                            .HasColumnType("uuid")
+                            .HasColumnName("id");
 
-                    b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistId", "MainArtists", b1 =>
-                        {
-                            b1.Property<Guid>("TrackId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("track_id");
+                        b1.Property<Guid>("TrackId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("track_id");
 
-                            b1.Property<Guid>("Value")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid")
-                                .HasColumnName("artist_id");
+                        b1.Property<Guid>("Value")
+                            .HasColumnType("uuid")
+                            .HasColumnName("artist_id");
 
-                            b1.HasKey("TrackId", "Value");
+                        b1.HasKey("Id");
 
-                            b1.ToTable("track_main_artists", "catalog");
+                        b1.HasIndex("TrackId", "Value")
+                            .IsUnique();
 
-                            b1.WithOwner()
-                                .HasForeignKey("TrackId");
-                        });
+                        b1.ToTable("track_featured_artists", "catalog");
 
-                    b.Navigation("FeaturedArtists");
+                        b1.WithOwner()
+                            .HasForeignKey("TrackId");
+                    });
 
-                    b.Navigation("Genres");
+                b.OwnsMany("SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects.ArtistId", "MainArtists", b1 =>
+                    {
+                        b1.Property<Guid>("Id")
+                            .ValueGeneratedOnAdd()
+                            .HasColumnType("uuid")
+                            .HasColumnName("id");
 
-                    b.Navigation("MainArtists");
+                        b1.Property<Guid>("TrackId")
+                            .HasColumnType("uuid")
+                            .HasColumnName("track_id");
 
-                    b.Navigation("Moods");
-                });
+                        b1.Property<Guid>("Value")
+                            .HasColumnType("uuid")
+                            .HasColumnName("artist_id");
 
-            modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", b =>
-                {
-                    b.Navigation("_tracks");
-                });
+                        b1.HasKey("Id");
+
+                        b1.HasIndex("TrackId", "Value")
+                            .IsUnique();
+
+                        b1.ToTable("track_main_artists", "catalog");
+
+                        b1.WithOwner()
+                            .HasForeignKey("TrackId");
+                    });
+
+                b.Navigation("FeaturedArtists");
+
+                b.Navigation("Genres");
+
+                b.Navigation("MainArtists");
+
+                b.Navigation("Moods");
+            });
+
+        modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", b =>
+            {
+                b.Navigation("_tracks");
+            });
 #pragma warning restore 612, 618
-        }
     }
 }

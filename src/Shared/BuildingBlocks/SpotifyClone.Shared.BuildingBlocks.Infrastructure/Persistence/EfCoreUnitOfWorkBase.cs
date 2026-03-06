@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 
@@ -35,6 +36,11 @@ public abstract class EfCoreUnitOfWorkBase<TDbContext>(
         //DbContext.Set<OutboxMessage>().AddRange(outboxMessages);
 
         int result = await DbContext.SaveChangesAsync(cancellationToken);
+        var entries = DbContext.ChangeTracker.Entries().ToList();
+        foreach (EntityEntry? entry in entries)
+        {
+            Console.WriteLine();
+        }
 
         foreach (DomainEvent? domainEvent in domainEvents)
         {

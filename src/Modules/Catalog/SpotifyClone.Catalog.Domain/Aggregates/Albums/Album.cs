@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.Enums;
+﻿using SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Events;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Exceptions;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Rules;
@@ -22,10 +23,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
     public AlbumType Type { get; private set; } = null!;
     public AlbumCoverImage? Cover { get; private set; }
     public IReadOnlySet<ArtistId> MainArtists => _mainArtists.AsReadOnly();
-    public IReadOnlySet<TrackId> Tracks => _tracks
-                                           .OrderBy(t => t.Position)
-                                           .Select(t => t.Id)
-                                           .ToHashSet();
+    public IReadOnlySet<AlbumTrack> Tracks => _tracks;
 
     public static Album Create(AlbumId id, string title, IEnumerable<ArtistId> mainArtists)
     {
@@ -92,7 +90,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         ReleaseDate = releaseDate;
         Status = AlbumStatus.Published;
 
-        RaiseDomainEvent(new AlbumPublishedDomainEvent(Id, Tracks, releaseDate));
+        RaiseDomainEvent(new AlbumPublishedDomainEvent(Id, _tracks.Select(t => t.Id), releaseDate));
     }
 
     public void Unpublish()
@@ -107,16 +105,27 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         RaiseDomainEvent(new AlbumUnpublishedDomainEvent(Id));
     }
 
-    public void AddMainArtist(ArtistId artistId)
+    public void UpdateMainArtists(IReadOnlyCollection<ArtistId> mainArtists)
     {
-        ArgumentNullException.ThrowIfNull(artistId);
+        ArgumentNullException.ThrowIfNull(mainArtists);
 
         if (Status.IsPublished)
         {
-            throw new AlbumAlreadyPublishedDomainException("Cannot add main artist to a published album.");
+            throw new AlbumAlreadyPublishedDomainException("Cannot update main artists of a published album.");
         }
 
-        _mainArtists.Add(artistId);
+        if (mainArtists.Count <= 0)
+        {
+            throw new InvalidAlbumMainArtistsDomainException(
+                "An album must have at least one main artist.");
+        }
+
+        _mainArtists.Clear();
+
+        foreach (ArtistId artistId in mainArtists)
+        {
+            _mainArtists.Add(artistId);
+        }
     }
 
     public void RemoveMainArtist(ArtistId artistId)
@@ -136,12 +145,6 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         }
     }
 
-    public bool MainArtistExists(ArtistId artistId)
-    {
-        ArgumentNullException.ThrowIfNull(artistId);
-        return _mainArtists.Contains(artistId);
-    }
-
     public void AddTrack(TrackId trackId)
     {
         ArgumentNullException.ThrowIfNull(trackId);
@@ -157,13 +160,10 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
 
         var track = new AlbumTrack(trackId, nextPosition);
 
-        if (!_tracks.Add(track))
+        if (_tracks.Add(track))
         {
-            // Prevent circular domain event raising
-            return;
+            RaiseDomainEvent(new TrackAddedToAlbumDomainEvent(Id, trackId));
         }
-
-        RaiseDomainEvent(new TrackAddedToAlbumDomainEvent(Id, trackId));
     }
 
     public void RemoveTrack(TrackId trackId)

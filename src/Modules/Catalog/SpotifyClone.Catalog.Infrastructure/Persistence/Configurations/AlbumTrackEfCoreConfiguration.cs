@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Configurations.Converters;
 

@@ -21,7 +21,7 @@ public interface IArtistRepository
         CancellationToken cancellationToken = default);
 
     Task<bool> Exists(
-        IEnumerable<ArtistId> ids,
+        ISet<ArtistId> ids,
         CancellationToken cancellationToken = default);
 
     Task AddAsync(

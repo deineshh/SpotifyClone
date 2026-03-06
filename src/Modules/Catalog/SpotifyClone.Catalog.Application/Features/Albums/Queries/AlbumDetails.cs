@@ -12,4 +12,4 @@ public sealed record AlbumDetails(
     string Type,
     ImageMetadataDetails? Cover,
     IEnumerable<ArtistSummary> MainArtists,
-    IEnumerable<TrackSummary> Tracks);
+    IEnumerable<AlbumTrackSummary> Tracks);

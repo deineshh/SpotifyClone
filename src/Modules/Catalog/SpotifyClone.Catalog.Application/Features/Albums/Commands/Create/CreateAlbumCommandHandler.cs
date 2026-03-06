@@ -32,7 +32,7 @@ internal sealed class CreateAlbumCommandHandler(
             return Result.Failure<CreateAlbumCommandResult>(ArtistErrors.NotFound);
         }
 
-        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value == _currentUser.Id)) &&
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value != _currentUser.Id)) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<CreateAlbumCommandResult>(AlbumErrors.NotOwned);
@@ -41,7 +41,7 @@ internal sealed class CreateAlbumCommandHandler(
         var album = Album.Create(
             AlbumId.From(Guid.NewGuid()),
             request.Title,
-            request.MainArtists.Select(a => ArtistId.From(a)));
+            artists.Select(a => a.Id));
 
         await _unit.Albums.AddAsync(album, cancellationToken);
 

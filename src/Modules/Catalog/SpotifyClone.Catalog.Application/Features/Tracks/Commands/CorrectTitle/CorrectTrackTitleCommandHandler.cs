@@ -34,7 +34,7 @@ internal sealed class CorrectTrackTitleCommandHandler(
             track.MainArtists,
             cancellationToken);
 
-        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value == _currentUser.Id)) &&
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value != _currentUser.Id)) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<CorrectTrackTitleCommandResult>(AlbumErrors.NotOwned);

@@ -35,7 +35,7 @@ internal sealed class MoveTrackInAlbumCommandHandler(
             album.MainArtists,
             cancellationToken);
 
-        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value == _currentUser.Id)) &&
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value != _currentUser.Id)) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<MoveTrackInAlbumCommandResult>(AlbumErrors.NotOwned);

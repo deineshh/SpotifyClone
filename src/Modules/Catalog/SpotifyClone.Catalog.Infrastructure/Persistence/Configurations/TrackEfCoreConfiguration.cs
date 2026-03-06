@@ -55,16 +55,21 @@ internal sealed class TrackEfCoreConfiguration : IEntityTypeConfiguration<Track>
         {
             a.ToTable("track_main_artists");
 
-            a.Property<TrackId>("TrackId")
-                .HasColumnName("track_id");
+            a.Property<Guid>("Id")
+                .HasColumnName("id");
+            a.HasKey("Id");
 
             a.WithOwner().HasForeignKey("TrackId");
+
+            a.Property<TrackId>("TrackId")
+                .HasColumnName("track_id");
 
             a.Property(x => x.Value)
                 .HasColumnName("artist_id")
                 .IsRequired();
 
-            a.HasKey("TrackId", "Value");
+            a.HasIndex("TrackId", "Value")
+                .IsUnique();
         });
         builder.Navigation(x => x.MainArtists)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
@@ -73,52 +78,67 @@ internal sealed class TrackEfCoreConfiguration : IEntityTypeConfiguration<Track>
         {
             a.ToTable("track_featured_artists");
 
-            a.Property<TrackId>("TrackId")
-                .HasColumnName("track_id");
+            a.Property<Guid>("Id")
+                .HasColumnName("id");
+            a.HasKey("Id");
 
             a.WithOwner().HasForeignKey("TrackId");
+
+            a.Property<TrackId>("TrackId")
+                .HasColumnName("track_id");
 
             a.Property(x => x.Value)
                 .HasColumnName("artist_id")
                 .IsRequired();
 
-            a.HasKey("TrackId", "Value");
+            a.HasIndex("TrackId", "Value")
+                .IsUnique();
         });
         builder.Navigation(x => x.FeaturedArtists)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.OwnsMany(t => t.Genres, g =>
+        builder.OwnsMany(t => t.Genres, a =>
         {
-            g.ToTable("track_genres");
+            a.ToTable("track_genres");
 
-            g.Property<TrackId>("TrackId")
+            a.Property<Guid>("Id")
+                .HasColumnName("id");
+            a.HasKey("Id");
+
+            a.WithOwner().HasForeignKey("TrackId");
+
+            a.Property<TrackId>("TrackId")
                 .HasColumnName("track_id");
 
-            g.WithOwner().HasForeignKey("TrackId");
-
-            g.Property(x => x.Value)
+            a.Property(x => x.Value)
                 .HasColumnName("genre_id")
                 .IsRequired();
 
-            g.HasKey("TrackId", "Value");
+            a.HasIndex("TrackId", "Value")
+                .IsUnique();
         });
         builder.Navigation(x => x.Genres)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.OwnsMany(t => t.Moods, m =>
+        builder.OwnsMany(t => t.Moods, a =>
         {
-            m.ToTable("track_moods");
+            a.ToTable("track_moods");
 
-            m.Property<TrackId>("TrackId")
+            a.Property<Guid>("Id")
+                .HasColumnName("id");
+            a.HasKey("Id");
+
+            a.WithOwner().HasForeignKey("TrackId");
+
+            a.Property<TrackId>("TrackId")
                 .HasColumnName("track_id");
 
-            m.WithOwner().HasForeignKey("TrackId");
-
-            m.Property(x => x.Value)
+            a.Property(x => x.Value)
                 .HasColumnName("mood_id")
                 .IsRequired();
 
-            m.HasKey("TrackId", "Value");
+            a.HasIndex("TrackId", "Value")
+                .IsUnique();
         });
         builder.Navigation(x => x.Moods)
             .UsePropertyAccessMode(PropertyAccessMode.Field);

@@ -12,6 +12,10 @@ public interface IMoodRepository
         MoodId id,
         CancellationToken cancellationToken = default);
 
+    Task<IEnumerable<Mood>> GetByIdsAsync(
+        IEnumerable<MoodId> ids,
+        CancellationToken cancellationToken = default);
+
     Task<bool> Exists(
         MoodId id,
         CancellationToken cancellationToken = default);
