@@ -5,6 +5,9 @@
 
 #### Static code analysis rule customizations
 
+# S1854: Unused assignments should be removed
+dotnet_diagnostic.S1854.severity = suggestion
+
 # CA1873: Avoid potentially expensive logging
 dotnet_diagnostic.CA1873.severity = suggestion
 

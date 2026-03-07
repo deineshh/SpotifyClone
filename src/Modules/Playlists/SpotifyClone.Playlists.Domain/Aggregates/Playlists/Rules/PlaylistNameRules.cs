@@ -12,7 +12,7 @@ public static class PlaylistNameRules
 
         if (name.Length > MaxLength)
         {
-            throw new InvalidPlaylistNameDomainException($"Name exceeds maximum length of {MaxLength} characters.");
+            throw new InvalidPlaylistMetadataDomainException($"Name exceeds maximum length of {MaxLength} characters.");
         }
     }
 }

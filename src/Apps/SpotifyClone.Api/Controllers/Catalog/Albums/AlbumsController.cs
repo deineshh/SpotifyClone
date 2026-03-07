@@ -159,7 +159,7 @@ public sealed class AlbumsController(IMediator mediator)
     [HttpPut("{id:guid}/cover")]
     public async Task<ActionResult> LinkNewCoverImage(
         [FromRoute] Guid id,
-        [FromBody] LinkAlbumToNewCoverRequest request,
+        [FromBody] LinkNewCoverToAlbumRequest request,
         CancellationToken cancellationToken = default)
     {
         Result<LinkNewCoverToAlbumCommandResult> result = await Mediator.Send(

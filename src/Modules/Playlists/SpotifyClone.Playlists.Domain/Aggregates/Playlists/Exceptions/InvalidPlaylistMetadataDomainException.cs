@@ -2,5 +2,5 @@
 
 namespace SpotifyClone.Playlists.Domain.Aggregates.Playlists.Exceptions;
 
-public sealed class InvalidPlaylistNameDomainException(string message)
+public sealed class InvalidPlaylistMetadataDomainException(string message)
     : DomainExceptionBase(message);

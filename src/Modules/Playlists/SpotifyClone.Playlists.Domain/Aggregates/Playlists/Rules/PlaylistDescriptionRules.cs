@@ -10,7 +10,7 @@ public static class PlaylistDescriptionRules
     {
         if (description?.Length > MaxLength)
         {
-            throw new InvalidPlaylistDescriptionDomainException(
+            throw new InvalidPlaylistMetadataDomainException(
                 $"Description exceeds maximum length of {MaxLength} characters.");
         }
     }

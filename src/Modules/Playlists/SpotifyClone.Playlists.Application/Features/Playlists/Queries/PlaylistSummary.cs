@@ -7,4 +7,4 @@ public sealed record PlaylistSummary(
     string Name,
     string? Description,
     bool IsPublic,
-    ImageMetadataDetails Cover);
+    ImageMetadataDetails? Cover);

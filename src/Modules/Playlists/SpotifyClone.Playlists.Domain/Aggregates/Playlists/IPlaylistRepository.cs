@@ -1,4 +1,5 @@
 ﻿using SpotifyClone.Playlists.Domain.Aggregates.Playlists.ValueObjects;
+using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Playlists.Domain.Aggregates.Playlists;
 
@@ -10,6 +11,10 @@ public interface IPlaylistRepository
 
     Task<IEnumerable<Playlist>> GetByIdsAsync(
         IEnumerable<PlaylistId> ids,
+        CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<Playlist>> GetAllByOwnerAsync(
+        UserId ownerId,
         CancellationToken cancellationToken = default);
 
     Task AddAsync(

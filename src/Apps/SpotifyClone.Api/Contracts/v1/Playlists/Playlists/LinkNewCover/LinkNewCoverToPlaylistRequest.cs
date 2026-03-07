@@ -1,6 +1,6 @@
-﻿namespace SpotifyClone.Api.Contracts.v1.Catalog.Albums.LinkNewCover;
+﻿namespace SpotifyClone.Api.Contracts.v1.Playlists.Playlists.LinkNewCover;
 
-public sealed record LinkAlbumToNewCoverRequest
+public sealed record LinkNewCoverToPlaylistRequest
 {
     public required Guid ImageId { get; init; }
     public required int ImageWidth { get; init; }

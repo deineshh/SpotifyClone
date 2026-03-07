@@ -2,6 +2,7 @@
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists.ValueObjects;
 using SpotifyClone.Playlists.Infrastructure.Persistence.Database;
+using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Playlists.Infrastructure.Persistence.Repositories;
 
@@ -19,8 +20,8 @@ internal sealed class PlaylistEfCoreRepository(PlaylistsAppDbContext context)
         PlaylistId id,
         CancellationToken cancellationToken = default)
         => await _playlists
-            .Where(a => a.Id == id)
-            .Include(a => a.Collaborators)
+            .Where(p => p.Id == id)
+            .Include(p => p.Collaborators)
             .Include("_tracks")
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -37,6 +38,13 @@ internal sealed class PlaylistEfCoreRepository(PlaylistsAppDbContext context)
             .Where(p => ids.Contains(p.Id))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IEnumerable<Playlist>> GetAllByOwnerAsync(
+        UserId ownerId,
+        CancellationToken cancellationToken = default)
+        => await _playlists
+            .Where(p => p.OwnerId == ownerId)
+            .ToListAsync(cancellationToken);
 
     public async Task DeleteAsync(
         Playlist playlist,

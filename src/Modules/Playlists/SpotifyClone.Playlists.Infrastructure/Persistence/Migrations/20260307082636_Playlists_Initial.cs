@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -41,6 +42,7 @@ public partial class Playlists_Initial : Migration
                 cover_metadata_file_type = table.Column<string>(type: "text", nullable: true),
                 cover_metadata_size_in_bytes = table.Column<long>(type: "bigint", nullable: true),
                 cover_image_id = table.Column<Guid>(type: "uuid", nullable: true),
+                is_auto_generated = table.Column<bool>(type: "boolean", nullable: false),
                 is_public = table.Column<bool>(type: "boolean", nullable: false)
             },
             constraints: table => table.PrimaryKey("PK_playlists", x => x.id));
