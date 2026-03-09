@@ -71,7 +71,10 @@ partial class CatalogAppDbContextModelSnapshot : ModelSnapshot
 
                 b.HasKey("album_id", "Id");
 
-                b.HasIndex("album_id", "Position")
+                b.HasIndex("Id", "album_id")
+                    .IsUnique();
+
+                b.HasIndex("Id", "Position", "album_id")
                     .IsUnique();
 
                 b.ToTable("album_tracks", "catalog");

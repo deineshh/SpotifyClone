@@ -93,12 +93,12 @@ internal sealed class AlbumEfCoreConfiguration : IEntityTypeConfiguration<Album>
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder
-            .HasMany<AlbumTrack>("_tracks")
+            .HasMany(x => x.Tracks)
             .WithOne()
             .HasForeignKey("album_id");
-        builder.Navigation("_tracks")
+        builder.Navigation(x => x.Tracks)
+            .HasField("_tracks")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
-        builder.Ignore(x => x.Tracks);
 
         builder.Ignore(x => x.DomainEvents);
     }

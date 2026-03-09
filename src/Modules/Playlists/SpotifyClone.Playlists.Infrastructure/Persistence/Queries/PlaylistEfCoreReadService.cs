@@ -18,56 +18,56 @@ internal sealed class PlaylistEfCoreReadService(
         PlaylistId id,
         CancellationToken cancellationToken = default)
         => await _context.Playlists
-        .Where(a => a.Id == id)
-        .Select(a => new PlaylistDetails(
-            a.Id.Value,
-            a.Name,
-            a.Description,
-            a.OwnerId.Value,
-            a.IsPublic,
-            a.Cover == null ? null : new ImageMetadataDetails(
-                a.Cover.ImageId.Value,
-                a.Cover.Metadata.Width,
-                a.Cover.Metadata.Height,
-                a.Cover.Metadata.FileType.Value,
-                a.Cover.Metadata.SizeInBytes),
-            a.Collaborators.Select(id => id.Value),
-            a.Tracks.Select(t => new PlaylistTrackSummary(t.Id.Value, t.Position))))
+        .Where(p => p.Id == id)
+        .Select(p => new PlaylistDetails(
+            p.Id.Value,
+            p.Name,
+            p.Description,
+            p.OwnerId.Value,
+            p.IsPublic,
+            p.Cover == null ? null : new ImageMetadataDetails(
+                p.Cover.ImageId.Value,
+                p.Cover.Metadata.Width,
+                p.Cover.Metadata.Height,
+                p.Cover.Metadata.FileType.Value,
+                p.Cover.Metadata.SizeInBytes),
+            p.Collaborators.Select(id => id.Value),
+            p.Tracks.Select(t => new PlaylistTrackSummary(t.Id.Value, t.Position))))
         .SingleOrDefaultAsync(cancellationToken);
 
     public async Task<IEnumerable<PlaylistSummary>> GetAllByOwnerAsync(
         UserId ownerId,
         CancellationToken cancellationToken = default)
         => await _context.Playlists
-        .Where(a => a.OwnerId.Value == ownerId.Value)
-        .Select(a => new PlaylistSummary(
-            a.Id.Value,
-            a.Name,
-            a.Description,
-            a.IsPublic,
-            a.Cover == null ? null : new ImageMetadataDetails(
-                a.Cover.ImageId.Value,
-                a.Cover.Metadata.Width,
-                a.Cover.Metadata.Height,
-                a.Cover.Metadata.FileType.Value,
-                a.Cover.Metadata.SizeInBytes)))
+        .Where(p => p.OwnerId == ownerId)
+        .Select(p => new PlaylistSummary(
+            p.Id.Value,
+            p.Name,
+            p.Description,
+            p.IsPublic,
+            p.Cover == null ? null : new ImageMetadataDetails(
+                p.Cover.ImageId.Value,
+                p.Cover.Metadata.Width,
+                p.Cover.Metadata.Height,
+                p.Cover.Metadata.FileType.Value,
+                p.Cover.Metadata.SizeInBytes)))
         .ToListAsync(cancellationToken);
 
     public async Task<IEnumerable<PlaylistSummary>> GetAllPublicByOwnerAsync(
         UserId ownerId,
         CancellationToken cancellationToken = default)
         => await _context.Playlists
-        .Where(a => a.OwnerId.Value == ownerId.Value && a.IsPublic)
-        .Select(a => new PlaylistSummary(
-            a.Id.Value,
-            a.Name,
-            a.Description,
-            a.IsPublic,
-            a.Cover == null ? null : new ImageMetadataDetails(
-                a.Cover.ImageId.Value,
-                a.Cover.Metadata.Width,
-                a.Cover.Metadata.Height,
-                a.Cover.Metadata.FileType.Value,
-                a.Cover.Metadata.SizeInBytes)))
+        .Where(p => p.OwnerId == ownerId && p.IsPublic)
+        .Select(p => new PlaylistSummary(
+            p.Id.Value,
+            p.Name,
+            p.Description,
+            p.IsPublic,
+            p.Cover == null ? null : new ImageMetadataDetails(
+                p.Cover.ImageId.Value,
+                p.Cover.Metadata.Width,
+                p.Cover.Metadata.Height,
+                p.Cover.Metadata.FileType.Value,
+                p.Cover.Metadata.SizeInBytes)))
         .ToListAsync(cancellationToken);
 }

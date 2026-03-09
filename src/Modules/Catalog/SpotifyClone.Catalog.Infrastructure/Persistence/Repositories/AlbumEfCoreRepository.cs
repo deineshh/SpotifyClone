@@ -22,7 +22,7 @@ internal sealed class AlbumEfCoreRepository(CatalogAppDbContext context)
         => await _albums
             .Where(a => a.Id == id)
             .Include(a => a.MainArtists)
-            .Include("_tracks")
+            .Include(a => a.Tracks)
             .SingleOrDefaultAsync(cancellationToken);
 
     public async Task<IEnumerable<Album>> GetAllByMainArtistAsync(

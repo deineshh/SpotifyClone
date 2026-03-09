@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Configurations.Converters;
@@ -26,12 +25,8 @@ internal sealed class AlbumTrackEfCoreConfiguration : IEntityTypeConfiguration<A
         builder.Property(x => x.Position)
             .HasColumnName("position")
             .IsRequired();
-        builder.HasIndex("album_id", nameof(AlbumTrack.Position))
-            .IsUnique();
 
-        builder.HasOne<Album>()
-            .WithMany("_tracks")
-            .HasForeignKey("album_id")
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(nameof(AlbumTrack.Id), "album_id").IsUnique();
+        builder.HasIndex(nameof(AlbumTrack.Id), nameof(AlbumTrack.Position), "album_id").IsUnique();
     }
 }

@@ -3,6 +3,7 @@ using SpotifyClone.Playlists.Application.Errors;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Queries;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Playlists.Application.Features.Playlists.Queries.GetDetails;
@@ -27,9 +28,10 @@ internal sealed class GetPlaylistDetailsQueryHandler(
             return Result.Failure<PlaylistDetails>(PlaylistErrors.NotFound);
         }
 
-        if (!_currentUser.IsAuthenticated || playlist.OwnerId != _currentUser.Id)
+        if ((!_currentUser.IsAuthenticated || !playlist.Collaborators.Any(c => c == _currentUser.Id)) &&
+            !_currentUser.IsInRole(UserRoles.Admin))
         {
-            return Result.Failure<PlaylistDetails>(PlaylistErrors.NotFound);
+            return Result.Failure<PlaylistDetails>(PlaylistErrors.NotOwned);
         }
 
         return playlist;

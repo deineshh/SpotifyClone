@@ -160,10 +160,13 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
 
         var track = new AlbumTrack(trackId, nextPosition);
 
-        if (_tracks.Add(track))
+        if (!_tracks.Any(t => t.Id == track.Id) || _tracks.Add(track))
         {
-            RaiseDomainEvent(new TrackAddedToAlbumDomainEvent(Id, trackId));
+            throw new InvalidTrackInAlbumDomainException(
+                "Cannot add the same track to the playlist more than once.");
         }
+        
+        RaiseDomainEvent(new TrackAddedToAlbumDomainEvent(Id, trackId));
     }
 
     public void RemoveTrack(TrackId trackId)
@@ -178,7 +181,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         AlbumTrack? track = _tracks.FirstOrDefault(t => t.Id == trackId);
         if (track is null || !_tracks.Remove(track!))
         {
-            throw new TrackNotFoundInAlbumDomainException(
+            throw new InvalidTrackInAlbumDomainException(
                 $"Cannot remove track '{trackId.Value}' from the album, because it was not found in the album.");
         }
 
@@ -194,7 +197,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         }
 
         AlbumTrack trackToMove = _tracks.SingleOrDefault(t => t.Id == trackId)
-            ?? throw new TrackNotFoundInAlbumDomainException(trackId.Value.ToString());
+            ?? throw new InvalidTrackInAlbumDomainException(trackId.Value.ToString());
 
         // 1. Get current sorted list to identify neighbors
         var sortedTracks = _tracks.OrderBy(t => t.Position).ToList();

@@ -22,7 +22,7 @@ internal sealed class PlaylistEfCoreRepository(PlaylistsAppDbContext context)
         => await _playlists
             .Where(p => p.Id == id)
             .Include(p => p.Collaborators)
-            .Include("_tracks")
+            .Include(p => p.Tracks)
             .SingleOrDefaultAsync(cancellationToken);
 
     public async Task<IEnumerable<Playlist>> GetByIdsAsync(

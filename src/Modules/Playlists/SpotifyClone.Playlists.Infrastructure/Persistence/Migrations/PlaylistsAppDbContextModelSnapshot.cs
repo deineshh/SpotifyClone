@@ -25,20 +25,30 @@ partial class PlaylistsAppDbContextModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("SpotifyClone.Playlists.Domain.Aggregates.Playlists.Entities.PlaylistTrack", b =>
             {
-                b.Property<Guid>("playlist_id")
-                    .HasColumnType("uuid");
-
                 b.Property<Guid>("Id")
                     .HasColumnType("uuid")
                     .HasColumnName("track_id");
+
+                b.Property<Guid>("CreatorId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("creator_id");
 
                 b.Property<int>("Position")
                     .HasColumnType("integer")
                     .HasColumnName("position");
 
-                b.HasKey("playlist_id", "Id");
+                b.Property<Guid>("playlist_id")
+                    .HasColumnType("uuid");
+
+                b.HasKey("Id");
+
+                b.HasIndex("Id", "playlist_id")
+                    .IsUnique();
 
                 b.HasIndex("playlist_id", "Position")
+                    .IsUnique();
+
+                b.HasIndex("Id", "Position", "playlist_id")
                     .IsUnique();
 
                 b.ToTable("playlist_tracks", "playlists");

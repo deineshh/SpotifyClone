@@ -2,5 +2,5 @@
 
 namespace SpotifyClone.Catalog.Domain.Aggregates.Albums.Exceptions;
 
-public sealed class TrackNotFoundInAlbumDomainException(string message)
+public sealed class InvalidTrackInAlbumDomainException(string message)
     : CatalogDomainExceptionBase(message);

@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists;
-using SpotifyClone.Playlists.Domain.Aggregates.Playlists.Entities;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists.Rules;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists.ValueObjects;
 using SpotifyClone.Playlists.Infrastructure.Persistence.Configurations.Converters;
@@ -98,12 +97,12 @@ internal sealed class PlaylistEfCoreConfiguration
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder
-            .HasMany<PlaylistTrack>("_tracks")
+            .HasMany(x => x.Tracks)
             .WithOne()
             .HasForeignKey("playlist_id");
-        builder.Navigation("_tracks")
+        builder.Navigation(x => x.Tracks)
+            .HasField("_tracks")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
-        builder.Ignore(x => x.Tracks);
 
         builder.Ignore(x => x.DomainEvents);
     }

@@ -15,8 +15,8 @@ public sealed class PlaylistsDomainExceptionMapper : IDomainExceptionMapper
             InvalidImageMetadataDomainException => CommonPlaylistsErrors.InvalidImageMetadata,
             InvalidPlaylistMetadataDomainException => PlaylistErrors.InvalidMetadata,
             InvalidPlaylistCoverImageDomainException => PlaylistErrors.InvalidCover,
-            InvalidPlaylistCollaboratorsDomainException => PlaylistErrors.InvalidCollaborators,
-            TrackNotFoundInPlaylistDomainException => PlaylistErrors.TrackNotFound,
+            InvalidPlaylistCollaboratorDomainException => PlaylistErrors.InvalidCollaborator,
+            InvalidPlaylistTrackDomainException => PlaylistErrors.InvalidTrack,
 
             // Other
             _ => CommonErrors.Unknown

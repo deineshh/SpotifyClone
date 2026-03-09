@@ -9,5 +9,5 @@ public sealed record PlaylistDetails(
     Guid OwnerId,
     bool IsPublic,
     ImageMetadataDetails? Cover,
-    IEnumerable<Guid> Contributors,
+    IEnumerable<Guid> Collaborators,
     IEnumerable<PlaylistTrackSummary> Tracks);

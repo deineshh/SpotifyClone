@@ -44,7 +44,7 @@ public sealed class CatalogDomainExceptionMapper : IDomainExceptionMapper
             CannotPublishAlbumDomainException => AlbumErrors.CannotPublish,
             AlbumNotPublishedDomainException => AlbumErrors.NotPublished,
             MainArtistNotFoundInAlbumDomainException => AlbumErrors.MainArtistNotFound,
-            TrackNotFoundInAlbumDomainException => AlbumErrors.TrackNotFound,
+            InvalidTrackInAlbumDomainException => AlbumErrors.InvalidTrack,
 
             // Artist
             InvalidArtistAvatarImageDomainException => ArtistErrors.InvalidAvatarImage,

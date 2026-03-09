@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using SpotifyClone.Playlists.Domain.Aggregates.Playlists;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists.Entities;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists.ValueObjects;
 using SpotifyClone.Playlists.Infrastructure.Persistence.Configurations.Converters;
@@ -13,15 +12,23 @@ internal sealed class PlaylistTrackEfCoreConfiguration : IEntityTypeConfiguratio
     {
         builder.ToTable("playlist_tracks");
 
+        builder.Property("Id")
+            .HasColumnName("id");
+        builder.HasKey("Id");
+
         builder.Property<PlaylistId>("playlist_id")
-            .HasConversion(PlaylistsEfCoreValueConverters.PlaylistIdConverter);
+            .HasConversion(PlaylistsEfCoreValueConverters.PlaylistIdConverter)
+            .IsRequired();
 
         builder.Property(x => x.Id)
             .HasColumnName("track_id")
             .HasConversion(PlaylistsEfCoreValueConverters.TrackIdConverter)
             .IsRequired();
 
-        builder.HasKey("playlist_id", nameof(PlaylistTrack.Id));
+        builder.Property(x => x.CreatorId)
+            .HasColumnName("creator_id")
+            .HasConversion(PlaylistsEfCoreValueConverters.UserIdConverter)
+            .IsRequired();
 
         builder.Property(x => x.Position)
             .HasColumnName("position")
@@ -29,9 +36,7 @@ internal sealed class PlaylistTrackEfCoreConfiguration : IEntityTypeConfiguratio
         builder.HasIndex("playlist_id", nameof(PlaylistTrack.Position))
             .IsUnique();
 
-        builder.HasOne<Playlist>()
-            .WithMany("_tracks")
-            .HasForeignKey("playlist_id")
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(nameof(PlaylistTrack.Id), "playlist_id").IsUnique();
+        builder.HasIndex(nameof(PlaylistTrack.Id), nameof(PlaylistTrack.Position), "playlist_id").IsUnique();
     }
 }

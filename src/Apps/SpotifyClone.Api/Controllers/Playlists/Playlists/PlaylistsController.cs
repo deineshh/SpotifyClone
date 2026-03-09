@@ -1,13 +1,23 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SpotifyClone.Api.Contracts.v1.Playlists.Playlists.AddCollaborator;
+using SpotifyClone.Api.Contracts.v1.Playlists.Playlists.AddTrack;
 using SpotifyClone.Api.Contracts.v1.Playlists.Playlists.Create;
+using SpotifyClone.Api.Contracts.v1.Playlists.Playlists.EditDetails;
 using SpotifyClone.Api.Contracts.v1.Playlists.Playlists.LinkNewCover;
+using SpotifyClone.Api.Contracts.v1.Playlists.Playlists.MoveTrack;
 using SpotifyClone.Api.Mappers;
+using SpotifyClone.Playlists.Application.Features.Playlists.Commands.AddCollaborator;
+using SpotifyClone.Playlists.Application.Features.Playlists.Commands.AddTrack;
 using SpotifyClone.Playlists.Application.Features.Playlists.Commands.Create;
+using SpotifyClone.Playlists.Application.Features.Playlists.Commands.Delete;
+using SpotifyClone.Playlists.Application.Features.Playlists.Commands.EditDetails;
 using SpotifyClone.Playlists.Application.Features.Playlists.Commands.LinkNewCover;
+using SpotifyClone.Playlists.Application.Features.Playlists.Commands.MoveTrack;
+using SpotifyClone.Playlists.Application.Features.Playlists.Commands.RemoveCollaborator;
+using SpotifyClone.Playlists.Application.Features.Playlists.Commands.RemoveTrackFromPlaylist;
 using SpotifyClone.Playlists.Application.Features.Playlists.Queries;
-using SpotifyClone.Playlists.Application.Features.Playlists.Queries.GetAllByOwner;
 using SpotifyClone.Playlists.Application.Features.Playlists.Queries.GetDetails;
 using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -33,33 +43,6 @@ public sealed class PlaylistsController(IMediator mediator)
     {
         Result<PlaylistDetails> result = await Mediator.Send(
             new GetPlaylistDetailsQuery(id),
-            cancellationToken);
-        if (result.IsFailure)
-        {
-            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
-                result,
-                HttpContext);
-
-            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
-        }
-
-        return Ok(result.Value);
-    }
-
-    [EndpointSummary("Get all Playlists by Owner")]
-    [EndpointDescription("Returns Playlists owned by a certain User.")]
-    [ProducesResponseType(typeof(PlaylistList), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    [AllowAnonymous]
-    [HttpGet("users/{ownerId:guid}/playlists")]
-    public async Task<ActionResult<PlaylistList>> GetByOwner(
-        [FromQuery] Guid ownerId,
-        CancellationToken cancellationToken = default)
-    {
-        Result<PlaylistList> result = await Mediator.Send(
-            new GetAllPlaylistsByOwnerQuery(ownerId),
             cancellationToken);
         if (result.IsFailure)
         {
@@ -122,6 +105,213 @@ public sealed class PlaylistsController(IMediator mediator)
                 request.ImageHeight,
                 request.ImageFileType,
                 request.ImageSizeInBytes),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Edit Playlist details")]
+    [EndpointDescription("Edits playlist details (name, description, visibility).")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Listener)]
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult> EditDetails(
+        [FromRoute] Guid id,
+        [FromBody] EditPlaylistDetailsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<EditPlaylistDetailsCommandResult> result = await Mediator.Send(
+            new EditPlaylistDetailsCommand(
+                id,
+                request.Name,
+                request.Description,
+                request.IsPublic),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Delete Playlist")]
+    [EndpointDescription("Deletes a Playlist.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Listener)]
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> Delete(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<DeletePlaylistCommandResult> result = await Mediator.Send(
+            new DeletePlaylistCommand(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Add collaborator to Playlist")]
+    [EndpointDescription("Adds a collaborator to a playlist.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Listener)]
+    [HttpPost("{id:guid}/collaborators")]
+    public async Task<ActionResult> AddCollaborator(
+        [FromRoute] Guid id,
+        [FromBody] AddCollaboratorToPlaylistRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<AddCollaboratorToPlaylistCommandResult> result = await Mediator.Send(
+            new AddCollaboratorToPlaylistCommand(
+                id,
+                request.CollaboratorId),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Remove collaborator from Playlist")]
+    [EndpointDescription("Removes a collaborator from a playlist.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Listener)]
+    [HttpDelete("{id:guid}/collaborators/{collaboratorId:guid}")]
+    public async Task<ActionResult> RemoveCollaborator(
+        [FromRoute] Guid id,
+        [FromRoute] Guid collaboratorId,
+        CancellationToken cancellationToken = default)
+    {
+        Result<RemoveCollaboratorFromPlaylistCommandResult> result = await Mediator.Send(
+            new RemoveCollaboratorFromPlaylistCommand(id, collaboratorId),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Add track to Playlist")]
+    [EndpointDescription("Adds a track to a playlist.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Listener)]
+    [HttpPost("{id:guid}/tracks")]
+    public async Task<ActionResult> AddTrack(
+        [FromRoute] Guid id,
+        [FromBody] AddTrackToPlaylistRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<AddTrackToPlaylistCommandResult> result = await Mediator.Send(
+            new AddTrackToPlaylistCommand(
+                id,
+                request.TrackId),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Remove track from Playlist")]
+    [EndpointDescription("Removes a track from a playlist.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Listener)]
+    [HttpDelete("{id:guid}/tracks/{trackId:guid}")]
+    public async Task<ActionResult> RemoveTrack(
+        [FromRoute] Guid id,
+        [FromRoute] Guid trackId,
+        CancellationToken cancellationToken = default)
+    {
+        Result<RemoveTrackFromPlaylistCommandResult> result = await Mediator.Send(
+            new RemoveTrackFromPlaylistCommand(id, trackId),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Move track in Playlist")]
+    [EndpointDescription("Moves a track in a playlist.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Listener)]
+    [HttpPost("{id:guid}/tracks/{trackId:guid}/move")]
+    public async Task<ActionResult> MoveTracks(
+        [FromRoute] Guid id,
+        [FromRoute] Guid trackId,
+        [FromBody] MoveTrackInPlaylistRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<MoveTrackInPlaylistCommandResult> result = await Mediator.Send(
+            new MoveTrackInPlaylistCommand(
+                id,
+                trackId,
+                request.TargetPositionIndex),
             cancellationToken);
         if (result.IsFailure)
         {
