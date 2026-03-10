@@ -9,6 +9,14 @@ public interface IPlaylistRepository
         PlaylistId id,
         CancellationToken cancellationToken = default);
 
+    Task<Playlist?> GetLikedTracksAsync(
+        UserId ownerId,
+        CancellationToken cancellationToken = default);
+
+    Task<Playlist?> GetArchivedTracksAsync(
+        UserId ownerId,
+        CancellationToken cancellationToken = default);
+
     Task<IEnumerable<Playlist>> GetByIdsAsync(
         IEnumerable<PlaylistId> ids,
         CancellationToken cancellationToken = default);

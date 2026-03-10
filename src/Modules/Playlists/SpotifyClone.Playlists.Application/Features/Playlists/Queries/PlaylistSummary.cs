@@ -7,4 +7,5 @@ public sealed record PlaylistSummary(
     string Name,
     string? Description,
     bool IsPublic,
-    ImageMetadataDetails? Cover);
+    ImageMetadataDetails? CustomCoverImageId,
+    IEnumerable<Guid> GeneratedCoverImageIds);

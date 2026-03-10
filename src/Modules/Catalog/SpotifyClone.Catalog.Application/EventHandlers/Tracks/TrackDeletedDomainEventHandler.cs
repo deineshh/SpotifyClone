@@ -44,11 +44,21 @@ internal sealed class TrackDeletedDomainEventHandler(
         }
 
         var integrationEvent = new TrackDeletedIntegrationEvent(
-                notification.AudioFileId.Value);
-
+            notification.TrackId.Value);
         var message = OutboxMessage.FromIntegrationEvent(integrationEvent);
 
         await _unit.OutboxMessages.AddAsync(message, cancellationToken);
+
+        if (notification.AudioFileId is not null)
+        {
+            var integrationEvent2 = new TrackDeletedWithLinkedAudioIntegrationEvent(
+                notification.TrackId.Value,
+                notification.AudioFileId.Value);
+            var message2 = OutboxMessage.FromIntegrationEvent(integrationEvent2);
+
+            await _unit.OutboxMessages.AddAsync(message2, cancellationToken);
+        }
+
         await _unit.CommitAsync(cancellationToken);
     }
 }

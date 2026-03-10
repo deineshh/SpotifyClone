@@ -16,12 +16,17 @@ internal sealed class AlbumLinkedToCoverImageDomainEventHandler(
         AlbumLinkedToCoverImageDomainEvent notification,
         CancellationToken cancellationToken)
     {
-        var integrationEvent = new ImageLinkAddedIntegrationEvent(
-                notification.ImageId.Value);
+        var integrationEvent1 = new ImageLinkAddedIntegrationEvent(
+            notification.ImageId.Value);
+        var message1 = OutboxMessage.FromIntegrationEvent(integrationEvent1);
+        await _unit.OutboxMessages.AddAsync(message1, cancellationToken);
 
-        var message = OutboxMessage.FromIntegrationEvent(integrationEvent);
+        var integrationEvent2 = new AlbumLinkedToCoverImageIntegrationEvent(
+            notification.ImageId.Value,
+            notification.Tracks.Select(t => t.Value));
+        var message2 = OutboxMessage.FromIntegrationEvent(integrationEvent2);
+        await _unit.OutboxMessages.AddAsync(message2, cancellationToken);
 
-        await _unit.OutboxMessages.AddAsync(message, cancellationToken);
         await _unit.CommitAsync(cancellationToken);
     }
 }

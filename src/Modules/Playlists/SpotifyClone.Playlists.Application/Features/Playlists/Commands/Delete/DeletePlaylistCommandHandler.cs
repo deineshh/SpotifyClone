@@ -29,13 +29,14 @@ internal sealed class DeletePlaylistCommandHandler(
             return Result.Failure<DeletePlaylistCommandResult>(PlaylistErrors.NotFound);
         }
 
+        bool isAdmin = _currentUser.IsInRole(UserRoles.Admin);
         if ((!_currentUser.IsAuthenticated || playlist.OwnerId.Value != _currentUser.Id) &&
-            !_currentUser.IsInRole(UserRoles.Admin))
+            !isAdmin)
         {
             return Result.Failure<DeletePlaylistCommandResult>(PlaylistErrors.NotOwned);
         }
 
-        playlist.PrepareForDeletion();
+        playlist.PrepareForDeletion(isAdmin);
         await _unit.Playlists.DeleteAsync(playlist, cancellationToken);
 
         return new DeletePlaylistCommandResult();

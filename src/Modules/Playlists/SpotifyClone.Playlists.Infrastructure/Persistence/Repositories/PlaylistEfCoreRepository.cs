@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists;
+using SpotifyClone.Playlists.Domain.Aggregates.Playlists.Enums;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists.ValueObjects;
 using SpotifyClone.Playlists.Infrastructure.Persistence.Database;
 using SpotifyClone.Shared.Kernel.IDs;
@@ -21,6 +22,24 @@ internal sealed class PlaylistEfCoreRepository(PlaylistsAppDbContext context)
         CancellationToken cancellationToken = default)
         => await _playlists
             .Where(p => p.Id == id)
+            .Include(p => p.Collaborators)
+            .Include(p => p.Tracks)
+            .SingleOrDefaultAsync(cancellationToken);
+
+    public async Task<Playlist?> GetLikedTracksAsync(
+        UserId ownerId,
+        CancellationToken cancellationToken = default)
+        => await _playlists
+            .Where(p => p.OwnerId == ownerId && p.Type == PlaylistType.LikedTracks)
+            .Include(p => p.Collaborators)
+            .Include(p => p.Tracks)
+            .SingleOrDefaultAsync(cancellationToken);
+
+    public async Task<Playlist?> GetArchivedTracksAsync(
+        UserId ownerId,
+        CancellationToken cancellationToken = default)
+        => await _playlists
+            .Where(p => p.OwnerId == ownerId && p.Type == PlaylistType.ArchivedTracks)
             .Include(p => p.Collaborators)
             .Include(p => p.Tracks)
             .SingleOrDefaultAsync(cancellationToken);

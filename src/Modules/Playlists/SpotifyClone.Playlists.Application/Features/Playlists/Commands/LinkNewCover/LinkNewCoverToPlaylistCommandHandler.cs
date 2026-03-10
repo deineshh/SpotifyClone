@@ -31,8 +31,9 @@ internal sealed class LinkNewCoverToPlaylistCommandHandler(
             return Result.Failure<LinkNewCoverToPlaylistCommandResult>(PlaylistErrors.NotFound);
         }
 
+        bool isAdmin = _currentUser.IsInRole(UserRoles.Admin);
         if ((!_currentUser.IsAuthenticated || playlist.OwnerId.Value != _currentUser.Id) &&
-            !_currentUser.IsInRole(UserRoles.Admin))
+            !isAdmin)
         {
             return Result.Failure<LinkNewCoverToPlaylistCommandResult>(PlaylistErrors.NotOwned);
         }
@@ -42,7 +43,8 @@ internal sealed class LinkNewCoverToPlaylistCommandHandler(
             request.ImageWidth,
             request.ImageHeight,
             ImageFileType.From(request.ImageFileType),
-            request.ImageSizeInBytes));
+            request.ImageSizeInBytes),
+            isAdmin);
 
         return new LinkNewCoverToPlaylistCommandResult();
     }

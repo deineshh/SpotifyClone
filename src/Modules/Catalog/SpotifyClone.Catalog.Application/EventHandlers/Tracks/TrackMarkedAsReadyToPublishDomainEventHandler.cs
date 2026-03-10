@@ -4,6 +4,8 @@ using SpotifyClone.Catalog.Application.Abstractions;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
 using SpotifyClone.Catalog.Domain.Aggregates.Tracks.Events;
 using SpotifyClone.Catalog.Domain.Services;
+using SpotifyClone.Shared.BuildingBlocks.Application.Outbox;
+using SpotifyClone.Shared.IntegrationEvents.Catalog.Tracks;
 
 namespace SpotifyClone.Catalog.Application.EventHandlers.Tracks;
 
@@ -22,7 +24,6 @@ internal sealed class TrackMarkedAsReadyToPublishDomainEventHandler(
         CancellationToken cancellationToken)
     {
         Album? album = await _unit.Albums.GetByIdAsync(notification.AlbumId, cancellationToken);
-
         if (album is null)
         {
             _logger.LogError(
@@ -31,9 +32,13 @@ internal sealed class TrackMarkedAsReadyToPublishDomainEventHandler(
 
             return;
         }
-
         _albumTrackDomainService.TryMarkAlbumAsReadyToPublish(album);
         _albumTrackDomainService.ReevaluateAlbumType(album);
+
+        var integrationEvent = new TrackUnpublishedIntegrationEvent(
+                notification.TrackId.Value);
+        var message = OutboxMessage.FromIntegrationEvent(integrationEvent);
+        await _unit.OutboxMessages.AddAsync(message, cancellationToken);
 
         await _unit.CommitAsync(cancellationToken);
     }

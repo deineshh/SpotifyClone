@@ -22,7 +22,7 @@ using SpotifyClone.Playlists.Application.Features.Playlists.Queries.GetDetails;
 using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
-namespace SpotifyClone.Api.Controllers.Playlists.Playlists;
+namespace SpotifyClone.Api.Controllers.Playlists;
 
 [Tags("Playlists Module")]
 [Route("api/v1/playlists")]

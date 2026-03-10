@@ -28,7 +28,8 @@ internal sealed class GetPlaylistDetailsQueryHandler(
             return Result.Failure<PlaylistDetails>(PlaylistErrors.NotFound);
         }
 
-        if ((!_currentUser.IsAuthenticated || !playlist.Collaborators.Any(c => c == _currentUser.Id)) &&
+        if ((!_currentUser.IsAuthenticated ||
+            !playlist.Collaborators.Any(c => c.Id == _currentUser.Id)) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<PlaylistDetails>(PlaylistErrors.NotOwned);

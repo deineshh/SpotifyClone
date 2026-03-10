@@ -29,6 +29,13 @@ internal sealed class AddTrackToPlaylistCommandHandler(
             return Result.Failure<AddTrackToPlaylistCommandResult>(PlaylistErrors.NotFound);
         }
 
+        bool trackAvailable = await _unit.TrackReferences.IsPublishedAsync(
+            request.TrackId, cancellationToken);
+        if (!trackAvailable)
+        {
+            return Result.Failure<AddTrackToPlaylistCommandResult>(PlaylistErrors.InvalidTrack);
+        }
+
         bool isAdmin = _currentUser.IsInRole(UserRoles.Admin);
         if ((!_currentUser.IsAuthenticated || playlist.Collaborators.Any(c => c.Value != _currentUser.Id)) &&
             !isAdmin)

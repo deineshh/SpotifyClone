@@ -54,7 +54,9 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
         TryUnlinkCover();
 
         Cover = cover;
-        RaiseDomainEvent(new AlbumLinkedToCoverImageDomainEvent(Cover.ImageId));
+        RaiseDomainEvent(new AlbumLinkedToCoverImageDomainEvent(
+            Cover.ImageId,
+            _tracks.Select(t => t.Id)));
     }
 
     public void TryUnlinkCover()
@@ -64,7 +66,10 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
             return;
         }
 
-        RaiseDomainEvent(new AlbumUnlinkedFromCoverImageDomainEvent(Cover.ImageId));
+        RaiseDomainEvent(new AlbumUnlinkedFromCoverImageDomainEvent(
+            Cover.ImageId,
+            _tracks.Select(t => t.Id)));
+
         Cover = null;
     }
 
@@ -160,7 +165,7 @@ public sealed class Album : AggregateRoot<AlbumId, Guid>
 
         var track = new AlbumTrack(trackId, nextPosition);
 
-        if (!_tracks.Any(t => t.Id == track.Id) || _tracks.Add(track))
+        if (_tracks.Any(t => t.Id == track.Id) || !_tracks.Add(track))
         {
             throw new InvalidTrackInAlbumDomainException(
                 "Cannot add the same track to the playlist more than once.");

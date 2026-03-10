@@ -75,6 +75,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             mainArtists, featuredArtists, genres, moods);
 
         track.MoveToAlbum(albumId, isAlbumPublished);
+        track.RaiseDomainEvent(new TrackCreatedDomainEvent(track.Id));
 
         return track;
     }
@@ -130,7 +131,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         }
 
         Status = TrackStatus.ReadyToPublish;
-        RaiseDomainEvent(new TrackMarkedAsReadyToPublishDomainEvent(AlbumId));
+        RaiseDomainEvent(new TrackMarkedAsReadyToPublishDomainEvent(Id, AlbumId));
     }
 
     public void LinkAudioFile(AudioFileId audioFileId, TimeSpan duration)
@@ -172,6 +173,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         AlbumId = null;
         Status = TrackStatus.Archived;
+        RaiseDomainEvent(new TrackArchivedDomainEvent(Id));
     }
 
     public void Publish(DateTimeOffset releaseDate)
@@ -195,6 +197,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
         ReleaseDate = releaseDate;
         Status = TrackStatus.Published;
+        RaiseDomainEvent(new TrackPublishedDomainEvent(Id));
     }
 
     public void Unpublish()
@@ -206,6 +209,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
         ReleaseDate = null;
         Status = TrackStatus.ReadyToPublish;
+        RaiseDomainEvent(new TrackUnpublishedDomainEvent(Id));
     }
 
     public void PrepareForDeletion()
@@ -215,10 +219,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             throw new TrackAlreadyPublishedDomainException("Cannot delete a published track.");
         }
         
-        if (AudioFileId is not null)
-        {
-            RaiseDomainEvent(new TrackDeletedDomainEvent(Id, AlbumId, AudioFileId));
-        }
+        RaiseDomainEvent(new TrackDeletedDomainEvent(Id, AlbumId, AudioFileId));
     }
 
     public void CorrectTitle(string title)

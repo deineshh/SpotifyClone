@@ -8,5 +8,5 @@ namespace SpotifyClone.Catalog.Domain.Aggregates.Tracks.Events;
 public sealed record TrackDeletedDomainEvent(
     TrackId TrackId,
     AlbumId? AlbumId,
-    AudioFileId AudioFileId)
+    AudioFileId? AudioFileId)
     : DomainEvent;

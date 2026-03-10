@@ -29,6 +29,12 @@ internal sealed class AddCollaboratorToPlaylistCommandHandler(
             return Result.Failure<AddCollaboratorToPlaylistCommandResult>(PlaylistErrors.NotFound);
         }
 
+        // Remove comments when Accounts BC can publish UserRegisteredIntegrationEvent
+        //if (!await _unit.UserReferences.ExistsAsync(request.CollaboratorId, cancellationToken))
+        //{
+        //    return Result.Failure<AddCollaboratorToPlaylistCommandResult>(PlaylistErrors.InvalidCollaborator);
+        //}
+
         if ((!_currentUser.IsAuthenticated || playlist.OwnerId.Value != _currentUser.Id) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {

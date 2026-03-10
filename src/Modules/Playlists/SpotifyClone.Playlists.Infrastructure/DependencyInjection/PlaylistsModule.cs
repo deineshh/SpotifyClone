@@ -41,6 +41,8 @@ public static class PlaylistsModule
         services.AddScoped<IPlaylistsUnitOfWork, PlaylistsEfCoreUnitOfWork>();
 
         services.AddScoped<IPlaylistRepository, PlaylistEfCoreRepository>();
+        services.AddScoped<ITrackReferenceRepository, TrackReferenceEfCoreRepository>();
+        services.AddScoped<IUserReferenceRepository, UserReferenceEfCoreRepository>();
         services.AddScoped<IOutboxRepository, OutboxEfCoreRepository>();
 
         services.AddScoped<IPlaylistReadService, PlaylistEfCoreReadService>();

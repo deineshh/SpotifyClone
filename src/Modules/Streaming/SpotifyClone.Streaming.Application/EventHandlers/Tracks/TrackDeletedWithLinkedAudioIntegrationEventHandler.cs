@@ -6,16 +6,16 @@ using SpotifyClone.Streaming.Application.Jobs;
 
 namespace SpotifyClone.Streaming.Application.EventHandlers.Tracks;
 
-internal sealed class TrackDeletedIntegrationEventHandler(
+internal sealed class TrackDeletedWithLinkedAudioIntegrationEventHandler(
     IBackgroundJobService jobService,
-    ILogger<TrackDeletedIntegrationEventHandler> logger)
-    : INotificationHandler<TrackDeletedIntegrationEvent>
+    ILogger<TrackDeletedWithLinkedAudioIntegrationEventHandler> logger)
+    : INotificationHandler<TrackDeletedWithLinkedAudioIntegrationEvent>
 {
     private readonly IBackgroundJobService _jobService = jobService;
-    private readonly ILogger<TrackDeletedIntegrationEventHandler> _logger = logger;
+    private readonly ILogger<TrackDeletedWithLinkedAudioIntegrationEventHandler> _logger = logger;
 
     public async Task Handle(
-        TrackDeletedIntegrationEvent notification,
+        TrackDeletedWithLinkedAudioIntegrationEvent notification,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(

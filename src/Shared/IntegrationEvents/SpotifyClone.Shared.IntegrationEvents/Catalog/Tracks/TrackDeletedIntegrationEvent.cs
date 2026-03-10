@@ -3,5 +3,5 @@
 namespace SpotifyClone.Shared.IntegrationEvents.Catalog.Tracks;
 
 public sealed record TrackDeletedIntegrationEvent(
-    Guid AudioId)
+    Guid TrackId)
     : IntegrationEvent;

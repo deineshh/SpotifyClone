@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists;
+using SpotifyClone.Playlists.Infrastructure.Persistence.Entities;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence.Database;
 
 namespace SpotifyClone.Playlists.Infrastructure.Persistence.Database;
@@ -8,6 +9,8 @@ public sealed class PlaylistsAppDbContext(DbContextOptions<PlaylistsAppDbContext
     : ApplicationDbContext<PlaylistsAppDbContext>("playlists", options)
 {
     public DbSet<Playlist> Playlists => Set<Playlist>();
+    public DbSet<TrackReference> TrackReferences => Set<TrackReference>();
+    public DbSet<UserReference> UserReferences => Set<UserReference>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
