@@ -22,7 +22,7 @@ internal sealed class LoginWithPasswordCommandHandler(
     public async Task<Result<LoginWithPasswordCommandResult>> Handle(LoginWithPasswordCommand request, CancellationToken cancellationToken)
     {
         Result<IdentityUserInfo> identityResult = await _identity.ValidateUserAsync(
-            request.Email,
+            request.Identifier,
             request.Password,
             cancellationToken);
         if (identityResult.IsFailure)

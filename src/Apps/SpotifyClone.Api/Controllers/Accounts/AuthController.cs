@@ -27,8 +27,6 @@ namespace SpotifyClone.Api.Controllers.Accounts;
 public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvironment)
     : ApiController(mediator)
 {
-    private readonly IHostEnvironment _hostEnvironment = hostEnvironment;
-
     private readonly CookieOptions _cookieOptions = new CookieOptions
     {
         HttpOnly = true,
@@ -111,7 +109,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
         CancellationToken cancellationToken = default)
     {
         Result<LoginWithPasswordCommandResult> result = await Mediator.Send(
-            new LoginWithPasswordCommand(request.Email, request.Password),
+            new LoginWithPasswordCommand(request.Identifier, request.Password),
             cancellationToken);
         if (result.IsFailure)
         {

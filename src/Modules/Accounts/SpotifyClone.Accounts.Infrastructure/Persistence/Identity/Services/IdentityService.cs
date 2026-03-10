@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Application.Models;
@@ -23,16 +24,18 @@ internal sealed class IdentityService : IIdentityService
     }
 
     public async Task<Result<IdentityUserInfo>> ValidateUserAsync(
-        string email,
+        string identifier,
         string password,
         CancellationToken cancellationToken = default)
     {
-        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+        ApplicationUser? user = await _userManager.Users.FirstOrDefaultAsync(
+            u => u.Email == identifier || u.UserName == identifier,
+            cancellationToken);
 
         if (user is null)
         {
             return Result.Failure<IdentityUserInfo>(
-                AuthErrors.InvalidEmail);
+                AuthErrors.InvalidIdentifier);
         }
 
         if (!await _signInManager.CanSignInAsync(user))

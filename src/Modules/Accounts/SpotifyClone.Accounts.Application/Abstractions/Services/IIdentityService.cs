@@ -8,7 +8,7 @@ namespace SpotifyClone.Accounts.Application.Abstractions.Services;
 public interface IIdentityService
 {
     Task<Result<IdentityUserInfo>> ValidateUserAsync(
-        string email,
+        string identifier,
         string password,
         CancellationToken cancellationToken = default);
 

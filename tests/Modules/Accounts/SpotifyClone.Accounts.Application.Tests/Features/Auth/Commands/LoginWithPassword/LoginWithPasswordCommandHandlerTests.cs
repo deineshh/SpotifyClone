@@ -32,7 +32,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
     {
         // Arrange
         var command = new LoginWithPasswordCommand("test@test.com", "Password123!");
-        Error error = AuthErrors.InvalidEmail;
+        Error error = AuthErrors.InvalidIdentifier;
 
         _identityMock
             .Setup(x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))

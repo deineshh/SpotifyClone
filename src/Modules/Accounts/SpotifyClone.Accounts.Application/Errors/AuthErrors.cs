@@ -4,9 +4,9 @@ namespace SpotifyClone.Accounts.Application.Errors;
 
 public static class AuthErrors
 {
-    public static readonly Error InvalidEmail = new(
-        "Auth.InvalidEmail",
-        "The provided email is invalid.");
+    public static readonly Error InvalidIdentifier = new(
+        "Auth.InvalidIdentifier",
+        "The provided email or username is invalid.");
 
     public static readonly Error InvalidPassword = new(
         "Auth.InvalidPassword",
