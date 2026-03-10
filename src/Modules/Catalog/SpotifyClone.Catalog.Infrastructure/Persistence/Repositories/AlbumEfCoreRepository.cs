@@ -21,7 +21,8 @@ internal sealed class AlbumEfCoreRepository(CatalogAppDbContext context)
         CancellationToken cancellationToken = default)
         => await _albums
             .Where(a => a.Id == id)
-            .Include("_tracks")
+            .Include(a => a.MainArtists)
+            .Include(a => a.Tracks)
             .SingleOrDefaultAsync(cancellationToken);
 
     public async Task<IEnumerable<Album>> GetAllByMainArtistAsync(
@@ -29,6 +30,7 @@ internal sealed class AlbumEfCoreRepository(CatalogAppDbContext context)
         CancellationToken cancellationToken = default)
         => await _albums
             .Where(a => a.MainArtists.Any(id => id.Value == artistId.Value))
+            .Include(a => a.MainArtists)
             .Include("_tracks")
             .ToListAsync(cancellationToken);
 

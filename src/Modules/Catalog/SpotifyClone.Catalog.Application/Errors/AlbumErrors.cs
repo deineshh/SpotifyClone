@@ -30,7 +30,7 @@ public static class AlbumErrors
 
     public static readonly Error InvalidTracks = new(
         "Album.InvalidTracks",
-        "The specified tracks are invalid.");
+        "The specified track is invalid.");
 
     public static readonly Error InvalidTrackOrder = new(
         "Album.InvalidTrackOrder",
@@ -52,8 +52,8 @@ public static class AlbumErrors
         "Album.MainArtistNotFound",
         "Main artist was not found in the album.");
 
-    public static readonly Error TrackNotFound = new(
-        "Album.TrackNotFound",
+    public static readonly Error InvalidTrack = new(
+        "Album.InvalidTrack",
         "Track was not found in the album.");
 
     public static readonly Error NotOwned = new(

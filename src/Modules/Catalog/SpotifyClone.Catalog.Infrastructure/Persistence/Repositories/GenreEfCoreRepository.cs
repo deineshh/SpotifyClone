@@ -30,6 +30,13 @@ internal sealed class GenreEfCoreRepository(CatalogAppDbContext context)
         CancellationToken cancellationToken = default)
         => await _genres.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
 
+    public async Task<IEnumerable<Genre>> GetByIdsAsync(
+        IEnumerable<GenreId> ids,
+        CancellationToken cancellationToken = default)
+        => await _genres
+            .Where(a => ids.Contains(a.Id))
+            .ToListAsync(cancellationToken);
+
     public async Task DeleteAsync(
         Genre genre,
         CancellationToken cancellationToken = default)

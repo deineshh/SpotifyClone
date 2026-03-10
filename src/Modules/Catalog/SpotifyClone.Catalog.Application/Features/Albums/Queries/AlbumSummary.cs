@@ -1,4 +1,5 @@
-﻿using SpotifyClone.Catalog.Application.Models;
+﻿using SpotifyClone.Catalog.Application.Features.Artists.Queries;
+using SpotifyClone.Catalog.Application.Models;
 
 namespace SpotifyClone.Catalog.Application.Features.Albums.Queries;
 
@@ -8,4 +9,5 @@ public sealed record AlbumSummary(
     DateTimeOffset? ReleaseDate,
     string Status,
     string Type,
-    ImageMetadataDetails? Cover);
+    ImageMetadataDetails? Cover,
+    IEnumerable<ArtistSummary> MainArtists);

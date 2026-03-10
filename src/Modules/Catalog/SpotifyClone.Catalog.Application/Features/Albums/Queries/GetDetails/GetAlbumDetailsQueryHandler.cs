@@ -6,6 +6,7 @@ using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Queries;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Catalog.Application.Features.Albums.Queries.GetDetails;
@@ -36,10 +37,11 @@ internal sealed class GetAlbumDetailsQueryHandler(
             album.MainArtists.Select(a => ArtistId.From(a.Id)).ToList(),
             cancellationToken);
 
-        if (album.Status != AlbumStatus.Published.Value
-            && (!_currentUser.IsAuthenticated || !artists.Any(a => a.OwnerId == _currentUser.Id)))
+        if (album.Status != AlbumStatus.Published.Value &&
+            (!_currentUser.IsAuthenticated || !artists.Any(a => a.OwnerId == _currentUser.Id)) &&
+            !_currentUser.IsInRole(UserRoles.Admin))
         {
-            return Result.Failure<AlbumDetails>(AlbumErrors.NotFound);
+            return Result.Failure<AlbumDetails>(AlbumErrors.NotOwned);
         }
 
         return album;

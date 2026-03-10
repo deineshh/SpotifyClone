@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums;
+using SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.Rules;
 using SpotifyClone.Catalog.Domain.Aggregates.Albums.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Configurations.Converters;
@@ -65,37 +66,39 @@ internal sealed class AlbumEfCoreConfiguration : IEntityTypeConfiguration<Album>
                     .HasColumnName("cover_metadata_size_in_bytes")
                     .IsRequired();
             });
-
             builder.Navigation(x => x.Cover).IsRequired(false);
         });
-
-        builder.Navigation(x => x.Cover).IsRequired(false);
 
         builder.OwnsMany(t => t.MainArtists, a =>
         {
             a.ToTable("album_main_artists");
 
-            a.Property<AlbumId>("AlbumId")
-                .HasColumnName("album_id");
+            a.Property<Guid>("Id")
+                .HasColumnName("id");
+            a.HasKey("Id");
 
             a.WithOwner().HasForeignKey("AlbumId");
+
+            a.Property<AlbumId>("AlbumId")
+                .HasColumnName("album_id");
 
             a.Property(x => x.Value)
                 .HasColumnName("artist_id")
                 .IsRequired();
 
-            a.HasKey("AlbumId", "Value");
+            a.HasIndex("AlbumId", "Value")
+                .IsUnique();
         });
         builder.Navigation(x => x.MainArtists)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder
-            .HasMany<AlbumTrack>("_tracks")
+            .HasMany(x => x.Tracks)
             .WithOne()
             .HasForeignKey("album_id");
-        builder.Navigation("_tracks")
+        builder.Navigation(x => x.Tracks)
+            .HasField("_tracks")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
-        builder.Ignore(x => x.Tracks);
 
         builder.Ignore(x => x.DomainEvents);
     }

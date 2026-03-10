@@ -58,13 +58,13 @@ public sealed class ArtistsController(IMediator mediator)
 
     [EndpointSummary("Get Artist's albums")]
     [EndpointDescription("Returns Albums owned by a certain Artist.")]
-    [ProducesResponseType(typeof(ArtistDetails), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AlbumList), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [AllowAnonymous]
     [HttpGet("{id:guid}/albums")]
-    public async Task<ActionResult<AlbumList>> GetAllAlbumsByArtistDetails(
+    public async Task<ActionResult<AlbumList>> GetByArtist(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {

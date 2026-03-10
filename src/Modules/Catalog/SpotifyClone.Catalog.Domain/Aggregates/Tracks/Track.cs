@@ -75,6 +75,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             mainArtists, featuredArtists, genres, moods);
 
         track.MoveToAlbum(albumId, isAlbumPublished);
+        track.RaiseDomainEvent(new TrackCreatedDomainEvent(track.Id));
 
         return track;
     }
@@ -130,7 +131,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         }
 
         Status = TrackStatus.ReadyToPublish;
-        RaiseDomainEvent(new TrackMarkedAsReadyToPublishDomainEvent(AlbumId));
+        RaiseDomainEvent(new TrackMarkedAsReadyToPublishDomainEvent(Id, AlbumId));
     }
 
     public void LinkAudioFile(AudioFileId audioFileId, TimeSpan duration)
@@ -172,6 +173,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     {
         AlbumId = null;
         Status = TrackStatus.Archived;
+        RaiseDomainEvent(new TrackArchivedDomainEvent(Id));
     }
 
     public void Publish(DateTimeOffset releaseDate)
@@ -195,6 +197,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
         ReleaseDate = releaseDate;
         Status = TrackStatus.Published;
+        RaiseDomainEvent(new TrackPublishedDomainEvent(Id));
     }
 
     public void Unpublish()
@@ -206,6 +209,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
 
         ReleaseDate = null;
         Status = TrackStatus.ReadyToPublish;
+        RaiseDomainEvent(new TrackUnpublishedDomainEvent(Id));
     }
 
     public void PrepareForDeletion()
@@ -215,10 +219,7 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
             throw new TrackAlreadyPublishedDomainException("Cannot delete a published track.");
         }
         
-        if (AudioFileId is not null)
-        {
-            RaiseDomainEvent(new TrackDeletedDomainEvent(Id, AlbumId, AudioFileId));
-        }
+        RaiseDomainEvent(new TrackDeletedDomainEvent(Id, AlbumId, AudioFileId));
     }
 
     public void CorrectTitle(string title)
@@ -261,68 +262,70 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
     public void MarkAsNotExplicit()
         => ContainsExplicitContent = false;
 
-    public void AddMainArtist(ArtistId artistId)
+    public void UpdateMainArtists(IReadOnlyCollection<ArtistId> artists)
     {
-        ArgumentNullException.ThrowIfNull(artistId);
-
-        if (Status.IsPublished)
-        {
-            throw new TrackAlreadyPublishedDomainException("Cannot add main artist to a published track.");
-        }
-
-        _mainArtists.Add(artistId);
-    }
-
-    public void RemoveMainArtist(ArtistId artistId)
-    {
-        ArgumentNullException.ThrowIfNull(artistId);
+        ArgumentNullException.ThrowIfNull(artists);
 
         if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
-                "Cannot remove main artist from a published track.");
+                "Cannot update main artists of a published track.");
         }
 
-        _mainArtists.Remove(artistId);
+        if (artists.Count <= 0)
+        {
+            throw new InvalidTrackMainArtistsDomainException(
+                "A track must have at least one main artist.");
+        }
+
+        _mainArtists.Clear();
+
+        foreach (ArtistId artistId in artists)
+        {
+            _mainArtists.Add(artistId);
+        }
     }
 
-    public void AddFeaturedArtist(ArtistId artistId)
+    public void UpdateFeaturedArtists(IReadOnlyCollection<ArtistId> artists)
     {
-        ArgumentNullException.ThrowIfNull(artistId);
+        ArgumentNullException.ThrowIfNull(artists);
 
         if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
-                "Cannot add featured artist to a published track.");
+                "Cannot update featured artists of a published track.");
         }
 
-        _featuredArtists.Add(artistId);
+        _featuredArtists.Clear();
+
+        foreach (ArtistId artistId in artists)
+        {
+            _featuredArtists.Add(artistId);
+        }
     }
 
-    public void RemoveFeaturedArtist(ArtistId artistId)
+    public void UpdateGenres(IReadOnlyCollection<GenreId> genres)
     {
-        ArgumentNullException.ThrowIfNull(artistId);
+        ArgumentNullException.ThrowIfNull(genres);
 
         if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
-                "Cannot remove featured artist from a published track.");
+                "Cannot update genres of a published track.");
         }
 
-        _featuredArtists.Remove(artistId);
-    }
-
-    public void AddGenre(GenreId genreId)
-    {
-        ArgumentNullException.ThrowIfNull(genreId);
-
-        if (Status.IsPublished)
+        if (genres.Count <= 0)
         {
-            throw new TrackAlreadyPublishedDomainException(
-                "Cannot add genre to a published track.");
+            throw new InvalidTrackMainArtistsDomainException(
+                "A track must have at least one genre.");
         }
 
-        _genres.Add(genreId);
+        _genres.Clear();
+
+        foreach (GenreId genreId in genres)
+        {
+            _genres.Add(genreId);
+        }
     }
 
     public void RemoveGenre(GenreId genreId)
@@ -338,17 +341,28 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         _genres.Remove(genreId);
     }
 
-    public void AddMood(MoodId moodId)
+    public void UpdateMoods(IReadOnlyCollection<MoodId> moods)
     {
-        ArgumentNullException.ThrowIfNull(moodId);
+        ArgumentNullException.ThrowIfNull(moods);
 
         if (Status.IsPublished)
         {
             throw new TrackAlreadyPublishedDomainException(
-                "Cannot add mood to a published track.");
+                "Cannot update moods of a published track.");
         }
 
-        _moods.Add(moodId);
+        if (moods.Count <= 0)
+        {
+            throw new InvalidTrackMainArtistsDomainException(
+                "A track must have at least one mood.");
+        }
+
+        _moods.Clear();
+
+        foreach (MoodId moodId in moods)
+        {
+            _moods.Add(moodId);
+        }
     }
 
     public void RemoveMood(MoodId moodId)
@@ -362,30 +376,6 @@ public sealed class Track : AggregateRoot<TrackId, Guid>
         }
 
         _moods.Remove(moodId);
-    }
-
-    public bool MainArtistExists(ArtistId artistId)
-    {
-        ArgumentNullException.ThrowIfNull(artistId);
-        return _mainArtists.Contains(artistId);
-    }
-
-    public bool FeaturedArtistExists(ArtistId artistId)
-    {
-        ArgumentNullException.ThrowIfNull(artistId);
-        return _featuredArtists.Contains(artistId);
-    }
-
-    public bool GenreExists(GenreId genreId)
-    {
-        ArgumentNullException.ThrowIfNull(genreId);
-        return _genres.Contains(genreId);
-    }
-
-    public bool MoodExists(MoodId moodId)
-    {
-        ArgumentNullException.ThrowIfNull(moodId);
-        return _moods.Contains(moodId);
     }
 
     private Track(

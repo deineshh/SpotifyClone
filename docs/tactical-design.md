@@ -158,7 +158,7 @@ A user-defined collection of tracks.
 - Description: String?
 - Cover: PlaylistCoverImage? (Value Object):
     - Metadata: ImageMetadata (Value Object [SharedKernel](#shared-kernel))
-    - ImageFileId: ImageFileId (Value Object [SharedKernel](#shared-kernel))
+    - ImageId: ImageId (Value Object [SharedKernel](#shared-kernel))
 - IsPublic: Boolean
 - Tracks: List<PlaylistTrack> (Entity):
     - PRIMARY KEY: (PlaylistId, Position)

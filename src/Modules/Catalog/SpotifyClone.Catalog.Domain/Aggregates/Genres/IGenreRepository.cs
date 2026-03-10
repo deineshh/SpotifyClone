@@ -12,6 +12,10 @@ public interface IGenreRepository
         GenreId id,
         CancellationToken cancellationToken = default);
 
+    Task<IEnumerable<Genre>> GetByIdsAsync(
+        IEnumerable<GenreId> ids,
+        CancellationToken cancellationToken = default);
+
     Task<bool> Exists(
         GenreId id,
         CancellationToken cancellationToken = default);

@@ -47,26 +47,14 @@ internal sealed class AlbumEfCoreReadService(
                         artist.Avatar.Metadata.FileType.Value,
                         artist.Avatar.Metadata.SizeInBytes))
                 ).ToList(),
-            _context.Tracks
-                .Where(t => a.Tracks.Contains(t.Id))
-                .Select(t => new TrackSummary(
-                    t.Id.Value,
-                    t.Title,
-                    t.Duration,
-                    t.ReleaseDate,
-                    t.ContainsExplicitContent,
-                    t.Status.Value,
-                    t.AudioFileId == null ? null : t.AudioFileId.Value,
-                    t.AlbumId == null ? null : t.AlbumId.Value))
-                .ToList()))
+            a.Tracks.Select(t => new AlbumTrackSummary(t.Id.Value, t.Position))))
         .SingleOrDefaultAsync(cancellationToken);
 
     public async Task<IEnumerable<AlbumSummary>> GetAllByArtistIdAsync(
         ArtistId artistId,
         CancellationToken cancellationToken = default)
         => await _context.Albums
-        .Where(a =>
-            a.MainArtists.Any(a => a.Value == artistId.Value))
+        .Where(a => a.MainArtists.Any(a => a.Value == artistId.Value))
         .Select(a => new AlbumSummary(
             a.Id.Value,
             a.Title,
@@ -78,7 +66,20 @@ internal sealed class AlbumEfCoreReadService(
                 a.Cover.Metadata.Width,
                 a.Cover.Metadata.Height,
                 a.Cover.Metadata.FileType.Value,
-                a.Cover.Metadata.SizeInBytes)))
+                a.Cover.Metadata.SizeInBytes),
+            _context.Artists
+            .Where(art => a.MainArtists.Select(ma => ma.Value).Contains(art.Id.Value))
+            .Select(art => new ArtistSummary(
+                art.Id.Value,
+                art.Name,
+                art.Status.Value,
+                art.Avatar == null ? null : new ImageMetadataDetails(
+                    art.Avatar.ImageId.Value,
+                    art.Avatar.Metadata.Width,
+                    art.Avatar.Metadata.Height,
+                    art.Avatar.Metadata.FileType.Value,
+                    art.Avatar.Metadata.SizeInBytes)))
+            .ToList()))
         .ToListAsync(cancellationToken);
 
     public async Task<IEnumerable<AlbumSummary>> GetAllPublishedByArtistIdAsync(
@@ -99,6 +100,19 @@ internal sealed class AlbumEfCoreReadService(
                 a.Cover.Metadata.Width,
                 a.Cover.Metadata.Height,
                 a.Cover.Metadata.FileType.Value,
-                a.Cover.Metadata.SizeInBytes)))
+                a.Cover.Metadata.SizeInBytes),
+            _context.Artists
+            .Where(art => a.MainArtists.Select(ma => ma.Value).Contains(art.Id.Value))
+            .Select(art => new ArtistSummary(
+                art.Id.Value,
+                art.Name,
+                art.Status.Value,
+                art.Avatar == null ? null : new ImageMetadataDetails(
+                    art.Avatar.ImageId.Value,
+                    art.Avatar.Metadata.Width,
+                    art.Avatar.Metadata.Height,
+                    art.Avatar.Metadata.FileType.Value,
+                    art.Avatar.Metadata.SizeInBytes)))
+            .ToList()))
         .ToListAsync(cancellationToken);
 }

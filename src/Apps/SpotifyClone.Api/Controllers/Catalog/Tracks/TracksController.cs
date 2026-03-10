@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.CorrectTitle;
 using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.Create;
+using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.UpdateFeaturedArtists;
+using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.UpdateGenres;
+using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.UpdateMainArtists;
+using SpotifyClone.Api.Contracts.v1.Catalog.Tracks.UpdateMoods;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.CorrectTitle;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Create;
@@ -10,6 +14,10 @@ using SpotifyClone.Catalog.Application.Features.Tracks.Commands.Delete;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.MarkAsExplicit;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.MarkAsNotExplicit;
 using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UnlinkFromAudioFile;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UpdateFeaturedArtists;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UpdateGenres;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UpdateMainArtists;
+using SpotifyClone.Catalog.Application.Features.Tracks.Commands.UpdateMoods;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries;
 using SpotifyClone.Catalog.Application.Features.Tracks.Queries.GetDetails;
 using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
@@ -85,6 +93,126 @@ public sealed class TracksController(IMediator mediator)
             new { id = createResultData.TrackId },
             new CreateTrackResponse(
                 createResultData.TrackId));
+    }
+
+    [EndpointSummary("Update Track's main artists")]
+    [EndpointDescription("Updates the list of track's main artists.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
+    [HttpPut("{id:guid}/main-artists")]
+    public async Task<ActionResult> UpdateTrackMainArtists(
+        [FromRoute] Guid id,
+        [FromBody] UpdateTrackMainArtistsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UpdateTrackMainArtistsCommandResult> result = await Mediator.Send(
+            new UpdateTrackMainArtistsCommand(
+                id,
+                request.MainArtistIds),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Update Track's featured artists")]
+    [EndpointDescription("Updates the list of track's featured artists.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
+    [HttpPut("{id:guid}/feat-artists")]
+    public async Task<ActionResult> UpdateTrackFeaturedArtists(
+        [FromRoute] Guid id,
+        [FromBody] UpdateTrackFeaturedArtistsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UpdateTrackFeaturedArtistsCommandResult> result = await Mediator.Send(
+            new UpdateTrackFeaturedArtistsCommand(
+                id,
+                request.FeaturedArtistIds),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Update Track's genres")]
+    [EndpointDescription("Updates the list of track's genres.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
+    [HttpPut("{id:guid}/genres")]
+    public async Task<ActionResult> UpdateTrackGenres(
+        [FromRoute] Guid id,
+        [FromBody] UpdateTrackGenresRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UpdateTrackGenresCommandResult> result = await Mediator.Send(
+            new UpdateTrackGenresCommand(
+                id,
+                request.GenreIds),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
+    }
+
+    [EndpointSummary("Update Track's moods")]
+    [EndpointDescription("Updates the list of track's moods.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Creator)]
+    [HttpPut("{id:guid}/moods")]
+    public async Task<ActionResult> UpdateTrackMoods(
+        [FromRoute] Guid id,
+        [FromBody] UpdateTrackMoodsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UpdateTrackMoodsCommandResult> result = await Mediator.Send(
+            new UpdateTrackMoodsCommand(
+                id,
+                request.MoodIds),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return NoContent();
     }
 
     [EndpointSummary("Unlink Audio file")]
