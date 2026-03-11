@@ -130,7 +130,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
                 result.Value.ExpiresAt));
     }
 
-    [Authorize]
+    [Authorize(Roles = UserRoles.Listener)]
     [HttpPost("refresh")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -166,7 +166,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
                 result.Value.ExpiresAt));
     }
 
-    [Authorize]
+    [Authorize(Roles = UserRoles.Listener)]
     [HttpPost("logout")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -212,6 +212,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
         return Ok(new { Message = "Email verified successfully" });
     }
 
+    [Authorize(Roles = UserRoles.Listener)]
     [HttpPost("phone/send-code")]
     [EnableRateLimiting("send-limits")]
     public async Task<ActionResult> SendVerificationSms(

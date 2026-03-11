@@ -97,7 +97,7 @@ partial class CatalogAppDbContextModelSnapshot : ModelSnapshot
                     .HasColumnType("character varying(30)")
                     .HasColumnName("name");
 
-                b.Property<Guid>("OwnerId")
+                b.Property<Guid?>("OwnerId")
                     .HasColumnType("uuid")
                     .HasColumnName("owner_id");
 
@@ -320,7 +320,7 @@ partial class CatalogAppDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Entities.AlbumTrack", b =>
             {
                 b.HasOne("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", null)
-                    .WithMany("_tracks")
+                    .WithMany("Tracks")
                     .HasForeignKey("album_id")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
@@ -714,7 +714,7 @@ partial class CatalogAppDbContextModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("SpotifyClone.Catalog.Domain.Aggregates.Albums.Album", b =>
             {
-                b.Navigation("_tracks");
+                b.Navigation("Tracks");
             });
 #pragma warning restore 612, 618
     }

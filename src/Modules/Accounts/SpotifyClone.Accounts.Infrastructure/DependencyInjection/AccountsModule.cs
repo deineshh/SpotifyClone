@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +13,7 @@ using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Behaviors;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
+using SpotifyClone.Accounts.Application.Jobs;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
 using SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
 using SpotifyClone.Accounts.Infrastructure.Auth.Sms;
@@ -76,6 +78,8 @@ public static class AccountsModule
         services.AddTransient<IAccountVerificationService, IdentityAccountVerificationService>();
         services.AddTransient<ISmsSender, LoggerSmsSender>();
 
+        services.AddTransient<ProcessOutboxMessagesJob>();
+
         return services;
     }
 
@@ -127,5 +131,14 @@ public static class AccountsModule
                 Gender: "male",
                 Role: UserRoles.Creator));
         }
+
+        IRecurringJobManager recurringJobManager =
+            app.ApplicationServices.GetRequiredService<IRecurringJobManager>();
+
+        recurringJobManager.AddOrUpdate<ProcessOutboxMessagesJob>(
+            "accounts-outbox-processor",
+            job => job.ProcessAsync(),
+            "*/5 * * * * *" // Every 5 seconds (Cron expression)
+        );
     }
 }

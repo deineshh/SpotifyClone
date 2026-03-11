@@ -29,13 +29,13 @@ internal sealed class UnlinkAvatarFromArtistCommandHandler(
             return Result.Failure<UnlinkAvatarFromArtistCommandResult>(ArtistErrors.NotFound);
         }
 
-        if ((!_currentUser.IsAuthenticated || _currentUser.Id != artist.OwnerId.Value) &&
+        if ((!_currentUser.IsAuthenticated || _currentUser.Id != artist.OwnerId?.Value) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<UnlinkAvatarFromArtistCommandResult>(ArtistErrors.NotOwned);
         }
 
-        artist.UnlinkAvatarIfExists();
+        artist.UnlinkAvatar();
 
         return new UnlinkAvatarFromArtistCommandResult();
     }

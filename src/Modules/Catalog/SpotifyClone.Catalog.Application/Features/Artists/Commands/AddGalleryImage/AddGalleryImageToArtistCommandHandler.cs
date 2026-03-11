@@ -31,7 +31,7 @@ internal sealed class AddGalleryImageToArtistCommandHandler(
             return Result.Failure<AddGalleryImageToArtistCommandResult>(AlbumErrors.NotFound);
         }
 
-        if ((!_currentUser.IsAuthenticated || _currentUser.Id != artist.OwnerId.Value) &&
+        if ((!_currentUser.IsAuthenticated || _currentUser.Id != artist.OwnerId?.Value) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<AddGalleryImageToArtistCommandResult>(ArtistErrors.NotOwned);

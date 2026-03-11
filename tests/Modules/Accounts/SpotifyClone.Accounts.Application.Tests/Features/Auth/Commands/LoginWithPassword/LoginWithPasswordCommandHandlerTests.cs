@@ -1,5 +1,4 @@
-﻿using System.Security.Principal;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Moq;
 using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
@@ -35,7 +34,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
         Error error = AuthErrors.InvalidIdentifier;
 
         _identityMock
-            .Setup(x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
+            .Setup(x => x.ValidateUserAsync(command.Identifier, command.Password, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure<IdentityUserInfo>(error));
 
         // Act
@@ -45,7 +44,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e => e == error);
         _identityMock.Verify(
-            x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()),
+            x => x.ValidateUserAsync(command.Identifier, command.Password, It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -58,7 +57,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
         var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
 
         _identityMock
-            .Setup(x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
+            .Setup(x => x.ValidateUserAsync(command.Identifier, command.Password, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(identityInfo));
 
         _identityMock
@@ -107,7 +106,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
         var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
 
         _identityMock
-            .Setup(x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
+            .Setup(x => x.ValidateUserAsync(command.Identifier, command.Password, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(identityInfo));
 
         _identityMock
@@ -174,7 +173,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
         var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
 
         _identityMock
-            .Setup(x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()))
+            .Setup(x => x.ValidateUserAsync(command.Identifier, command.Password, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(identityInfo));
 
         _identityMock
@@ -217,7 +216,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
         result.Value.RefreshToken.Should().Be("rawRefreshToken123");
 
         _identityMock.Verify(
-            x => x.ValidateUserAsync(command.Email, command.Password, It.IsAny<CancellationToken>()),
+            x => x.ValidateUserAsync(command.Identifier, command.Password, It.IsAny<CancellationToken>()),
             Times.Once);
 
         _unitMock.Verify(

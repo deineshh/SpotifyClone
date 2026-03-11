@@ -41,9 +41,34 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
         return new UserProfile(id, displayName, birthDate, gender);
     }
 
+    public void LinkNewAvatar(AvatarImage avatar)
+    {
+        ArgumentNullException.ThrowIfNull(avatar);
+
+        UnlinkAvatar();
+
+        Avatar = avatar;
+        RaiseDomainEvent(new UserLinkedToAvatarImageDomainEvent(Avatar.ImageId));
+    }
+
+    public void UnlinkAvatar()
+    {
+        if (Avatar is null)
+        {
+            return;
+        }
+
+        RaiseDomainEvent(new UserUnlinkedFromAvatarImageDomainEvent(Avatar.ImageId));
+        Avatar = null;
+    }
+
     public void ProcessRegistration(string email, string confirmationToken)
         => RaiseDomainEvent(new UserRegisteredDomainEvent(
-            Id.Value,
-            email,
-            confirmationToken));
+            Id, email, confirmationToken, DisplayName, Avatar?.ImageId));
+
+    public void PrepareForDeletion()
+    {
+        UnlinkAvatar();
+        RaiseDomainEvent(new UserDeletedDomainEvent(Id));
+    }
 }

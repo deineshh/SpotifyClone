@@ -32,7 +32,7 @@ internal sealed class ArtistEfCoreConfiguration : IEntityTypeConfiguration<Artis
         builder.Property(x => x.OwnerId)
             .HasColumnName("owner_id")
             .HasConversion(CatalogEfCoreValueConverters.UserIdConverter)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(x => x.Status)
             .HasColumnName("status")

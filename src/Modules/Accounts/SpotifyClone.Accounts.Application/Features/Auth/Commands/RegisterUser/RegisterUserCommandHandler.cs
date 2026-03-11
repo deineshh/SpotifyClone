@@ -30,20 +30,7 @@ internal sealed class RegisterUserCommandHandler(
             return Result.Failure<RegisterUserCommandResult>(createUserResult.Errors);
         }
 
-        bool userExists = await _identity.UserExistsAsync(createUserResult.Value, cancellationToken);
-        if (!userExists)
-        {
-            return Result.Failure<RegisterUserCommandResult>(AuthErrors.RegistrationFailed);
-        }
-
         var userId = UserId.From(createUserResult.Value);
-
-        Result<string> emailVerificationTokenResult
-            = await _identity.GenerateEmailConfirmationTokenAsync(userId.Value);
-        if (emailVerificationTokenResult.IsFailure)
-        {
-            return Result.Failure<RegisterUserCommandResult>(emailVerificationTokenResult.Errors);
-        }
 
         Result<UserProfile> createUserProfileResult = await CreateUserProfileAsync(
             request, userId, cancellationToken);
@@ -60,6 +47,13 @@ internal sealed class RegisterUserCommandHandler(
         }
 
         UserProfile userProfile = createUserProfileResult.Value;
+
+        Result<string> emailVerificationTokenResult
+            = await _identity.GenerateEmailConfirmationTokenAsync(userId.Value);
+        if (emailVerificationTokenResult.IsFailure)
+        {
+            return Result.Failure<RegisterUserCommandResult>(emailVerificationTokenResult.Errors);
+        }
 
         userProfile.ProcessRegistration(request.Email, emailVerificationTokenResult.Value);
 

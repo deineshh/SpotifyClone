@@ -32,11 +32,11 @@ internal sealed class UpdateTrackGenresCommandHandler(
             return Result.Failure<UpdateTrackGenresCommandResult>(TrackErrors.NotFound);
         }
 
-        IEnumerable<Artist> artists = await _unit.Artists.GetByIdsAsync(
+        IEnumerable<Artist> artists = await _unit.Artists.GetAllByIdsAsync(
             track.MainArtists,
             cancellationToken);
 
-        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value != _currentUser.Id)) &&
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId?.Value != _currentUser.Id)) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<UpdateTrackGenresCommandResult>(AlbumErrors.NotOwned);

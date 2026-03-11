@@ -22,17 +22,17 @@ public sealed class LoginWithPasswordValidatorTests
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void Email_Should_NotBeNullOrEmpty(string? invalidEmail)
+    public void Identifier_Should_NotBeNullOrEmpty(string? invalidIdentifier)
     {
         // Arrange
         var validator = new LoginWithPasswordCommandValidator();
 
         // Act
         TestValidationResult<LoginWithPasswordCommand> result = validator.TestValidate(
-            new LoginWithPasswordCommand(invalidEmail!, "StrongPass123!"));
+            new LoginWithPasswordCommand(invalidIdentifier!, "StrongPass123!"));
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Email);
+        result.ShouldHaveValidationErrorFor(x => x.Identifier);
     }
 
     [Theory]

@@ -32,11 +32,11 @@ internal sealed class UpdateTrackMoodsCommandHandler(
             return Result.Failure<UpdateTrackMoodsCommandResult>(TrackErrors.NotFound);
         }
 
-        IEnumerable<Artist> artists = await _unit.Artists.GetByIdsAsync(
+        IEnumerable<Artist> artists = await _unit.Artists.GetAllByIdsAsync(
             track.MainArtists,
             cancellationToken);
 
-        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value != _currentUser.Id)) &&
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId?.Value != _currentUser.Id)) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<UpdateTrackMoodsCommandResult>(AlbumErrors.NotOwned);

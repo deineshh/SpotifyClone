@@ -7,9 +7,9 @@ public sealed class LoginWithPasswordCommandValidator
 {
     public LoginWithPasswordCommandValidator()
     {
-        RuleFor(x => x.Email)
-            .NotNull().WithMessage("Email is required.")
-            .NotEmpty().WithMessage("Email is required.");
+        RuleFor(x => x.Identifier)
+            .NotNull().WithMessage("Identifier is required.")
+            .NotEmpty().WithMessage("Identifier is required.");
 
         RuleFor(x => x.Password)
             .NotNull().WithMessage("Password is required.")

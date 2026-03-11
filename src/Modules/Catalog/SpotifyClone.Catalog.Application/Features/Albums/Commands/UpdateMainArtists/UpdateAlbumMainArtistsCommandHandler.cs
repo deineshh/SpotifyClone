@@ -31,17 +31,17 @@ internal sealed class UpdateAlbumMainArtistsCommandHandler(
             return Result.Failure<UpdateAlbumMainArtistsCommandResult>(AlbumErrors.NotFound);
         }
 
-        IEnumerable<Artist> mainArtists = await _unit.Artists.GetByIdsAsync(
+        IEnumerable<Artist> mainArtists = await _unit.Artists.GetAllByIdsAsync(
             album.MainArtists,
             cancellationToken);
 
-        if ((!_currentUser.IsAuthenticated || mainArtists.Any(a => a.OwnerId.Value != _currentUser.Id)) &&
+        if ((!_currentUser.IsAuthenticated || mainArtists.Any(a => a.OwnerId?.Value != _currentUser.Id)) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<UpdateAlbumMainArtistsCommandResult>(AlbumErrors.NotOwned);
         }
 
-        IEnumerable<Artist> newMainArtists = await _unit.Artists.GetByIdsAsync(
+        IEnumerable<Artist> newMainArtists = await _unit.Artists.GetAllByIdsAsync(
             request.MainArtists.Select(a => ArtistId.From(a)),
             cancellationToken);
         if (newMainArtists.Count() != request.MainArtists.Count())

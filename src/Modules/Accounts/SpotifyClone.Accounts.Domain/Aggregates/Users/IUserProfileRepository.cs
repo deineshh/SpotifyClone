@@ -11,4 +11,8 @@ public interface IUserProfileRepository
     Task AddAsync(
         UserProfile user,
         CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(
+        UserProfile userProfile,
+        CancellationToken cancellationToken = default);
 }

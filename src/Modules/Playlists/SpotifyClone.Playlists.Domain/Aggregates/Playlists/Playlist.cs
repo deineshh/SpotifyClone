@@ -95,6 +95,11 @@ public sealed class Playlist : AggregateRoot<PlaylistId, Guid>
 
     public void AddCollaborator(UserId collaboratorId)
     {
+        if (OwnerId == collaboratorId)
+        {
+            return;
+        }
+
         if (Type != PlaylistType.UserCreated)
         {
             throw new PlaylistIsNotUserGeneratedDomainException(
