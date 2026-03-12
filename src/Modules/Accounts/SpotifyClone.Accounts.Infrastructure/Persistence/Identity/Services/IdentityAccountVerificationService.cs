@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
-using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Configuration;
 using SpotifyClone.Shared.BuildingBlocks.Application.Email;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -13,13 +12,48 @@ internal sealed class IdentityAccountVerificationService(
     IIdentityService identity,
     IEmailSender emailSender,
     ISmsSender smsSender,
-    IOptions<ApplicationSettings> appSettings) : IAccountVerificationService
+    IOptions<ApplicationSettings> appSettings)
+    : IAccountVerificationService
 {
     private readonly ILogger<IdentityAccountVerificationService> _logger = logger;
     private readonly IIdentityService _identity = identity;
     private readonly IEmailSender _emailSender = emailSender;
     private readonly ISmsSender _smsSender = smsSender;
     private readonly ApplicationSettings _appSettings = appSettings.Value;
+
+    public async Task<Result> SendEmailChangedEmailAsync(
+        string oldEmail,
+        string newEmail,
+        string displayName,
+        CancellationToken cancellationToken = default)
+    {
+        var emailMessage = new EmailMessage(
+            [oldEmail],
+            $"Вашу електронну адресу {_appSettings.DomainName} змінено",
+            PlainTextBody: $"Привіт, {displayName},\n\n" +
+            $"Електронну адресу вашого облікового запису Spotify нещодавно було змінено.\n\n" +
+            $"Ознайомтеся з деталями цих оновлень облікового запису нижче:\n\n" +
+            $"Стара електронна адреса:\n{oldEmail}\n\n" +
+            $"Нова електронна адреса:\n{newEmail}\n\n" +
+            $"Якщо ви внесли цю зміну, подальші дії не потрібні.\n\n" +
+            $"Ви не вносили цю зміну? Негайно скасуйте ці зміни у вашому обліковому записі {_appSettings.DomainName}." +
+            $"\n\nБудь ласка, не пересилайте цей лист.\n\n" +
+            $"Забезпечення вашої безпеки,\n{_appSettings.DomainName} Security");
+
+        _logger.LogInformation("Sending email changed email...");
+
+        Result result = await _emailSender.SendAsync(emailMessage, cancellationToken: cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Sending email changed email failed.");
+        }
+        else
+        {
+            _logger.LogInformation("Sending email changed email succeeded.");
+        }
+
+        return result;
+    }
 
     public async Task<Result> SendVerificationEmailAsync(
         string email,
@@ -30,12 +64,11 @@ internal sealed class IdentityAccountVerificationService(
         var emailMessage = new EmailMessage(
             [email],
             $"{_appSettings.DomainName} - Підтвердження пошти",
-            GetHtmlBody(token));
+            GetRegistrationHtml(token));
 
         _logger.LogInformation("Sending verification email...");
 
         Result result = await _emailSender.SendAsync(emailMessage, cancellationToken: cancellationToken);
-
         if (result.IsFailure)
         {
             _logger.LogError("Sending verification email failed.");
@@ -67,7 +100,7 @@ internal sealed class IdentityAccountVerificationService(
         return result;
     }
 
-    public async Task<Result> SendVerificationSmsAsync(
+    public async Task<Result> SendPhoneNumberVerificationAsync(
         Guid userId,
         string phoneNumber)
     {
@@ -105,7 +138,7 @@ internal sealed class IdentityAccountVerificationService(
         return result;
     }
 
-    private static string GetHtmlBody(string token)
+    private static string GetRegistrationHtml(string token)
         => $$"""
     <!DOCTYPE html>
     <html>

@@ -13,7 +13,7 @@ internal sealed class SendVerificationSmsCommandHandler(
     public async Task<Result> Handle(
         SendVerificationSmsCommand request,
         CancellationToken cancellationToken)
-        => await _accountVerificationService.SendVerificationSmsAsync(
+        => await _accountVerificationService.SendPhoneNumberVerificationAsync(
             request.UserId,
             request.PhoneNumber);
 }

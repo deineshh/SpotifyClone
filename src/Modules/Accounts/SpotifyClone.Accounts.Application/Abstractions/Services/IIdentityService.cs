@@ -40,6 +40,12 @@ public interface IIdentityService
         string password,
         params string[] roles);
 
+    Task<Result> ChangeEmailWithPasswordAsync(
+        Guid id,
+        string email,
+        string password,
+        CancellationToken cancellationToken = default);
+
     Task<Result> DeleteUserAsync(Guid id);
 
     Task<Result<string>> GenerateEmailConfirmationTokenAsync(

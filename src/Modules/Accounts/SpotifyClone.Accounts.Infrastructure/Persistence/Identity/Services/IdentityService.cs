@@ -10,18 +10,13 @@ using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Services;
 
-internal sealed class IdentityService : IIdentityService
-{
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-
-    public IdentityService(
+internal sealed class IdentityService(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager)
-    {
-        _userManager = userManager;
-        _signInManager = signInManager;
-    }
+    : IIdentityService
+{
+    private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 
     public async Task<Result<IdentityUserInfo>> ValidateUserAsync(
         string identifier,
@@ -31,7 +26,6 @@ internal sealed class IdentityService : IIdentityService
         ApplicationUser? user = await _userManager.Users.FirstOrDefaultAsync(
             u => u.Email == identifier || u.UserName == identifier,
             cancellationToken);
-
         if (user is null)
         {
             return Result.Failure<IdentityUserInfo>(
@@ -44,9 +38,7 @@ internal sealed class IdentityService : IIdentityService
                 AuthErrors.SignInNotAllowed);
         }
 
-        bool passwordValid = await _userManager.CheckPasswordAsync(user, password);
-
-        if (!passwordValid)
+        if (!await _userManager.CheckPasswordAsync(user, password))
         {
             return Result.Failure<IdentityUserInfo>(
                 AuthErrors.InvalidPassword);
@@ -164,10 +156,12 @@ internal sealed class IdentityService : IIdentityService
         string password,
         params string[] roles)
     {
+        var username = Guid.NewGuid();
+
         var user = new ApplicationUser
         {
-            Id = Guid.NewGuid(),
-            UserName = email,
+            Id = username,
+            UserName = username.ToString(),
             Email = email
         };
 
@@ -190,6 +184,40 @@ internal sealed class IdentityService : IIdentityService
         }
 
         return user.Id;
+    }
+
+    public async Task<Result> ChangeEmailWithPasswordAsync(
+        Guid id,
+        string email,
+        string password,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(id.ToString());
+        if (user is null)
+        {
+            return Result.Failure(IdentityUserErrors.NotFound);
+        }
+
+        Result validateUserResult = await ValidateUserAsync(user.Email!, password, cancellationToken);
+        if (validateUserResult.IsFailure)
+        {
+            return validateUserResult;
+        }
+
+        if (await EmailExistsAsync(email, cancellationToken))
+        {
+            return Result.Failure(AuthErrors.EmailAlreadyInUse);
+        }
+
+        user.Email = email;
+
+        IdentityResult updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            return Result.Failure(IdentityErrorsToApplicationErrors(updateResult.Errors));
+        }
+
+        return Result.Success();
     }
 
     public async Task<Result> DeleteUserAsync(Guid id)

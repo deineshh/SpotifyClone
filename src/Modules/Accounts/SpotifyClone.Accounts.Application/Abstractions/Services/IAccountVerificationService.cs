@@ -4,6 +4,12 @@ namespace SpotifyClone.Accounts.Application.Abstractions.Services;
 
 public interface IAccountVerificationService
 {
+    Task<Result> SendEmailChangedEmailAsync(
+        string oldEmail,
+        string newEmail,
+        string displayName,
+        CancellationToken cancellationToken = default);
+
     Task<Result> SendVerificationEmailAsync(
         string email,
         Guid userId,
@@ -15,7 +21,7 @@ public interface IAccountVerificationService
         string token,
         CancellationToken cancellationToken = default);
 
-    Task<Result> SendVerificationSmsAsync(
+    Task<Result> SendPhoneNumberVerificationAsync(
         Guid userId,
         string phoneNumber);
 

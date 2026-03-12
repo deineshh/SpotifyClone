@@ -62,6 +62,20 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
         Avatar = null;
     }
 
+    public void EditDetails(string displayName)
+    {
+        DisplayNameRules.Validate(displayName);
+        DisplayName = displayName;
+    }
+
+    public void EditPersonalInfo(Gender gender, DateTimeOffset birthDateUtc)
+    {
+        ArgumentNullException.ThrowIfNull(gender);
+
+        Gender = gender;
+        BirthDate = birthDateUtc.ToUniversalTime();
+    }
+
     public void ProcessRegistration(string email, string confirmationToken)
         => RaiseDomainEvent(new UserRegisteredDomainEvent(
             Id, email, confirmationToken, DisplayName, Avatar?.ImageId));

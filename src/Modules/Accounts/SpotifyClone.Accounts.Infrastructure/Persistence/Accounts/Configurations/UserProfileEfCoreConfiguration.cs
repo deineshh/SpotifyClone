@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
 using SpotifyClone.Accounts.Domain.Aggregates.Users.Rules;
-using SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Configurations.Converters;
 
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Configurations;
