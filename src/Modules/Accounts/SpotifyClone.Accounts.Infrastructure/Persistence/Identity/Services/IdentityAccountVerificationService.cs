@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
+using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Configuration;
 using SpotifyClone.Shared.BuildingBlocks.Application.Email;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -90,7 +91,7 @@ internal sealed class IdentityAccountVerificationService(
 
         if (result.IsFailure)
         {
-            _logger.LogError("Confirming email failed.");
+            _logger.LogError("Confirming email failed, {Error}", result.Errors.Select(e => e.ToString()));
         }
         else
         {
@@ -104,15 +105,15 @@ internal sealed class IdentityAccountVerificationService(
         Guid userId,
         string phoneNumber)
     {
-        Result<string> codeResult = await _identity.GeneratePhoneNumberConfirmationTokenAsync(
+        Result<string> tokenResult = await _identity.GeneratePhoneNumberConfirmationTokenAsync(
             userId,
             phoneNumber);
-        if (codeResult.IsFailure)
+        if (tokenResult.IsFailure)
         {
-            return Result.Failure(codeResult.Errors);
+            return Result.Failure(tokenResult.Errors);
         }
 
-        string message = $"Твій {_appSettings.DomainName} код: {codeResult.Value}";
+        string message = $"Твій {_appSettings.DomainName} код: {tokenResult.Value}";
         await _smsSender.SendAsync(phoneNumber, message);
 
         return Result.Success();
@@ -128,7 +129,7 @@ internal sealed class IdentityAccountVerificationService(
 
         if (result.IsFailure)
         {
-            _logger.LogError("Confirming phone number failed.");
+            _logger.LogError("Confirming phone number failed, {Error}", result.Errors.Select(e => e.ToString()));
         }
         else
         {
@@ -137,6 +138,64 @@ internal sealed class IdentityAccountVerificationService(
 
         return result;
     }
+
+    public async Task<Result<TimeSpan>> SendPasswordResetEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        Result<string> tokenResult = await _identity.GeneratePasswordResetTokenAsync(email, cancellationToken);
+        if (tokenResult.IsFailure)
+        {
+            return Result.Failure<TimeSpan>(tokenResult.Errors);
+        }
+
+        var message = new EmailMessage(
+            [email],
+            $"{_appSettings.DomainName} - обновлення паролю",
+            null,
+            $"Твій {_appSettings.DomainName} код для обновлення паролю: {tokenResult.Value}");
+        Result sendResult = await _emailSender.SendAsync(message, cancellationToken: cancellationToken);
+        if (sendResult.IsFailure)
+        {
+            _logger.LogError(
+                "Sending password reset email failed, {Error}",
+                sendResult.Errors.Select(e => e.ToString()));
+        }
+        else
+        {
+            _logger.LogInformation("Sending password reset email succeeeded.");
+        }
+
+        return TimeSpan.FromSeconds(180);
+    }
+
+    public async Task<Result> VerifyPasswordResetTokenAsync(
+        string email,
+        string token,
+        CancellationToken cancellationToken = default)
+    {
+        Result<bool> verificationResult = await _identity.VerifyPasswordResetTokenAsync(
+            email, token, cancellationToken);
+        if (verificationResult.IsFailure)
+        {
+            return verificationResult;
+        }
+
+        if (!verificationResult.Value)
+        {
+            return Result.Failure(AuthErrors.InvalidPasswordResetToken);
+        }
+
+        return verificationResult;
+    }
+
+    public async Task<Result> ConfirmPasswordResetAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken cancellationToken = default)
+        => await _identity.ConfirmPasswordResetTokenAsync(
+            email, token, newPassword, cancellationToken);
 
     private static string GetRegistrationHtml(string token)
         => $$"""

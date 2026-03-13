@@ -82,8 +82,8 @@ builder.Services.AddRateLimiter(options =>
 
     options.AddFixedWindowLimiter("send-limits", opt =>
     {
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.PermitLimit = 1;
+        opt.Window = TimeSpan.FromHours(1);
+        opt.PermitLimit = 3;
         opt.QueueLimit = 0;
     });
 

@@ -44,6 +44,10 @@ public static class AuthErrors
         "InvalidPhoneNumberConfirmationToken",
         "Phone number confirmation token is invalid.");
 
+    public static readonly Error InvalidPasswordResetToken = Identity(
+        "InvalidPasswordResetToken",
+        "Password reset token is invalid.");
+
     public static Error Identity(string codeTitle, string description) => new(
         $"Identity.{codeTitle}",
         description);

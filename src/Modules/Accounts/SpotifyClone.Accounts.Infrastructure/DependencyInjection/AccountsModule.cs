@@ -59,10 +59,14 @@ public static class AccountsModule
         {
             options.User.RequireUniqueEmail = true;
             options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultPhoneProvider;
+            options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultPhoneProvider;
         })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<IdentityAppDbContext>()
             .AddDefaultTokenProviders();
+
+        services.Configure<DataProtectionTokenProviderOptions>(options =>
+            options.TokenLifespan = TimeSpan.FromMinutes(15));
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
@@ -137,7 +141,6 @@ public static class AccountsModule
 
         IRecurringJobManager recurringJobManager =
             app.ApplicationServices.GetRequiredService<IRecurringJobManager>();
-
         recurringJobManager.AddOrUpdate<ProcessOutboxMessagesJob>(
             "accounts-outbox-processor",
             job => job.ProcessAsync(),

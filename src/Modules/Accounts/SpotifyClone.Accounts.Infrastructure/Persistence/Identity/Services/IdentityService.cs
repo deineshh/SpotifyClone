@@ -311,6 +311,59 @@ internal sealed class IdentityService(
         return Result.Success();
     }
 
+    public async Task<Result<string>> GeneratePasswordResetTokenAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<string>(IdentityUserErrors.NotFound);
+        }
+
+        return await _userManager.GeneratePasswordResetTokenAsync(user);
+    }
+
+    public async Task<Result<bool>> VerifyPasswordResetTokenAsync(
+        string email,
+        string token,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<bool>(IdentityUserErrors.NotFound);
+        }
+
+        return await _userManager.VerifyUserTokenAsync(
+            user,
+            _userManager.Options.Tokens.PasswordResetTokenProvider,
+            UserManager<ApplicationUser>.ResetPasswordTokenPurpose,
+            token);
+    }
+
+    public async Task<Result> ConfirmPasswordResetTokenAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<bool>(IdentityUserErrors.NotFound);
+        }
+
+        IdentityResult resetPasswordResult = await _userManager.ResetPasswordAsync(
+            user, token, newPassword);
+        if (!resetPasswordResult.Succeeded)
+        {
+            return Result.Failure(IdentityErrorsToApplicationErrors(resetPasswordResult.Errors));
+        }
+
+        return Result.Success();
+    }
+
     private static Error[] IdentityErrorsToApplicationErrors(IEnumerable<IdentityError> identityErrors)
         => identityErrors.Select(e => AuthErrors.Identity(e.Code, e.Description)).ToArray();
 }

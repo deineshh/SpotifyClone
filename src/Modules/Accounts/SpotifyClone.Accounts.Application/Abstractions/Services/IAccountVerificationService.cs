@@ -30,4 +30,19 @@ public interface IAccountVerificationService
         string phoneNumber,
         string token,
         CancellationToken cancellationToken = default);
+
+    Task<Result<TimeSpan>> SendPasswordResetEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> VerifyPasswordResetTokenAsync(
+        string email,
+        string token,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> ConfirmPasswordResetAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken cancellationToken = default);
 }

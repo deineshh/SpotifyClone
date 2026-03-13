@@ -63,4 +63,19 @@ public interface IIdentityService
         Guid userId,
         string phoneNumber,
         string token);
+
+    Task<Result<string>> GeneratePasswordResetTokenAsync(
+        string email,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<bool>> VerifyPasswordResetTokenAsync(
+        string email,
+        string token,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> ConfirmPasswordResetTokenAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken cancellationToken = default);
 }
