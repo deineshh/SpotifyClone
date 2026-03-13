@@ -24,6 +24,10 @@ public static class AuthErrors
         "Auth.RegistrationFailed",
         "Registration of the specified user failed.");
 
+    public static readonly Error NotLoggedIn = new(
+        "Auth.NotLoggedIn",
+        "User is not authenticated.");
+
     public static readonly Error EmailAlreadyConfirmed = new(
         "Auth.EmailAlreadyConfirmed",
         "Email is already confirmed.");

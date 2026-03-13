@@ -2,8 +2,11 @@
 using SpotifyClone.Playlists.Application.Abstractions.Data;
 using SpotifyClone.Playlists.Application.Features.Playlists.Queries;
 using SpotifyClone.Playlists.Application.Models;
+using SpotifyClone.Playlists.Domain.Aggregates.Playlists;
+using SpotifyClone.Playlists.Domain.Aggregates.Playlists.Entities;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists.ValueObjects;
 using SpotifyClone.Playlists.Infrastructure.Persistence.Database;
+using SpotifyClone.Playlists.Infrastructure.Persistence.Entities;
 using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Playlists.Infrastructure.Persistence.Queries;
@@ -74,35 +77,57 @@ internal sealed class PlaylistEfCoreReadService(
     }
 
     public async Task<IEnumerable<PlaylistSummary>> GetAllByOwnerAsync(
-        UserId ownerId,
-        CancellationToken cancellationToken = default)
-        => await _context.Playlists
-        .AsNoTracking()
-        .Where(p => p.OwnerId == ownerId)
-        .Select(p => new PlaylistSummary(
-            p.Id.Value,
-            p.Name,
-            p.Description,
-            p.IsPublic,
-            p.Cover == null ? null : new ImageMetadataDetails(
-                p.Cover.ImageId.Value,
-                p.Cover.Metadata.Width,
-                p.Cover.Metadata.Height,
-                p.Cover.Metadata.FileType.Value,
-                p.Cover.Metadata.SizeInBytes),
-            _context.TrackReferences
-                .Where(t => p.Tracks.Any(pt => pt.Id.Value == t.Id))
-                .OrderBy(t => p.Tracks.First(pt => pt.Id.Value == t.Id).Position)
-                .Select(t => t.Id)
-                .Take(4)))
-        .ToListAsync(cancellationToken);
+    UserId ownerId,
+    CancellationToken cancellationToken = default)
+    => await GetPlaylistSummaries(
+        _context.Playlists.Where(p => p.OwnerId == ownerId),
+        cancellationToken);
 
     public async Task<IEnumerable<PlaylistSummary>> GetAllPublicByOwnerAsync(
         UserId ownerId,
         CancellationToken cancellationToken = default)
-        => await _context.Playlists
-        .Where(p => p.OwnerId == ownerId && p.IsPublic)
-        .Select(p => new PlaylistSummary(
+        => await GetPlaylistSummaries(
+            _context.Playlists.Where(p => p.OwnerId == ownerId && p.IsPublic),
+            cancellationToken);
+
+    private async Task<List<PlaylistSummary>> GetPlaylistSummaries(
+    IQueryable<Playlist> query,
+    CancellationToken ct)
+    {
+        var playlists = await query
+            .AsNoTracking()
+            .Select(p => new
+            {
+                p.Id,
+                p.Name,
+                p.Description,
+                p.IsPublic,
+                p.Cover
+            })
+            .ToListAsync(ct);
+
+        var playlistIds = playlists.Select(p => p.Id).ToList();
+
+        List<PlaylistTrack> playlistTracks = await _context.PlaylistTracks
+            .Where(pt => playlistIds.Contains(pt.PlaylistId))
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        List<TrackReference> trackRefs = await _context.TrackReferences
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        var trackLookup = playlistTracks
+            .Join(trackRefs,
+                pt => pt.Id.Value,
+                tr => tr.Id,
+                (pt, tr) => new { pt.PlaylistId, pt.Position, tr.Id })
+            .GroupBy(x => x.PlaylistId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderBy(x => x.Position).Take(4).Select(x => x.Id).ToList());
+
+        return playlists.Select(p => new PlaylistSummary(
             p.Id.Value,
             p.Name,
             p.Description,
@@ -113,10 +138,7 @@ internal sealed class PlaylistEfCoreReadService(
                 p.Cover.Metadata.Height,
                 p.Cover.Metadata.FileType.Value,
                 p.Cover.Metadata.SizeInBytes),
-            _context.TrackReferences
-                .Where(t => p.Tracks.Any(pt => pt.Id.Value == t.Id))
-                .OrderBy(t => p.Tracks.First(pt => pt.Id.Value == t.Id).Position)
-                .Select(t => t.Id)
-                .Take(4)))
-        .ToListAsync(cancellationToken);
+            trackLookup.GetValueOrDefault(p.Id) ?? new List<Guid>()
+        )).ToList();
+    }
 }

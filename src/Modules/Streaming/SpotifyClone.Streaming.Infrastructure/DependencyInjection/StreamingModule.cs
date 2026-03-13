@@ -48,13 +48,18 @@ public static class StreamingModule
             .UseMemoryStorage());
         services.AddHangfireServer();
 
+        services.AddHostedService<MinioInitializer>();
+
+        services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.SectionName));
+
+        services.AddSingleton<IMediaService, FfmpegMediaService>();
+        services.AddSingleton<IFileStorage, MinioFileStorage>();
+
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<IStreamingUnitOfWork>());
         services.AddScoped<IStreamingUnitOfWork, StreamingEfCoreUnitOfWork>();
         services.AddScoped<IAudioAssetRepository, AudioAssetEfCoreRepository>();
         services.AddScoped<IImageAssetRepository, ImageAssetEfCoreRepository>();
         services.AddScoped<IOutboxRepository, OutboxEfCoreRepository>();
-        services.AddScoped<IMediaService, FfmpegMediaService>();
-        services.AddScoped<IFileStorage, MinioFileStorage>();
         services.AddScoped<IDomainExceptionMapper, StreamingDomainExceptionMapper>();
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(StreamingTransactionalPipelineBehavior<,>));
@@ -63,8 +68,6 @@ public static class StreamingModule
         services.AddTransient<MarkAudioAssetAsOrphanedJob>();
         services.AddTransient<AudioAssetCleanupJob>();
         services.AddTransient<ImageAssetCleanupJob>();
-
-        services.Configure<MinioOptions>(configuration.GetSection(MinioOptions.SectionName));
 
         return services;
     }

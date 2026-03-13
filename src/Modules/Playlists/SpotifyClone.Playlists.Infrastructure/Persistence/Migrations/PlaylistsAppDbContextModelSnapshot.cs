@@ -33,22 +33,20 @@ partial class PlaylistsAppDbContextModelSnapshot : ModelSnapshot
                     .HasColumnType("uuid")
                     .HasColumnName("creator_id");
 
+                b.Property<Guid>("PlaylistId")
+                    .HasColumnType("uuid")
+                    .HasColumnName("playlist_id");
+
                 b.Property<int>("Position")
                     .HasColumnType("integer")
                     .HasColumnName("position");
 
-                b.Property<Guid>("playlist_id")
-                    .HasColumnType("uuid");
-
                 b.HasKey("Id");
 
-                b.HasIndex("Id", "playlist_id")
+                b.HasIndex("Id", "PlaylistId")
                     .IsUnique();
 
-                b.HasIndex("playlist_id", "Position")
-                    .IsUnique();
-
-                b.HasIndex("Id", "Position", "playlist_id")
+                b.HasIndex("PlaylistId", "Position")
                     .IsUnique();
 
                 b.ToTable("playlist_tracks", "playlists");
@@ -168,7 +166,7 @@ partial class PlaylistsAppDbContextModelSnapshot : ModelSnapshot
             {
                 b.HasOne("SpotifyClone.Playlists.Domain.Aggregates.Playlists.Playlist", null)
                     .WithMany("Tracks")
-                    .HasForeignKey("playlist_id")
+                    .HasForeignKey("PlaylistId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
             });

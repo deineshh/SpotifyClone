@@ -6,11 +6,15 @@ using SpotifyClone.Accounts.Application.Features.Accounts.Commands.EditPersonalI
 using SpotifyClone.Accounts.Application.Features.Accounts.Commands.EditProfileDetails;
 using SpotifyClone.Accounts.Application.Features.Accounts.Commands.LinkNewAvatar;
 using SpotifyClone.Accounts.Application.Features.Accounts.Commands.UnlinkAvatar;
+using SpotifyClone.Accounts.Application.Features.Accounts.Queries;
+using SpotifyClone.Accounts.Application.Features.Accounts.Queries.GetCurrentDetails;
+using SpotifyClone.Accounts.Application.Features.Accounts.Queries.GetProfileDetails;
 using SpotifyClone.Api.Contracts.v1.Accounts.Profile.EditPersonalInfo;
 using SpotifyClone.Api.Contracts.v1.Accounts.Profile.EditProfileDetails;
 using SpotifyClone.Api.Contracts.v1.Accounts.Profile.LinkNewAvatar;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Playlists.Application.Features.Playlists.Queries;
+using SpotifyClone.Playlists.Application.Features.Playlists.Queries.GetAllByCurrentUser;
 using SpotifyClone.Playlists.Application.Features.Playlists.Queries.GetAllByOwner;
 using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -21,6 +25,33 @@ namespace SpotifyClone.Api.Controllers.Accounts;
 public sealed class UsersController(IMediator mediator)
     : ApiController(mediator)
 {
+    [EndpointSummary("Get User's public profile")]
+    [EndpointDescription("Returns a User's public profile.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [AllowAnonymous]
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult> GetPublicProfile(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        Result<UserProfileDetails> result = await Mediator.Send(
+            new GetUserProfileDetailsQuery(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(result.Value);
+    }
+
     [EndpointSummary("Get Playlists by User")]
     [EndpointDescription("Returns Playlists owned by a certain User.")]
     [ProducesResponseType(typeof(PlaylistList), StatusCodes.Status200OK)]
@@ -29,12 +60,64 @@ public sealed class UsersController(IMediator mediator)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [AllowAnonymous]
     [HttpGet("{id:guid}/playlists")]
-    public async Task<ActionResult<PlaylistList>> GetByOwner(
+    public async Task<ActionResult<PlaylistList>> GetPlaylists(
         [FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
         Result<PlaylistList> result = await Mediator.Send(
             new GetAllPlaylistsByOwnerQuery(id),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(result.Value);
+    }
+
+    [EndpointSummary("Get current User private profile")]
+    [EndpointDescription("Returns the current User's private profile.")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Listener)]
+    [HttpGet("me")]
+    public async Task<ActionResult> GetCurrentProfile(
+        CancellationToken cancellationToken = default)
+    {
+        Result<CurrentUserDetails> result = await Mediator.Send(
+            new GetCurrentUserDetailsQuery(),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            ProblemDetails problemDetails = ResultToProblemDetailsMapper.MapToProblemDetails(
+                result,
+                HttpContext);
+
+            return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
+        }
+
+        return Ok(result.Value);
+    }
+
+    [EndpointSummary("Get current User Playlists")]
+    [EndpointDescription("Returns the current User's playlists.")]
+    [ProducesResponseType(typeof(PlaylistList), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = UserRoles.Listener)]
+    [HttpGet("me/playlists")]
+    public async Task<ActionResult<PlaylistList>> GetCurrentUserPlaylists(
+        CancellationToken cancellationToken = default)
+    {
+        Result<PlaylistList> result = await Mediator.Send(
+            new GetAllPlaylistsByCurrentUserQuery(),
             cancellationToken);
         if (result.IsFailure)
         {

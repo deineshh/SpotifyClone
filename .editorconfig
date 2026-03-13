@@ -5,6 +5,9 @@
 
 #### Static code analysis rule customizations
 
+# S3358: Ternary operators should not be nested
+dotnet_diagnostic.S3358.severity = suggestion
+
 # S1854: Unused assignments should be removed
 dotnet_diagnostic.S1854.severity = suggestion
 

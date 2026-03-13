@@ -99,7 +99,7 @@ internal sealed class PlaylistEfCoreConfiguration
         builder
             .HasMany(x => x.Tracks)
             .WithOne()
-            .HasForeignKey("playlist_id");
+            .HasForeignKey(t => t.PlaylistId);
         builder.Navigation(x => x.Tracks)
             .HasField("_tracks")
             .UsePropertyAccessMode(PropertyAccessMode.Field);

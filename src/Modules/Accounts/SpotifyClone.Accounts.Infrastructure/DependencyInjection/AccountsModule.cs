@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpotifyClone.Accounts.Application;
 using SpotifyClone.Accounts.Application.Abstractions;
+using SpotifyClone.Accounts.Application.Abstractions.Data;
 using SpotifyClone.Accounts.Application.Abstractions.Repositories;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Behaviors;
@@ -26,6 +27,7 @@ using SpotifyClone.Accounts.Infrastructure.Persistence.Auth.Repositories;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Services;
+using SpotifyClone.Accounts.Infrastructure.Persistence.Queries;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
 using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
@@ -69,6 +71,7 @@ public static class AccountsModule
         services.AddScoped<IUserProfileRepository, UserProfileEfCoreRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenEfCoreRepository>();
         services.AddScoped<IOutboxRepository, OutboxEfCoreRepository>();
+        services.AddScoped<IUserReadService, UserEfCoreReadService>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
 
