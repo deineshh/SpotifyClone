@@ -24,9 +24,9 @@ internal sealed class UserProfileEfCoreConfiguration : IEntityTypeConfiguration<
             .HasMaxLength(DisplayNameRules.MaxLength)
             .IsRequired();
 
-        builder.Property(x => x.BirthDate)
-            .HasColumnName("birth_date")
-            .IsRequired();
+        builder.Property(x => x.BirthDateUtc)
+            .HasColumnName("birth_date_utc")
+            .IsRequired(false);
 
         builder.Property(x => x.Gender)
             .HasColumnName("gender")

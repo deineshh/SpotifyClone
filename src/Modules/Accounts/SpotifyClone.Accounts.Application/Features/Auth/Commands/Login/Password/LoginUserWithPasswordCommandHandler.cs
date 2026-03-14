@@ -5,21 +5,21 @@ using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
+namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.Password;
 
-internal sealed class LoginWithPasswordCommandHandler(
+internal sealed class LoginUserWithPasswordCommandHandler(
     IAccountsUnitOfWork unit,
     IIdentityService identity,
     ITokenService tokenService,
     ITokenHasher tokenHasher)
-    : ICommandHandler<LoginWithPasswordCommand, LoginWithPasswordCommandResult>
+    : ICommandHandler<LoginUserWithPasswordCommand, LoginUserCommandResult>
 {
     private readonly IAccountsUnitOfWork _unit = unit;
     private readonly IIdentityService _identity = identity;
     private readonly ITokenService _tokenService = tokenService;
     private readonly ITokenHasher _tokenHasher = tokenHasher;
 
-    public async Task<Result<LoginWithPasswordCommandResult>> Handle(LoginWithPasswordCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LoginUserCommandResult>> Handle(LoginUserWithPasswordCommand request, CancellationToken cancellationToken)
     {
         Result<IdentityUserInfo> identityResult = await _identity.ValidateUserAsync(
             request.Identifier,
@@ -27,16 +27,16 @@ internal sealed class LoginWithPasswordCommandHandler(
             cancellationToken);
         if (identityResult.IsFailure)
         {
-            return Result.Failure<LoginWithPasswordCommandResult>(identityResult.Errors);
+            return Result.Failure<LoginUserCommandResult>(identityResult.Errors);
         }
         Result<IReadOnlyCollection<string>> rolesResult = await _identity.GetUserRolesAsync(
-            identityResult.Value.UserId, cancellationToken);
+            identityResult.Value.Id, cancellationToken);
         if (rolesResult.IsFailure)
         {
-            return Result.Failure<LoginWithPasswordCommandResult>(rolesResult.Errors);
+            return Result.Failure<LoginUserCommandResult>(rolesResult.Errors);
         }
 
-        UserId userId = identityResult.Value.UserId;
+        UserId userId = identityResult.Value.Id;
 
         AccessToken accessToken = _tokenService.GenerateAccessToken(identityResult.Value, rolesResult.Value);
         RefreshTokenEnvelope refreshToken = _tokenService.GenerateRefreshToken(userId);
@@ -45,17 +45,17 @@ internal sealed class LoginWithPasswordCommandHandler(
         Result revokeResult = await _unit.RefreshTokens.RevokeAllAsync(userId, refreshTokenHash, cancellationToken);
         if (revokeResult.IsFailure)
         {
-            return Result.Failure<LoginWithPasswordCommandResult>(revokeResult.Errors);
+            return Result.Failure<LoginUserCommandResult>(revokeResult.Errors);
         }
 
         Result storeResult = await _unit.RefreshTokens.StoreAsync(
             userId, refreshTokenHash, refreshToken.ExpiresAt, cancellationToken);
         if (storeResult.IsFailure)
         {
-            return Result.Failure<LoginWithPasswordCommandResult>(storeResult.Errors);
+            return Result.Failure<LoginUserCommandResult>(storeResult.Errors);
         }
 
-        return Result.Success(new LoginWithPasswordCommandResult(
+        return Result.Success(new LoginUserCommandResult(
             accessToken.RawToken,
             accessToken.ExpiresAt,
             refreshToken.RawToken));

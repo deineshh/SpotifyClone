@@ -13,5 +13,5 @@ public sealed record CurrentUserDetails(
     string Role,
     string DisplayName,
     string Gender,
-    DateTimeOffset BirthDateUtc,
+    DateTimeOffset? BirthDateUtc,
     ImageMetadataDetails? Avatar);

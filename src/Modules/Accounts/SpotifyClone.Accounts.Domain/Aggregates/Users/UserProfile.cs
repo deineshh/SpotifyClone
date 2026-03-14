@@ -9,34 +9,21 @@ namespace SpotifyClone.Accounts.Domain.Aggregates.Users;
 
 public sealed class UserProfile : AggregateRoot<UserId, Guid>
 {
-    public string DisplayName { get; private set; }
-    public DateTimeOffset BirthDate { get; private set; }
-    public Gender Gender { get; private set; }
+    public string DisplayName { get; private set; } = null!;
+    public DateTimeOffset? BirthDateUtc { get; private set; }
+    public Gender Gender { get; private set; } = null!;
     public AvatarImage? Avatar { get; private set; }
 
-    private UserProfile()
-    {
-        DisplayName = null!;
-        Gender = null!;
-    }
-
-    private UserProfile(
-        UserId id, string displayName, DateTimeOffset birthDate, Gender gender, AvatarImage? avatarImage = null)
-        : base(id)
-    {
-        DisplayName = displayName;
-        BirthDate = birthDate;
-        Gender = gender;
-        Avatar = avatarImage;
-    }
-
     public static UserProfile Create(
-        UserId id, string displayName, DateTimeOffset birthDate, Gender gender)
+        UserId id, string displayName, DateTimeOffset? birthDate, Gender gender)
     {
-        birthDate = birthDate.ToUniversalTime();
-
         DisplayNameRules.Validate(displayName);
-        BirthDateRules.Validate(birthDate);
+
+        if (birthDate is not null)
+        {
+            birthDate = birthDate.Value.ToUniversalTime();
+            BirthDateRules.Validate(birthDate.Value);
+        }
 
         return new UserProfile(id, displayName, birthDate, gender);
     }
@@ -73,7 +60,7 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
         ArgumentNullException.ThrowIfNull(gender);
 
         Gender = gender;
-        BirthDate = birthDateUtc.ToUniversalTime();
+        BirthDateUtc = birthDateUtc.ToUniversalTime();
     }
 
     public void ProcessRegistration(string email, string confirmationToken)
@@ -84,5 +71,19 @@ public sealed class UserProfile : AggregateRoot<UserId, Guid>
     {
         UnlinkAvatar();
         RaiseDomainEvent(new UserDeletedDomainEvent(Id));
+    }
+
+    private UserProfile()
+    {
+    }
+
+    private UserProfile(
+        UserId id, string displayName, DateTimeOffset? birthDate, Gender gender, AvatarImage? avatarImage = null)
+        : base(id)
+    {
+        DisplayName = displayName;
+        BirthDateUtc = birthDate;
+        Gender = gender;
+        Avatar = avatarImage;
     }
 }

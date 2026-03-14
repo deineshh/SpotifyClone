@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
 
-namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
+namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.Password;
 
-public sealed class LoginWithPasswordCommandValidator
-    : AbstractValidator<LoginWithPasswordCommand>
+public sealed class LoginUserWithPasswordCommandValidator
+    : AbstractValidator<LoginUserWithPasswordCommand>
 {
-    public LoginWithPasswordCommandValidator()
+    public LoginUserWithPasswordCommandValidator()
     {
         RuleFor(x => x.Identifier)
             .NotNull().WithMessage("Identifier is required.")

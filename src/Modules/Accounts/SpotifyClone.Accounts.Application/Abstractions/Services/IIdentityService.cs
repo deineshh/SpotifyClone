@@ -12,8 +12,12 @@ public interface IIdentityService
         string password,
         CancellationToken cancellationToken = default);
 
-    Task<Result<IdentityUserInfo>> GetUserInfoAsync(
+    Task<Result<IdentityUserInfo>> FindByIdAsync(
         UserId userId,
+        CancellationToken cancellationToken = default);
+
+    Task<IdentityUserInfo?> FindByEmailAsync(
+        string email,
         CancellationToken cancellationToken = default);
 
     Task<Result<IReadOnlyCollection<string>>> GetUserRolesAsync(
@@ -37,7 +41,7 @@ public interface IIdentityService
 
     Task<Result<Guid>> CreateUserAsync(
         string email,
-        string password,
+        string? password,
         params string[] roles);
 
     Task<Result> ChangeEmailWithPasswordAsync(
@@ -77,5 +81,16 @@ public interface IIdentityService
         string email,
         string token,
         string newPassword,
+        CancellationToken cancellationToken = default);
+
+    Task<ExternalLoginInfoEnvelope?> GetExternalLoginInfoAsync();
+
+    Task<IdentityUserInfo?> FindByLoginProviderAsync(
+        string provider,
+        string providerKey);
+
+    Task<Result> AddLoginAsync(
+        Guid id,
+        ExternalLoginInfoEnvelope loginInfo,
         CancellationToken cancellationToken = default);
 }

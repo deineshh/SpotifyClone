@@ -22,7 +22,7 @@ public sealed class UserProfileTests
         // Assert
         user.Id.Should().Be(userId);
         user.DisplayName.Should().Be(displayName);
-        user.BirthDate.Should().Be(birthDate);
+        user.BirthDateUtc.Should().Be(birthDate);
         user.Gender.Should().Be(gender);
     }
 }

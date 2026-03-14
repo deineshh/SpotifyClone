@@ -61,6 +61,11 @@ builder.Services
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!)),
 
         ClockSkew = TimeSpan.Zero
+    })
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
     });
 
 builder.Services.AddAuthorization(options

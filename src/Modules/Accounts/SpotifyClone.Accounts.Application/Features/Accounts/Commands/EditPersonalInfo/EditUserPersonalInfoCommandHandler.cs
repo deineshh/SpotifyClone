@@ -44,7 +44,7 @@ internal sealed class EditUserPersonalInfoCommandHandler(
 
         userProfile.EditPersonalInfo(Gender.From(request.Gender), request.BirthDateUtc);
 
-        Result<IdentityUserInfo> userInfoResult = await _identity.GetUserInfoAsync(
+        Result<IdentityUserInfo> userInfoResult = await _identity.FindByIdAsync(
             UserId.From(request.UserId), cancellationToken);
         if (userInfoResult.IsFailure)
         {

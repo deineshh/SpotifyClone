@@ -53,12 +53,11 @@ internal sealed class IdentityService(
             requiresTwoFactor);
     }
 
-    public async Task<Result<IdentityUserInfo>> GetUserInfoAsync(
+    public async Task<Result<IdentityUserInfo>> FindByIdAsync(
         UserId userId,
         CancellationToken cancellationToken = default)
     {
         ApplicationUser? user = await _userManager.FindByIdAsync(userId.Value.ToString());
-
         if (user is null)
         {
             return Result.Failure<IdentityUserInfo>(IdentityUserErrors.NotFound);
@@ -67,6 +66,25 @@ internal sealed class IdentityService(
         if (!await _signInManager.CanSignInAsync(user))
         {
             return Result.Failure<IdentityUserInfo>(AuthErrors.SignInNotAllowed);
+        }
+
+        bool requiresTwoFactor = await _userManager.GetTwoFactorEnabledAsync(user);
+
+        return new IdentityUserInfo(
+            UserId.From(user.Id),
+            user.Email!,
+            user.EmailConfirmed,
+            requiresTwoFactor);
+    }
+
+    public async Task<IdentityUserInfo?> FindByEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return null;
         }
 
         bool requiresTwoFactor = await _userManager.GetTwoFactorEnabledAsync(user);
@@ -153,7 +171,7 @@ internal sealed class IdentityService(
 
     public async Task<Result<Guid>> CreateUserAsync(
         string email,
-        string password,
+        string? password,
         params string[] roles)
     {
         var username = Guid.NewGuid();
@@ -166,7 +184,10 @@ internal sealed class IdentityService(
         };
 
         IdentityResult createResult =
-            await _userManager.CreateAsync(user, password);
+            password is null
+            ? await _userManager.CreateAsync(user)
+            : await _userManager.CreateAsync(user, password);
+
         if (!createResult.Succeeded)
         {
             return Result.Failure<Guid>(
@@ -359,6 +380,61 @@ internal sealed class IdentityService(
         if (!resetPasswordResult.Succeeded)
         {
             return Result.Failure(IdentityErrorsToApplicationErrors(resetPasswordResult.Errors));
+        }
+
+        return Result.Success();
+    }
+
+    public async Task<ExternalLoginInfoEnvelope?> GetExternalLoginInfoAsync()
+    {
+        ExternalLoginInfo? loginInfo = await _signInManager.GetExternalLoginInfoAsync();
+        if (loginInfo is null)
+        {
+            return null;
+        }
+
+        return new ExternalLoginInfoEnvelope(
+            loginInfo.Principal.FindFirstValue(ClaimTypes.Email)!,
+            loginInfo.Principal.FindFirstValue(ClaimTypes.Name)!,
+            loginInfo.LoginProvider,
+            loginInfo.ProviderKey,
+            loginInfo.ProviderDisplayName!);
+    }
+
+    public async Task<IdentityUserInfo?> FindByLoginProviderAsync(
+        string provider,
+        string providerKey)
+    {
+        ApplicationUser? user = await _userManager.FindByLoginAsync(provider, providerKey);
+        if (user is null)
+        {
+            return null;
+        }
+
+        return new IdentityUserInfo(
+            UserId.From(user.Id),
+            user.Email!,
+            user.EmailConfirmed,
+            user.TwoFactorEnabled);
+    }
+
+    public async Task<Result> AddLoginAsync(
+        Guid id,
+        ExternalLoginInfoEnvelope loginInfo,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(id.ToString());
+        if (user is null)
+        {
+            return Result.Failure(IdentityUserErrors.NotFound);
+        }
+
+        IdentityResult addLoginResult = await _userManager.AddLoginAsync(
+            user,
+            new UserLoginInfo(loginInfo.LoginProvider, loginInfo.ProviderKey, loginInfo.ProviderDisplayName));
+        if (!addLoginResult.Succeeded)
+        {
+            return Result.Failure(IdentityErrorsToApplicationErrors(addLoginResult.Errors));
         }
 
         return Result.Success();

@@ -1,5 +1,5 @@
 ﻿using FluentValidation.TestHelper;
-using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefreshToken;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.RefreshToken;
 
 namespace SpotifyClone.Accounts.Application.Tests.Features.Auth.Commands.LoginWithRefreshToken;
 
@@ -9,11 +9,11 @@ public sealed class LoginWithRefreshTokenValidatorTests
     public void Validate_Should_NotHaveAnyValidationErrors_When_DataIsValid()
     {
         // Arrange
-        var validator = new LoginWithRefreshTokenCommandValidator();
+        var validator = new LoginUserWithRefreshTokenCommandValidator();
 
         // Act
-        TestValidationResult<LoginWithRefreshTokenCommand> result = validator.TestValidate(
-            new LoginWithRefreshTokenCommand("rawRefreshToken"));
+        TestValidationResult<LoginUserWithRefreshTokenCommand> result = validator.TestValidate(
+            new LoginUserWithRefreshTokenCommand("rawRefreshToken"));
 
         // Assert
         result.ShouldNotHaveAnyValidationErrors();
@@ -25,11 +25,11 @@ public sealed class LoginWithRefreshTokenValidatorTests
     public void Email_Should_NotBeNullOrEmpty(string? invalidRefreshToken)
     {
         // Arrange
-        var validator = new LoginWithRefreshTokenCommandValidator();
+        var validator = new LoginUserWithRefreshTokenCommandValidator();
 
         // Act
-        TestValidationResult<LoginWithRefreshTokenCommand> result = validator.TestValidate(
-            new LoginWithRefreshTokenCommand(invalidRefreshToken!));
+        TestValidationResult<LoginUserWithRefreshTokenCommand> result = validator.TestValidate(
+            new LoginUserWithRefreshTokenCommand(invalidRefreshToken!));
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.RawToken);

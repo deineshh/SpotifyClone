@@ -53,7 +53,7 @@ internal sealed class UserEfCoreReadService(
             {
                 u.DisplayName,
                 Gender = u.Gender.Value,
-                u.BirthDate,
+                u.BirthDateUtc,
                 Avatar = u.Avatar == null ? null : new ImageMetadataDetails(
                     u.Avatar.ImageId.Value,
                     u.Avatar.Metadata.Width,
@@ -78,7 +78,7 @@ internal sealed class UserEfCoreReadService(
             identityUserInfo.Role,
             userProfileInfo.DisplayName,
             userProfileInfo.Gender,
-            userProfileInfo.BirthDate,
+            userProfileInfo.BirthDateUtc,
             userProfileInfo.Avatar);
     }
 

@@ -3,7 +3,8 @@ using Moq;
 using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Errors;
-using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Login;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.Password;
 using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -17,10 +18,10 @@ public sealed class LoginWithPasswordCommandHandlerTests
     private readonly Mock<ITokenService> _tokenServiceMock = new();
     private readonly Mock<IAccountsUnitOfWork> _unitMock = new();
     private readonly Mock<ITokenHasher> _tokenHasherMock = new();
-    private readonly LoginWithPasswordCommandHandler _handler;
+    private readonly LoginUserWithPasswordCommandHandler _handler;
 
     public LoginWithPasswordCommandHandlerTests()
-        => _handler = new LoginWithPasswordCommandHandler(
+        => _handler = new LoginUserWithPasswordCommandHandler(
             _unitMock.Object,
             _identityMock.Object,
             _tokenServiceMock.Object,
@@ -30,7 +31,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
     public async Task Handle_Should_ReturnFailure_When_IdentityValidationFails()
     {
         // Arrange
-        var command = new LoginWithPasswordCommand("test@test.com", "Password123!");
+        var command = new LoginUserWithPasswordCommand("test@test.com", "Password123!");
         Error error = AuthErrors.InvalidIdentifier;
 
         _identityMock
@@ -38,7 +39,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Failure<IdentityUserInfo>(error));
 
         // Act
-        Result<LoginWithPasswordCommandResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginUserCommandResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -52,7 +53,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
     public async Task Handle_Should_ReturnFailure_When_RevokeRefreshTokensFails()
     {
         // Arrange
-        var command = new LoginWithPasswordCommand("test@test.com", "Password123!");
+        var command = new LoginUserWithPasswordCommand("test@test.com", "Password123!");
         var userId = UserId.New();
         var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
 
@@ -84,7 +85,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Failure());
 
         // Act
-        Result<LoginWithPasswordCommandResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginUserCommandResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -101,7 +102,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
     public async Task Handle_Should_ReturnFailure_When_RefreshTokenStoreFails()
     {
         // Arrange
-        var command = new LoginWithPasswordCommand("test@test.com", "Password123!");
+        var command = new LoginUserWithPasswordCommand("test@test.com", "Password123!");
         var userId = UserId.New();
         var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
 
@@ -143,7 +144,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Failure(error));
 
         // Act
-        Result<LoginWithPasswordCommandResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginUserCommandResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -168,7 +169,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
     public async Task Handle_Should_ReturnSuccess_When_LoginSucceeds()
     {
         // Arrange
-        var command = new LoginWithPasswordCommand("test@test.com", "Password123!");
+        var command = new LoginUserWithPasswordCommand("test@test.com", "Password123!");
         var userId = UserId.New();
         var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
 
@@ -208,7 +209,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
             .ReturnsAsync(Result.Success());
 
         // Act
-        Result<LoginWithPasswordCommandResult> result = await _handler.Handle(command, CancellationToken.None);
+        Result<LoginUserCommandResult> result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

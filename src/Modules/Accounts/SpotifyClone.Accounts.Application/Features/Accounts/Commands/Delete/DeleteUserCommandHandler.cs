@@ -39,7 +39,7 @@ internal sealed class DeleteUserCommandHandler(
             return Result.Failure<DeleteUserCommandResult>(UserProfileErrors.NotFound);
         }
 
-        Result<IdentityUserInfo> identityUserResult = await _identity.GetUserInfoAsync(userId, cancellationToken);
+        Result<IdentityUserInfo> identityUserResult = await _identity.FindByIdAsync(userId, cancellationToken);
         if (identityUserResult.IsFailure)
         {
             return Result.Failure<DeleteUserCommandResult>(identityUserResult.Errors);

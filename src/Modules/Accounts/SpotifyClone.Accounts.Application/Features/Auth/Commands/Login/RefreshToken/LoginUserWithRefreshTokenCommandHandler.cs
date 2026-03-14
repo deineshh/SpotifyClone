@@ -1,27 +1,26 @@
 ﻿using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Errors;
-using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
 using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
-namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefreshToken;
+namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.RefreshToken;
 
-internal sealed class LoginWithRefreshTokenCommandHandler(
+internal sealed class LoginUserWithRefreshTokenCommandHandler(
     IAccountsUnitOfWork unit,
     ITokenService tokenService,
     ITokenHasher tokenHasher,
     IIdentityService identity)
-    : ICommandHandler<LoginWithRefreshTokenCommand, LoginWithRefreshTokenCommandResult>
+    : ICommandHandler<LoginUserWithRefreshTokenCommand, LoginUserCommandResult>
 {
     private readonly IAccountsUnitOfWork _unit = unit;
     private readonly ITokenService _tokenService = tokenService;
     private readonly ITokenHasher _tokenHasher = tokenHasher;
     private readonly IIdentityService _identity = identity;
 
-    public async Task<Result<LoginWithRefreshTokenCommandResult>> Handle(
-        LoginWithRefreshTokenCommand request,
+    public async Task<Result<LoginUserCommandResult>> Handle(
+        LoginUserWithRefreshTokenCommand request,
         CancellationToken cancellationToken)
     {
         string oldRefreshTokenHash = _tokenHasher.Hash(request.RawToken);
@@ -31,7 +30,7 @@ internal sealed class LoginWithRefreshTokenCommandHandler(
 
         if (refreshTokenResult.IsFailure)
         {
-            return Result.Failure<LoginWithRefreshTokenCommandResult>(refreshTokenResult.Errors);
+            return Result.Failure<LoginUserCommandResult>(refreshTokenResult.Errors);
         }
 
         RefreshTokenEnvelope refreshToken = refreshTokenResult.Value;
@@ -44,30 +43,30 @@ internal sealed class LoginWithRefreshTokenCommandHandler(
 
             if (revokeWithoutNewTokenResult.IsFailure)
             {
-                return Result.Failure<LoginWithRefreshTokenCommandResult>(refreshTokenResult.Errors);
+                return Result.Failure<LoginUserCommandResult>(refreshTokenResult.Errors);
             }
 
-            return Result.Failure<LoginWithRefreshTokenCommandResult>(RefreshTokenErrors.Expired);
+            return Result.Failure<LoginUserCommandResult>(RefreshTokenErrors.Expired);
         }
 
         Result<IdentityUserInfo> identityResult =
-            await _identity.GetUserInfoAsync(refreshToken.UserId, cancellationToken);
+            await _identity.FindByIdAsync(refreshToken.UserId, cancellationToken);
         if (identityResult.IsFailure)
         {
-            return Result.Failure<LoginWithRefreshTokenCommandResult>(identityResult.Errors);
+            return Result.Failure<LoginUserCommandResult>(identityResult.Errors);
         }
 
         Result<IReadOnlyCollection<string>> rolesResult = await _identity.GetUserRolesAsync(
-            identityResult.Value.UserId, cancellationToken);
+            identityResult.Value.Id, cancellationToken);
         if (rolesResult.IsFailure)
         {
-            return Result.Failure<LoginWithRefreshTokenCommandResult>(rolesResult.Errors);
+            return Result.Failure<LoginUserCommandResult>(rolesResult.Errors);
         }
 
         IdentityUserInfo user = identityResult.Value;
         AccessToken accessToken = _tokenService.GenerateAccessToken(user, rolesResult.Value);
 
-        RefreshTokenEnvelope newRefreshToken = _tokenService.GenerateRefreshToken(user.UserId);
+        RefreshTokenEnvelope newRefreshToken = _tokenService.GenerateRefreshToken(user.Id);
         string newTokenHash = _tokenHasher.Hash(newRefreshToken.RawToken);
 
         Result revokeWithNewTokenResult = await _unit.RefreshTokens.RevokeAsync(
@@ -77,21 +76,21 @@ internal sealed class LoginWithRefreshTokenCommandHandler(
 
         if (revokeWithNewTokenResult.IsFailure)
         {
-            return Result.Failure<LoginWithRefreshTokenCommandResult>(revokeWithNewTokenResult.Errors);
+            return Result.Failure<LoginUserCommandResult>(revokeWithNewTokenResult.Errors);
         }
 
         Result storeResult = await _unit.RefreshTokens.StoreAsync(
-            user.UserId,
+            user.Id,
             newTokenHash,
             newRefreshToken.ExpiresAt,
             cancellationToken);
 
         if (storeResult.IsFailure)
         {
-            return Result.Failure<LoginWithRefreshTokenCommandResult>(storeResult.Errors);
+            return Result.Failure<LoginUserCommandResult>(storeResult.Errors);
         }
 
-        return Result.Success(new LoginWithRefreshTokenCommandResult(
+        return Result.Success(new LoginUserCommandResult(
             accessToken.RawToken,
             accessToken.ExpiresAt,
             newRefreshToken.RawToken));

@@ -63,7 +63,7 @@ internal sealed class RegisterUserCommandHandler(
             userProfile.Id.Value,
             request.Email,
             userProfile.DisplayName,
-            userProfile.BirthDate,
+            userProfile.BirthDateUtc,
             userProfile.Gender.Value,
             request.Role);
     }

@@ -1,11 +1,16 @@
 ﻿using System.Net;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 using SpotifyClone.Accounts.Application.Errors;
-using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
-using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefreshToken;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Login;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.Google;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.Password;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.RefreshToken;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.Logout;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.ResetPassword.Confirm;
@@ -14,8 +19,8 @@ using SpotifyClone.Accounts.Application.Features.Auth.Commands.ResetPassword.Ver
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.SendVerificationSms;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.VerifyEmail;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.VerifyPhoneNumber;
-using SpotifyClone.Api.Contracts.v1.Accounts.Auth.LoginWithPassword;
-using SpotifyClone.Api.Contracts.v1.Accounts.Auth.LoginWithRefreshToken;
+using SpotifyClone.Accounts.Infrastructure.Persistence.Identity;
+using SpotifyClone.Api.Contracts.v1.Accounts.Auth.Login;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.PasswordReset;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.RegisterUser;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.SendVerificationSms;
@@ -23,6 +28,7 @@ using SpotifyClone.Api.Contracts.v1.Accounts.Auth.VerifyEmail;
 using SpotifyClone.Api.Contracts.v1.Accounts.Auth.VerifyPhoneNumber;
 using SpotifyClone.Api.Mappers;
 using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
+using SpotifyClone.Shared.BuildingBlocks.Application.Configuration;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Api.Controllers.Accounts;
@@ -77,8 +83,8 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             };
         }
 
-        Result<LoginWithPasswordCommandResult> loginResult = await Mediator.Send(
-            new LoginWithPasswordCommand(
+        Result<LoginUserCommandResult> loginResult = await Mediator.Send(
+            new LoginUserWithPasswordCommand(
                 request.Email,
                 request.Password),
             cancellationToken);
@@ -92,7 +98,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
         }
 
         RegisterUserCommandResult registrationResultData = registrationResult.Value;
-        LoginWithPasswordCommandResult loginResultData = loginResult.Value;
+        LoginUserCommandResult loginResultData = loginResult.Value;
 
         Response.Cookies.Append("refreshToken", loginResultData.RefreshToken, _cookieOptions);
 
@@ -100,7 +106,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             registrationResultData.UserId,
             registrationResultData.Email,
             registrationResultData.DisplayName,
-            registrationResultData.BirthDate,
+            registrationResultData.BirthDateUtc,
             registrationResultData.Gender,
             loginResultData.AccessToken,
             loginResultData.ExpiresAt));
@@ -110,12 +116,12 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
-    public async Task<ActionResult<LoginWithPasswordResponse>> Login(
-        LoginWithPasswordRequest request,
+    public async Task<ActionResult<LoginUserResponse>> Login(
+        LoginUserWithPasswordRequest request,
         CancellationToken cancellationToken = default)
     {
-        Result<LoginWithPasswordCommandResult> result = await Mediator.Send(
-            new LoginWithPasswordCommand(request.Identifier, request.Password),
+        Result<LoginUserCommandResult> result = await Mediator.Send(
+            new LoginUserWithPasswordCommand(request.Identifier, request.Password),
             cancellationToken);
         if (result.IsFailure)
         {
@@ -126,12 +132,10 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
-        LoginWithPasswordCommandResult resultData = result.Value;
-
-        Response.Cookies.Append("refreshToken", resultData.RefreshToken, _cookieOptions);
+        Response.Cookies.Append("refreshToken", result.Value.RefreshToken, _cookieOptions);
 
         return Ok(
-            new LoginWithPasswordResponse(
+            new LoginUserResponse(
                 result.Value.AccessToken,
                 result.Value.ExpiresAt));
     }
@@ -141,7 +145,7 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Authorize(Roles = UserRoles.Listener)]
-    public async Task<ActionResult<LoginWithRefreshTokenResponse>> Refresh(
+    public async Task<ActionResult<LoginUserResponse>> Refresh(
         CancellationToken cancellationToken = default)
     {
         string? refreshToken = Request.Cookies["refreshToken"];
@@ -150,8 +154,8 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             return Unauthorized("Refresh token not found.");
         }
 
-        Result<LoginWithRefreshTokenCommandResult> result = await Mediator.Send(
-            new LoginWithRefreshTokenCommand(refreshToken),
+        Result<LoginUserCommandResult> result = await Mediator.Send(
+            new LoginUserWithRefreshTokenCommand(refreshToken),
             cancellationToken);
         if (result.IsFailure)
         {
@@ -162,12 +166,12 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
             return new ObjectResult(problemDetails) { StatusCode = problemDetails.Status };
         }
 
-        LoginWithRefreshTokenCommandResult resultData = result.Value;
+        LoginUserCommandResult resultData = result.Value;
 
         Response.Cookies.Append("refreshToken", resultData.RefreshToken, _cookieOptions);
 
         return Ok(
-            new LoginWithRefreshTokenResponse(
+            new LoginUserResponse(
                 result.Value.AccessToken,
                 result.Value.ExpiresAt));
     }
@@ -356,5 +360,45 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
         }
 
         return Ok();
+    }
+
+    [HttpGet("login-google")]
+    public IActionResult LoginGoogle(SignInManager<ApplicationUser> signInManager)
+    {
+        const string Google = "Google";
+
+        AuthenticationProperties properties = signInManager.ConfigureExternalAuthenticationProperties(
+            Google, "/api/v1/auth/login-google-callback");
+
+        return Challenge(properties, Google);
+    }
+
+    [HttpGet("login-google-callback")]
+    [EndpointSummary("Google authentication callback")]
+    [EndpointDescription("Authenticates the User through OAuth 2.0.")]
+    [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [AllowAnonymous]
+    public async Task<ActionResult> LoginGoogleCallback(
+        IOptions<ApplicationSettings> appSettings,
+        CancellationToken cancellationToken = default)
+    {
+        Result<LoginUserCommandResult> result = await Mediator.Send(
+            new LoginUserWithGoogleCommand(),
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return Redirect($"{appSettings.Value.FrontendUrl}/login?error=auth_failed");
+        }
+
+        Response.Cookies.Append("refreshToken", result.Value.RefreshToken, _cookieOptions);
+
+        string successUrl = $"{appSettings.Value.FrontendUrl}" +
+            $"/auth-success?accessToken={result.Value.AccessToken}&expiresAt={result.Value.ExpiresAt}";
+
+        return Redirect(successUrl);
     }
 }

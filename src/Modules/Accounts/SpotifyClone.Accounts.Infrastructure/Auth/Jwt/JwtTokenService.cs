@@ -24,7 +24,7 @@ internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenServ
 
         var jwtClaims = new List<Claim>
         {
-            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub, user.UserId.Value.ToString()),
+            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
             new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email, user.Email),
             new("email_confirmed", user.EmailConfirmed.ToString().ToLowerInvariant()),
             new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
