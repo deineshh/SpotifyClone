@@ -101,25 +101,25 @@ internal sealed class IdentityAccountVerificationService(
         return result;
     }
 
-    public async Task<Result> SendPhoneNumberVerificationAsync(
+    public async Task<Result> SendOtpAsync(
         Guid userId,
-        string phoneNumber)
+        string phoneNumber,
+        CancellationToken cancellationToken = default)
     {
-        Result<string> tokenResult = await _identity.GeneratePhoneNumberConfirmationTokenAsync(
-            userId,
-            phoneNumber);
+        Result<string> tokenResult = await _identity.GeneratePhoneNumberConfirmationTokenAsync(userId, phoneNumber);
         if (tokenResult.IsFailure)
         {
             return Result.Failure(tokenResult.Errors);
         }
 
-        string message = $"Твій {_appSettings.DomainName} код: {tokenResult.Value}";
-        await _smsSender.SendAsync(phoneNumber, message);
+        _logger.LogInformation("Sending One-Time-Password SMS...");
 
+        string message = $"Твій {_appSettings.DomainName} код: {tokenResult.Value}";
+        await _smsSender.SendAsync(phoneNumber, message, cancellationToken);
         return Result.Success();
     }
     
-    public async Task<Result> VerifyPhoneNumberAsync(
+    public async Task<Result> VerifyOtpAsync(
         Guid userId,
         string phoneNumber,
         string token,

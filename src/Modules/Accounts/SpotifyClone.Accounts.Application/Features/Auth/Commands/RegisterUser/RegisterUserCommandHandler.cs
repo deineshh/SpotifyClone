@@ -79,7 +79,7 @@ internal sealed class RegisterUserCommandHandler(
         }
 
         Result<Guid> createUserResult = await _identity.CreateUserAsync(
-            request.Email, request.Password, UserRoles.CalculateBy(request.Role));
+            request.Email, request.Password, null, false, UserRoles.CalculateBy(request.Role));
 
         return createUserResult;
     }

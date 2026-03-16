@@ -5,75 +5,63 @@ using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
 using SpotifyClone.Accounts.Domain.Aggregates.Users.Enums;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Commands;
-using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 using SpotifyClone.Shared.BuildingBlocks.Domain.Primitives;
 using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.Google;
+namespace SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.Otp.Verify;
 
-internal sealed class LoginUserWithGoogleCommandHandler(
+internal sealed class VerifyOtpLoginCommandHandler(
     IIdentityService identity,
+    IOtpCacheService otpCache,
     ITokenHasher tokenHasher,
     ITokenService tokenService,
     IAccountsUnitOfWork unit)
-    : ICommandHandler<LoginUserWithGoogleCommand, LoginUserCommandResult>
+    : ICommandHandler<VerifyOtpLoginCommand, LoginUserCommandResult>
 {
     private readonly IIdentityService _identity = identity;
+    private readonly IOtpCacheService _otpCache = otpCache;
     private readonly ITokenHasher _tokenHasher = tokenHasher;
     private readonly ITokenService _tokenService = tokenService;
     private readonly IAccountsUnitOfWork _unit = unit;
 
     public async Task<Result<LoginUserCommandResult>> Handle(
-    LoginUserWithGoogleCommand request,
-    CancellationToken cancellationToken)
+        VerifyOtpLoginCommand request,
+        CancellationToken cancellationToken)
     {
-        // 1. Отримуємо дані з контексту Google
-        ExternalLoginInfoEnvelope? loginInfo = await _identity.GetExternalLoginInfoAsync();
-        if (loginInfo is null)
+        // 1. Дістаємо збережений код з кешу
+        string? savedCode = await _otpCache.GetOtpAsync(request.PhoneNumber, cancellationToken);
+
+        // 2. Валідація: чи є код і чи співпадає він
+        if (string.IsNullOrEmpty(savedCode) || savedCode != request.Code)
         {
-            return Result.Failure<LoginUserCommandResult>(AuthErrors.SignInNotAllowed);
+            return Result.Failure<LoginUserCommandResult>(AuthErrors.InvalidPhoneNumberConfirmationToken);
         }
 
-        // 2. Спробуємо знайти юзера, який ВЖЕ пов'язаний з цим Google-аккаунтом
-        IdentityUserInfo? userInfo = await _identity.FindByLoginProviderAsync(
-            loginInfo.LoginProvider, loginInfo.ProviderKey);
+        // 3. Код правильний! Одразу видаляємо його, щоб уникнути повторного використання (Replay Attack)
+        await _otpCache.RemoveOtpAsync(request.PhoneNumber, cancellationToken);
 
-        // 3. Якщо не знайшли — шукаємо по Email або реєструємо
-        if (userInfo is null)
+        // 4. Шукаємо користувача в базі
+        IdentityUserInfo? userInfo = await _identity.FindByPhoneNumber(request.PhoneNumber, cancellationToken);
+
+        // 5. ЯКЩО ЮЗЕРА НЕМАЄ -> СТВОРЮЄМО
+        if (userInfo == null)
         {
-            // Перевіряємо, чи існує юзер з таким емейлом
-            IdentityUserInfo? userByEmail = await _identity.FindByEmailAsync(
-                loginInfo.Email, cancellationToken);
-            if (userByEmail is not null)
+            Result<Guid> createResult = await RegisterNewUserAsync(request.PhoneNumber, cancellationToken);
+            if (createResult.IsFailure)
             {
-                userInfo = userByEmail;
-            }
-            else
-            {
-                // Реєструємо нового юзера
-                Result<Guid> registerResult = await RegisterNewUserAsync(loginInfo, cancellationToken);
-                if (registerResult.IsFailure)
-                {
-                    return Result.Failure<LoginUserCommandResult>(registerResult.Errors);
-                }
-
-                // Після реєстрації нам треба отримати IdentityUserInfo для токена
-                IdentityUserInfo? newUserInfo = await _identity.FindByEmailAsync(loginInfo.Email, cancellationToken);
-                if (newUserInfo is null)
-                {
-                    return Result.Failure<LoginUserCommandResult>(IdentityUserErrors.NotFound);
-                }
-
-                userInfo = newUserInfo;
+                return Result.Failure<LoginUserCommandResult>(AuthErrors.RegistrationFailed);
             }
 
-            // Прив'язуємо Google до Identity-юзера
-            Result linkResult = await _identity.AddLoginAsync(userInfo.Id.Value, loginInfo, cancellationToken);
-            if (linkResult.IsFailure)
+            IdentityUserInfo? newUserInfo = await _identity.FindByPhoneNumber(
+                request.PhoneNumber, cancellationToken);
+            if (newUserInfo is null)
             {
-                return Result.Failure<LoginUserCommandResult>(linkResult.Errors);
+                return Result.Failure<LoginUserCommandResult>(IdentityUserErrors.NotFound);
             }
+
+            userInfo = newUserInfo;
         }
 
         // 4. Генеруємо токени для API
@@ -109,20 +97,21 @@ internal sealed class LoginUserWithGoogleCommandHandler(
     }
 
     private async Task<Result<Guid>> RegisterNewUserAsync(
-        ExternalLoginInfoEnvelope loginInfo,
+        string phoneNumber,
         CancellationToken cancellationToken = default)
     {
-        Result<Guid> createUserResult = await _identity.CreateUserAsync(loginInfo.Email, null, null);
-        if (createUserResult.IsFailure)
+        Result<Guid> createResult = await _identity.CreateUserAsync(
+            null, null, phoneNumber, true, UserRoles.CalculateBy(UserRoles.Listener));
+        if (createResult.IsFailure)
         {
-            return createUserResult;
+            return createResult;
         }
 
         try
         {
             var userProfile = UserProfile.Create(
-                UserId.From(createUserResult.Value),
-                loginInfo.Name,
+                UserId.From(createResult.Value),
+                $"Listener_{phoneNumber[^4..]}",
                 null,
                 Gender.NotSpecified);
 
@@ -130,7 +119,7 @@ internal sealed class LoginUserWithGoogleCommandHandler(
         }
         catch (DomainExceptionBase)
         {
-            Result deleteResult = await _identity.DeleteUserAsync(createUserResult.Value);
+            Result deleteResult = await _identity.DeleteUserAsync(createResult.Value);
             if (deleteResult.IsFailure)
             {
                 return Result.Failure<Guid>(deleteResult.Errors);
@@ -139,6 +128,6 @@ internal sealed class LoginUserWithGoogleCommandHandler(
             throw;
         }
 
-        return createUserResult;
+        return createResult;
     }
 }

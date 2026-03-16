@@ -102,8 +102,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
         var storedToken =
             new RefreshTokenEnvelope(userId, "ignored", DateTimeOffset.UtcNow.AddDays(10), true);
 
-        var identity =
-            new IdentityUserInfo(userId, "test@test.com", true, false);
+        var identity = new IdentityUserInfo(userId, "test@test.com", null, true, false, false);
 
         _tokenHasher
             .Setup(x => x.Hash(It.IsAny<string>()))
@@ -159,7 +158,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
 
         var storedToken = new RefreshTokenEnvelope(userId, "ignored", DateTimeOffset.UtcNow.AddDays(10), true);
 
-        var identity = new IdentityUserInfo(userId, "test@test.com", true, false);
+        var identity = new IdentityUserInfo(userId, "test@test.com", null, true, false, false);
 
         var accessToken = new AccessToken("access-token", DateTimeOffset.UtcNow.AddMinutes(5));
         var newRefreshToken = new RefreshTokenEnvelope(

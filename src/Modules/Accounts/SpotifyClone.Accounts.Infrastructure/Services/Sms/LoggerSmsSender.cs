@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 
-namespace SpotifyClone.Accounts.Infrastructure.Auth.Sms;
+namespace SpotifyClone.Accounts.Infrastructure.Services.Sms;
 
 internal sealed class LoggerSmsSender(
     ILogger<LoggerSmsSender> logger) : ISmsSender
@@ -10,6 +10,7 @@ internal sealed class LoggerSmsSender(
 
     public async Task SendAsync(
         string to,
-        string message)
-        => logger.LogInformation("SMS to {PhoneNumber}: {Message}", to, message);
+        string message,
+        CancellationToken cancellationToken = default)
+        => _logger.LogInformation("SMS to {PhoneNumber}: {Message}", to, message);
 }

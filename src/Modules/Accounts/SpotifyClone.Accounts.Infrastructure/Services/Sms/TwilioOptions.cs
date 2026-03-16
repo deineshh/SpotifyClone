@@ -1,4 +1,4 @@
-﻿namespace SpotifyClone.Accounts.Infrastructure.Auth.Sms;
+﻿namespace SpotifyClone.Accounts.Infrastructure.Services.Sms;
 
 public sealed record TwilioOptions
 {

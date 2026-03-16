@@ -44,13 +44,13 @@ internal sealed class IdentityService(
                 AuthErrors.InvalidPassword);
         }
 
-        bool requiresTwoFactor = await _userManager.GetTwoFactorEnabledAsync(user);
-
         return new IdentityUserInfo(
             UserId.From(user.Id),
-            user.Email!,
+            user.Email,
+            user.PhoneNumber,
             user.EmailConfirmed,
-            requiresTwoFactor);
+            user.PhoneNumberConfirmed,
+            user.TwoFactorEnabled);
     }
 
     public async Task<Result<IdentityUserInfo>> FindByIdAsync(
@@ -68,13 +68,13 @@ internal sealed class IdentityService(
             return Result.Failure<IdentityUserInfo>(AuthErrors.SignInNotAllowed);
         }
 
-        bool requiresTwoFactor = await _userManager.GetTwoFactorEnabledAsync(user);
-
         return new IdentityUserInfo(
             UserId.From(user.Id),
-            user.Email!,
+            user.Email,
+            user.PhoneNumber,
             user.EmailConfirmed,
-            requiresTwoFactor);
+            user.PhoneNumberConfirmed,
+            user.TwoFactorEnabled);
     }
 
     public async Task<IdentityUserInfo?> FindByEmailAsync(
@@ -87,13 +87,34 @@ internal sealed class IdentityService(
             return null;
         }
 
-        bool requiresTwoFactor = await _userManager.GetTwoFactorEnabledAsync(user);
+        return new IdentityUserInfo(
+            UserId.From(user.Id),
+            user.Email,
+            user.PhoneNumber,
+            user.EmailConfirmed,
+            user.PhoneNumberConfirmed,
+            user.TwoFactorEnabled);
+    }
+
+    public async Task<IdentityUserInfo?> FindByPhoneNumber(
+        string phoneNumber,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.Users.FirstOrDefaultAsync(
+            u => u.PhoneNumber == phoneNumber,
+            cancellationToken);
+        if (user is null)
+        {
+            return null;
+        }
 
         return new IdentityUserInfo(
             UserId.From(user.Id),
-            user.Email!,
+            user.Email,
+            user.PhoneNumber,
             user.EmailConfirmed,
-            requiresTwoFactor);
+            user.PhoneNumberConfirmed,
+            user.TwoFactorEnabled);
     }
 
     public async Task<Result<IReadOnlyCollection<string>>> GetUserRolesAsync(
@@ -170,8 +191,10 @@ internal sealed class IdentityService(
     }
 
     public async Task<Result<Guid>> CreateUserAsync(
-        string email,
+        string? email,
         string? password,
+        string? phoneNumber,
+        bool phoneNumberConfirmed = false,
         params string[] roles)
     {
         var username = Guid.NewGuid();
@@ -180,7 +203,9 @@ internal sealed class IdentityService(
         {
             Id = username,
             UserName = username.ToString(),
-            Email = email
+            Email = email,
+            PhoneNumber = phoneNumber,
+            PhoneNumberConfirmed = phoneNumberConfirmed,
         };
 
         IdentityResult createResult =
@@ -413,8 +438,10 @@ internal sealed class IdentityService(
 
         return new IdentityUserInfo(
             UserId.From(user.Id),
-            user.Email!,
+            user.Email,
+            user.PhoneNumber,
             user.EmailConfirmed,
+            user.PhoneNumberConfirmed,
             user.TwoFactorEnabled);
     }
 

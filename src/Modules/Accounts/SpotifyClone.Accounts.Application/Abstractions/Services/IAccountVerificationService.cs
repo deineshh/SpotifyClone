@@ -21,11 +21,12 @@ public interface IAccountVerificationService
         string token,
         CancellationToken cancellationToken = default);
 
-    Task<Result> SendPhoneNumberVerificationAsync(
+    Task<Result> SendOtpAsync(
         Guid userId,
-        string phoneNumber);
+        string phoneNumber,
+        CancellationToken cancellationToken = default);
 
-    Task<Result> VerifyPhoneNumberAsync(
+    Task<Result> VerifyOtpAsync(
         Guid userId,
         string phoneNumber,
         string token,

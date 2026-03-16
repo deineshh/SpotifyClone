@@ -16,8 +16,6 @@ using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
 using SpotifyClone.Accounts.Application.Jobs;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
-using SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
-using SpotifyClone.Accounts.Infrastructure.Auth.Sms;
 using SpotifyClone.Accounts.Infrastructure.Persistence;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Repositories;
@@ -28,6 +26,9 @@ using SpotifyClone.Accounts.Infrastructure.Persistence.Identity;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Services;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Queries;
+using SpotifyClone.Accounts.Infrastructure.Services;
+using SpotifyClone.Accounts.Infrastructure.Services.Jwt;
+using SpotifyClone.Accounts.Infrastructure.Services.Sms;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
 using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
@@ -57,13 +58,18 @@ public static class AccountsModule
 
         services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
         {
-            options.User.RequireUniqueEmail = true;
             options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultPhoneProvider;
             options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultPhoneProvider;
         })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<IdentityAppDbContext>()
             .AddDefaultTokenProviders();
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+            options.InstanceName = "SpotifyClone_";
+        });
 
         services.Configure<DataProtectionTokenProviderOptions>(options =>
             options.TokenLifespan = TimeSpan.FromMinutes(15));
@@ -77,6 +83,7 @@ public static class AccountsModule
         services.AddScoped<IOutboxRepository, OutboxEfCoreRepository>();
         services.AddScoped<IUserReadService, UserEfCoreReadService>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IOtpCacheService, OtpCacheService>();
         services.AddScoped<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AccountsTransactionalPipelineBehavior<,>));

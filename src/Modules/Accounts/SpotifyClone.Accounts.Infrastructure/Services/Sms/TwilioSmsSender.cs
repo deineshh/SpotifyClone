@@ -4,7 +4,7 @@ using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
-namespace SpotifyClone.Accounts.Infrastructure.Auth.Sms;
+namespace SpotifyClone.Accounts.Infrastructure.Services.Sms;
 
 internal sealed class TwilioSmsSender : ISmsSender
 {
@@ -16,7 +16,10 @@ internal sealed class TwilioSmsSender : ISmsSender
         TwilioClient.Init(_options.AccountSid, _options.AuthToken);
     }
 
-    public async Task SendAsync(string to, string message)
+    public async Task SendAsync(
+        string to,
+        string message,
+        CancellationToken cancellationToken = default)
         => await MessageResource.CreateAsync(
             to: new PhoneNumber(to),
             from: new PhoneNumber(_options.FromPhoneNumber),

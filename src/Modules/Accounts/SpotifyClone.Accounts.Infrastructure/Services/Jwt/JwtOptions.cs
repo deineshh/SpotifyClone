@@ -1,4 +1,4 @@
-﻿namespace SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
+﻿namespace SpotifyClone.Accounts.Infrastructure.Services.Jwt;
 
 public sealed record JwtOptions
 {

@@ -20,6 +20,10 @@ public interface IIdentityService
         string email,
         CancellationToken cancellationToken = default);
 
+    Task<IdentityUserInfo?> FindByPhoneNumber(
+        string phoneNumber,
+        CancellationToken cancellationToken = default);
+
     Task<Result<IReadOnlyCollection<string>>> GetUserRolesAsync(
         UserId userId,
         CancellationToken cancellationToken = default);
@@ -40,8 +44,10 @@ public interface IIdentityService
         CancellationToken cancellationToken = default);
 
     Task<Result<Guid>> CreateUserAsync(
-        string email,
+        string? email,
         string? password,
+        string? phoneNumber,
+        bool phoneNumberConfirmed = false,
         params string[] roles);
 
     Task<Result> ChangeEmailWithPasswordAsync(

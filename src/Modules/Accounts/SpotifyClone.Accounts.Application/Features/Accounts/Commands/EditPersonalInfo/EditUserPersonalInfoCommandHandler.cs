@@ -52,7 +52,7 @@ internal sealed class EditUserPersonalInfoCommandHandler(
         }
         IdentityUserInfo userInfo = userInfoResult.Value;
 
-        if (request.Email != userInfo.Email)
+        if (userInfo.Email is not null && request.Email != userInfo.Email)
         {
             string oldEmail = userInfo.Email;
 

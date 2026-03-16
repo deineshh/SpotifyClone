@@ -8,7 +8,7 @@ using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.Kernel.IDs;
 
-namespace SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
+namespace SpotifyClone.Accounts.Infrastructure.Services.Jwt;
 
 internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenService
 {
@@ -24,14 +24,28 @@ internal sealed class JwtTokenService(IOptions<JwtOptions> options) : ITokenServ
 
         var jwtClaims = new List<Claim>
         {
-            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
-            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email, user.Email),
-            new("email_confirmed", user.EmailConfirmed.ToString().ToLowerInvariant()),
-            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Iat,
+            new(JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Iat,
                 new DateTimeOffset(now).ToUnixTimeSeconds().ToString(),
                 ClaimValueTypes.Integer64)
         };
+
+        if (!string.IsNullOrEmpty(user.Email))
+        {
+            jwtClaims.Add(new(JwtRegisteredClaimNames.Email, user.Email));
+            jwtClaims.Add(new(
+                JwtRegisteredClaimNames.EmailVerified,
+                user.EmailConfirmed.ToString().ToLowerInvariant()));
+        }
+
+        if (!string.IsNullOrEmpty(user.PhoneNumber))
+        {
+            jwtClaims.Add(new(JwtRegisteredClaimNames.PhoneNumber, user.PhoneNumber));
+            jwtClaims.Add(new(
+                JwtRegisteredClaimNames.PhoneNumberVerified,
+                user.PhoneNumberConfirmed.ToString().ToLowerInvariant()));
+        }
 
         foreach (string role in roles)
         {

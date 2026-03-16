@@ -55,7 +55,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
         // Arrange
         var command = new LoginUserWithPasswordCommand("test@test.com", "Password123!");
         var userId = UserId.New();
-        var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
+        var identityInfo = new IdentityUserInfo(userId, "test@test.com", null, true, false, false);
 
         _identityMock
             .Setup(x => x.ValidateUserAsync(command.Identifier, command.Password, It.IsAny<CancellationToken>()))
@@ -104,7 +104,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
         // Arrange
         var command = new LoginUserWithPasswordCommand("test@test.com", "Password123!");
         var userId = UserId.New();
-        var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
+        var identityInfo = new IdentityUserInfo(userId, "test@test.com", null, true, false, false);
 
         _identityMock
             .Setup(x => x.ValidateUserAsync(command.Identifier, command.Password, It.IsAny<CancellationToken>()))
@@ -171,7 +171,7 @@ public sealed class LoginWithPasswordCommandHandlerTests
         // Arrange
         var command = new LoginUserWithPasswordCommand("test@test.com", "Password123!");
         var userId = UserId.New();
-        var identityInfo = new IdentityUserInfo(userId, "test@test.com", true, false);
+        var identityInfo = new IdentityUserInfo(userId, "test@test.com", null, true, false, false);
 
         _identityMock
             .Setup(x => x.ValidateUserAsync(command.Identifier, command.Password, It.IsAny<CancellationToken>()))
