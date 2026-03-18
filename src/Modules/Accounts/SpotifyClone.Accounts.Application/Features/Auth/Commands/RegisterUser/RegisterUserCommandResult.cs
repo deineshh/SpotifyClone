@@ -4,6 +4,6 @@ public sealed record RegisterUserCommandResult(
     Guid UserId,
     string Email,
     string DisplayName,
-    DateTimeOffset BirthDate,
+    DateTimeOffset? BirthDateUtc,
     string Gender,
     string Role);

@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Application.Models;
@@ -9,30 +10,26 @@ using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Services;
 
-internal sealed class IdentityService : IIdentityService
-{
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-
-    public IdentityService(
+internal sealed class IdentityService(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager)
-    {
-        _userManager = userManager;
-        _signInManager = signInManager;
-    }
+    : IIdentityService
+{
+    private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 
     public async Task<Result<IdentityUserInfo>> ValidateUserAsync(
-        string email,
+        string identifier,
         string password,
         CancellationToken cancellationToken = default)
     {
-        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
-
+        ApplicationUser? user = await _userManager.Users.FirstOrDefaultAsync(
+            u => u.Email == identifier || u.UserName == identifier,
+            cancellationToken);
         if (user is null)
         {
             return Result.Failure<IdentityUserInfo>(
-                AuthErrors.InvalidEmail);
+                AuthErrors.InvalidIdentifier);
         }
 
         if (!await _signInManager.CanSignInAsync(user))
@@ -41,29 +38,26 @@ internal sealed class IdentityService : IIdentityService
                 AuthErrors.SignInNotAllowed);
         }
 
-        bool passwordValid = await _userManager.CheckPasswordAsync(user, password);
-
-        if (!passwordValid)
+        if (!await _userManager.CheckPasswordAsync(user, password))
         {
             return Result.Failure<IdentityUserInfo>(
                 AuthErrors.InvalidPassword);
         }
 
-        bool requiresTwoFactor = await _userManager.GetTwoFactorEnabledAsync(user);
-
         return new IdentityUserInfo(
             UserId.From(user.Id),
-            user.Email!,
+            user.Email,
+            user.PhoneNumber,
             user.EmailConfirmed,
-            requiresTwoFactor);
+            user.PhoneNumberConfirmed,
+            user.TwoFactorEnabled);
     }
 
-    public async Task<Result<IdentityUserInfo>> GetUserInfoAsync(
+    public async Task<Result<IdentityUserInfo>> FindByIdAsync(
         UserId userId,
         CancellationToken cancellationToken = default)
     {
         ApplicationUser? user = await _userManager.FindByIdAsync(userId.Value.ToString());
-
         if (user is null)
         {
             return Result.Failure<IdentityUserInfo>(IdentityUserErrors.NotFound);
@@ -74,13 +68,53 @@ internal sealed class IdentityService : IIdentityService
             return Result.Failure<IdentityUserInfo>(AuthErrors.SignInNotAllowed);
         }
 
-        bool requiresTwoFactor = await _userManager.GetTwoFactorEnabledAsync(user);
+        return new IdentityUserInfo(
+            UserId.From(user.Id),
+            user.Email,
+            user.PhoneNumber,
+            user.EmailConfirmed,
+            user.PhoneNumberConfirmed,
+            user.TwoFactorEnabled);
+    }
+
+    public async Task<IdentityUserInfo?> FindByEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return null;
+        }
 
         return new IdentityUserInfo(
             UserId.From(user.Id),
-            user.Email!,
+            user.Email,
+            user.PhoneNumber,
             user.EmailConfirmed,
-            requiresTwoFactor);
+            user.PhoneNumberConfirmed,
+            user.TwoFactorEnabled);
+    }
+
+    public async Task<IdentityUserInfo?> FindByPhoneNumber(
+        string phoneNumber,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.Users.FirstOrDefaultAsync(
+            u => u.PhoneNumber == phoneNumber,
+            cancellationToken);
+        if (user is null)
+        {
+            return null;
+        }
+
+        return new IdentityUserInfo(
+            UserId.From(user.Id),
+            user.Email,
+            user.PhoneNumber,
+            user.EmailConfirmed,
+            user.PhoneNumberConfirmed,
+            user.TwoFactorEnabled);
     }
 
     public async Task<Result<IReadOnlyCollection<string>>> GetUserRolesAsync(
@@ -157,19 +191,28 @@ internal sealed class IdentityService : IIdentityService
     }
 
     public async Task<Result<Guid>> CreateUserAsync(
-        string email,
-        string password,
+        string? email,
+        string? password,
+        string? phoneNumber,
+        bool phoneNumberConfirmed = false,
         params string[] roles)
     {
+        var username = Guid.NewGuid();
+
         var user = new ApplicationUser
         {
-            Id = Guid.NewGuid(),
-            UserName = email,
-            Email = email
+            Id = username,
+            UserName = username.ToString(),
+            Email = email,
+            PhoneNumber = phoneNumber,
+            PhoneNumberConfirmed = phoneNumberConfirmed,
         };
 
         IdentityResult createResult =
-            await _userManager.CreateAsync(user, password);
+            password is null
+            ? await _userManager.CreateAsync(user)
+            : await _userManager.CreateAsync(user, password);
+
         if (!createResult.Succeeded)
         {
             return Result.Failure<Guid>(
@@ -187,6 +230,40 @@ internal sealed class IdentityService : IIdentityService
         }
 
         return user.Id;
+    }
+
+    public async Task<Result> ChangeEmailWithPasswordAsync(
+        Guid id,
+        string email,
+        string password,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(id.ToString());
+        if (user is null)
+        {
+            return Result.Failure(IdentityUserErrors.NotFound);
+        }
+
+        Result validateUserResult = await ValidateUserAsync(user.Email!, password, cancellationToken);
+        if (validateUserResult.IsFailure)
+        {
+            return validateUserResult;
+        }
+
+        if (await EmailExistsAsync(email, cancellationToken))
+        {
+            return Result.Failure(AuthErrors.EmailAlreadyInUse);
+        }
+
+        user.Email = email;
+
+        IdentityResult updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            return Result.Failure(IdentityErrorsToApplicationErrors(updateResult.Errors));
+        }
+
+        return Result.Success();
     }
 
     public async Task<Result> DeleteUserAsync(Guid id)
@@ -275,6 +352,116 @@ internal sealed class IdentityService : IIdentityService
         if (!result.Succeeded)
         {
             return Result.Failure(AuthErrors.InvalidPhoneNumberConfirmationToken);
+        }
+
+        return Result.Success();
+    }
+
+    public async Task<Result<string>> GeneratePasswordResetTokenAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<string>(IdentityUserErrors.NotFound);
+        }
+
+        return await _userManager.GeneratePasswordResetTokenAsync(user);
+    }
+
+    public async Task<Result<bool>> VerifyPasswordResetTokenAsync(
+        string email,
+        string token,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<bool>(IdentityUserErrors.NotFound);
+        }
+
+        return await _userManager.VerifyUserTokenAsync(
+            user,
+            _userManager.Options.Tokens.PasswordResetTokenProvider,
+            UserManager<ApplicationUser>.ResetPasswordTokenPurpose,
+            token);
+    }
+
+    public async Task<Result> ConfirmPasswordResetTokenAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Result.Failure<bool>(IdentityUserErrors.NotFound);
+        }
+
+        IdentityResult resetPasswordResult = await _userManager.ResetPasswordAsync(
+            user, token, newPassword);
+        if (!resetPasswordResult.Succeeded)
+        {
+            return Result.Failure(IdentityErrorsToApplicationErrors(resetPasswordResult.Errors));
+        }
+
+        return Result.Success();
+    }
+
+    public async Task<ExternalLoginInfoEnvelope?> GetExternalLoginInfoAsync()
+    {
+        ExternalLoginInfo? loginInfo = await _signInManager.GetExternalLoginInfoAsync();
+        if (loginInfo is null)
+        {
+            return null;
+        }
+
+        return new ExternalLoginInfoEnvelope(
+            loginInfo.Principal.FindFirstValue(ClaimTypes.Email)!,
+            loginInfo.Principal.FindFirstValue(ClaimTypes.Name)!,
+            loginInfo.LoginProvider,
+            loginInfo.ProviderKey,
+            loginInfo.ProviderDisplayName!);
+    }
+
+    public async Task<IdentityUserInfo?> FindByLoginProviderAsync(
+        string provider,
+        string providerKey)
+    {
+        ApplicationUser? user = await _userManager.FindByLoginAsync(provider, providerKey);
+        if (user is null)
+        {
+            return null;
+        }
+
+        return new IdentityUserInfo(
+            UserId.From(user.Id),
+            user.Email,
+            user.PhoneNumber,
+            user.EmailConfirmed,
+            user.PhoneNumberConfirmed,
+            user.TwoFactorEnabled);
+    }
+
+    public async Task<Result> AddLoginAsync(
+        Guid id,
+        ExternalLoginInfoEnvelope loginInfo,
+        CancellationToken cancellationToken = default)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(id.ToString());
+        if (user is null)
+        {
+            return Result.Failure(IdentityUserErrors.NotFound);
+        }
+
+        IdentityResult addLoginResult = await _userManager.AddLoginAsync(
+            user,
+            new UserLoginInfo(loginInfo.LoginProvider, loginInfo.ProviderKey, loginInfo.ProviderDisplayName));
+        if (!addLoginResult.Succeeded)
+        {
+            return Result.Failure(IdentityErrorsToApplicationErrors(addLoginResult.Errors));
         }
 
         return Result.Success();

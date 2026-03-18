@@ -23,7 +23,7 @@ internal sealed class CreateAlbumCommandHandler(
         CreateAlbumCommand request,
         CancellationToken cancellationToken)
     {
-        IEnumerable<Artist> artists = await _unit.Artists.GetByIdsAsync(
+        IEnumerable<Artist> artists = await _unit.Artists.GetAllByIdsAsync(
             request.MainArtists.Select(a => ArtistId.From(a)),
             cancellationToken);
 
@@ -32,7 +32,7 @@ internal sealed class CreateAlbumCommandHandler(
             return Result.Failure<CreateAlbumCommandResult>(ArtistErrors.NotFound);
         }
 
-        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value != _currentUser.Id)) &&
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId?.Value != _currentUser.Id)) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<CreateAlbumCommandResult>(AlbumErrors.NotOwned);

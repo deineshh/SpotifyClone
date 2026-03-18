@@ -3,7 +3,8 @@ using System.Security.Claims;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using SpotifyClone.Accounts.Application.Models;
-using SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
+using SpotifyClone.Accounts.Infrastructure.Services.Jwt;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Accounts.Infrastructure.Tests.Auth;
@@ -29,16 +30,16 @@ public sealed class JwtTokenServiceTests
         AccessToken token = service.GenerateAccessToken(
             new(
                 UserId.From(Guid.NewGuid()),
-                "test@email.com",
-                false, true),
-            new[] { "User" });
+                "test@email.com", null,
+                false, false, true),
+            UserRoles.CalculateBy(UserRoles.Listener));
 
         // Assert
         token.Should().NotBeNull();
     }
 
     [Fact]
-    public void GenerateAccessToken_Should_ContainUserIdAndEmailAndRoles()
+    public void GenerateAccessToken_Should_ContainAllInfo()
     {
         // Arrange
         var userId = UserId.From(Guid.NewGuid());
@@ -55,18 +56,21 @@ public sealed class JwtTokenServiceTests
         AccessToken token = service.GenerateAccessToken(
             new(
                 userId,
-                "test@email.com",
-                false, true),
-            new[] { "Admin", "User" });
+                "test@email.com", "+380123456789",
+                false, false, true),
+            UserRoles.CalculateBy(UserRoles.Admin));
 
         // Act
         JwtSecurityToken jwt = new JwtSecurityTokenHandler().ReadJwtToken(token.RawToken);
 
         // Assert
         jwt.Subject.Should().Be(userId.Value.ToString());
-        jwt.Claims.Should().Contain(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
-        jwt.Claims.Should().Contain(c => c.Type == ClaimTypes.Role && c.Value == "User");
+        jwt.Claims.Should().Contain(c => c.Type == ClaimTypes.Role && c.Value == UserRoles.Admin);
+        jwt.Claims.Should().Contain(c => c.Type == ClaimTypes.Role && c.Value == UserRoles.Listener);
         jwt.Claims.Should().Contain(c => c.Type == JwtRegisteredClaimNames.Email);
+        jwt.Claims.Should().Contain(c => c.Type == JwtRegisteredClaimNames.PhoneNumber);
+        jwt.Claims.Should().Contain(c => c.Type == JwtRegisteredClaimNames.EmailVerified);
+        jwt.Claims.Should().Contain(c => c.Type == JwtRegisteredClaimNames.PhoneNumberVerified);
     }
 
     [Fact]
@@ -87,8 +91,8 @@ public sealed class JwtTokenServiceTests
         AccessToken token = service.GenerateAccessToken(
             new(
                 UserId.From(Guid.NewGuid()),
-                "test@email.com",
-                false, true),
+                "test@email.com", null,
+                false, false, true),
             Array.Empty<string>());
 
         // Act

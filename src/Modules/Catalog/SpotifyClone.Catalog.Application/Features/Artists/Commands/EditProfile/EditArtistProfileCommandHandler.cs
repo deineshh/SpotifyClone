@@ -29,7 +29,7 @@ internal sealed class EditArtistProfileCommandHandler(
             return Result.Failure<EditArtistProfileCommandResult>(AlbumErrors.NotFound);
         }
 
-        if ((!_currentUser.IsAuthenticated || _currentUser.Id != artist.OwnerId.Value) &&
+        if ((!_currentUser.IsAuthenticated || _currentUser.Id != artist.OwnerId?.Value) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<EditArtistProfileCommandResult>(ArtistErrors.NotOwned);

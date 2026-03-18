@@ -4,6 +4,7 @@ using SpotifyClone.Catalog.Domain.Aggregates.Artists.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Primitives;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Queries;
+using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
 
 namespace SpotifyClone.Catalog.Application.Features.Artists.Queries.GetDetails;
@@ -29,7 +30,8 @@ internal sealed class GetArtistDetailsQueryHandler(
         }
 
         if (artist.Status == ArtistStatus.Banned.Value &&
-            artist.OwnerId != _currentUser.Id)
+            !_currentUser.IsAuthenticated && artist.OwnerId != _currentUser.Id &&
+            !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<ArtistDetails>(ArtistErrors.Banned);
         }

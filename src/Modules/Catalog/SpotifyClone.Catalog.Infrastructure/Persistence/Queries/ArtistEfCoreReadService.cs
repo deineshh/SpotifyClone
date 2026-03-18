@@ -29,7 +29,7 @@ internal sealed class ArtistEfCoreReadService(
             a.Id.Value,
             a.Name,
             a.Bio,
-            a.OwnerId.Value,
+            a.OwnerId == null ? null : a.OwnerId.Value,
             a.Status.Value,
             a.Avatar == null ? null : new ImageMetadataDetails(
                 a.Avatar.ImageId.Value,
@@ -63,7 +63,7 @@ internal sealed class ArtistEfCoreReadService(
             a.Id.Value,
             a.Name,
             a.Bio,
-            a.OwnerId.Value,
+            a.OwnerId == null ? null : a.OwnerId.Value,
             a.Status.Value,
             a.Avatar == null ? null : new ImageMetadataDetails(
                 a.Avatar.ImageId.Value,

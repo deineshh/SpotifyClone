@@ -8,12 +8,20 @@ namespace SpotifyClone.Accounts.Application.Abstractions.Services;
 public interface IIdentityService
 {
     Task<Result<IdentityUserInfo>> ValidateUserAsync(
-        string email,
+        string identifier,
         string password,
         CancellationToken cancellationToken = default);
 
-    Task<Result<IdentityUserInfo>> GetUserInfoAsync(
+    Task<Result<IdentityUserInfo>> FindByIdAsync(
         UserId userId,
+        CancellationToken cancellationToken = default);
+
+    Task<IdentityUserInfo?> FindByEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default);
+
+    Task<IdentityUserInfo?> FindByPhoneNumber(
+        string phoneNumber,
         CancellationToken cancellationToken = default);
 
     Task<Result<IReadOnlyCollection<string>>> GetUserRolesAsync(
@@ -36,9 +44,17 @@ public interface IIdentityService
         CancellationToken cancellationToken = default);
 
     Task<Result<Guid>> CreateUserAsync(
+        string? email,
+        string? password,
+        string? phoneNumber,
+        bool phoneNumberConfirmed = false,
+        params string[] roles);
+
+    Task<Result> ChangeEmailWithPasswordAsync(
+        Guid id,
         string email,
         string password,
-        params string[] roles);
+        CancellationToken cancellationToken = default);
 
     Task<Result> DeleteUserAsync(Guid id);
 
@@ -57,4 +73,30 @@ public interface IIdentityService
         Guid userId,
         string phoneNumber,
         string token);
+
+    Task<Result<string>> GeneratePasswordResetTokenAsync(
+        string email,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<bool>> VerifyPasswordResetTokenAsync(
+        string email,
+        string token,
+        CancellationToken cancellationToken = default);
+
+    Task<Result> ConfirmPasswordResetTokenAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken cancellationToken = default);
+
+    Task<ExternalLoginInfoEnvelope?> GetExternalLoginInfoAsync();
+
+    Task<IdentityUserInfo?> FindByLoginProviderAsync(
+        string provider,
+        string providerKey);
+
+    Task<Result> AddLoginAsync(
+        Guid id,
+        ExternalLoginInfoEnvelope loginInfo,
+        CancellationToken cancellationToken = default);
 }

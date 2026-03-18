@@ -9,41 +9,81 @@ namespace SpotifyClone.Accounts.Domain.Aggregates.Users;
 
 public sealed class UserProfile : AggregateRoot<UserId, Guid>
 {
-    public string DisplayName { get; private set; }
-    public DateTimeOffset BirthDate { get; private set; }
-    public Gender Gender { get; private set; }
+    public string DisplayName { get; private set; } = null!;
+    public DateTimeOffset? BirthDateUtc { get; private set; }
+    public Gender Gender { get; private set; } = null!;
     public AvatarImage? Avatar { get; private set; }
 
-    private UserProfile()
-    {
-        DisplayName = null!;
-        Gender = null!;
-    }
-
-    private UserProfile(
-        UserId id, string displayName, DateTimeOffset birthDate, Gender gender, AvatarImage? avatarImage = null)
-        : base(id)
-    {
-        DisplayName = displayName;
-        BirthDate = birthDate;
-        Gender = gender;
-        Avatar = avatarImage;
-    }
-
     public static UserProfile Create(
-        UserId id, string displayName, DateTimeOffset birthDate, Gender gender)
+        UserId id, string displayName, DateTimeOffset? birthDate, Gender gender)
     {
-        birthDate = birthDate.ToUniversalTime();
-
         DisplayNameRules.Validate(displayName);
-        BirthDateRules.Validate(birthDate);
+
+        if (birthDate is not null)
+        {
+            birthDate = birthDate.Value.ToUniversalTime();
+            BirthDateRules.Validate(birthDate.Value);
+        }
 
         return new UserProfile(id, displayName, birthDate, gender);
     }
 
+    public void LinkNewAvatar(AvatarImage avatar)
+    {
+        ArgumentNullException.ThrowIfNull(avatar);
+
+        UnlinkAvatar();
+
+        Avatar = avatar;
+        RaiseDomainEvent(new UserLinkedToAvatarImageDomainEvent(Avatar.ImageId));
+    }
+
+    public void UnlinkAvatar()
+    {
+        if (Avatar is null)
+        {
+            return;
+        }
+
+        RaiseDomainEvent(new UserUnlinkedFromAvatarImageDomainEvent(Avatar.ImageId));
+        Avatar = null;
+    }
+
+    public void EditDetails(string displayName)
+    {
+        DisplayNameRules.Validate(displayName);
+        DisplayName = displayName;
+    }
+
+    public void EditPersonalInfo(Gender gender, DateTimeOffset birthDateUtc)
+    {
+        ArgumentNullException.ThrowIfNull(gender);
+
+        Gender = gender;
+        BirthDateUtc = birthDateUtc.ToUniversalTime();
+    }
+
     public void ProcessRegistration(string email, string confirmationToken)
         => RaiseDomainEvent(new UserRegisteredDomainEvent(
-            Id.Value,
-            email,
-            confirmationToken));
+            Id, email, confirmationToken, DisplayName, Avatar?.ImageId));
+
+    public void PrepareForDeletion()
+    {
+        UnlinkAvatar();
+        RaiseDomainEvent(new UserDeletedDomainEvent(Id));
+    }
+
+    private UserProfile()
+    {
+    }
+
+    private UserProfile(
+        UserId id, string displayName, DateTimeOffset? birthDate, Gender gender, AvatarImage? avatarImage = null)
+        : base(id)
+    {
+        DisplayName = displayName;
+        BirthDateUtc = birthDate;
+        Gender = gender;
+        Avatar = avatarImage;
+    }
 }

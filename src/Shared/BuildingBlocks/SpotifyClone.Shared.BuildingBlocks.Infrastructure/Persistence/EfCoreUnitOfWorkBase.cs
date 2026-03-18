@@ -36,11 +36,6 @@ public abstract class EfCoreUnitOfWorkBase<TDbContext>(
         //DbContext.Set<OutboxMessage>().AddRange(outboxMessages);
 
         int result = await DbContext.SaveChangesAsync(cancellationToken);
-        var entries = DbContext.ChangeTracker.Entries().ToList();
-        foreach (EntityEntry? entry in entries)
-        {
-            Console.WriteLine();
-        }
 
         foreach (DomainEvent? domainEvent in domainEvents)
         {

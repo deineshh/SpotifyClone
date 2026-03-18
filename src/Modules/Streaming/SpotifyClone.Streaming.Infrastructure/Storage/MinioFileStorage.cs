@@ -21,9 +21,12 @@ public class MinioFileStorage : IFileStorage
             .WithCredentials(_options.AccessKey, _options.SecretKey)
             .WithSSL(false)
             .Build();
+    }
 
-        InitializeAudioBucket().GetAwaiter().GetResult();
-        InitializeImagesBucket().GetAwaiter().GetResult();
+    public async Task InitializeBucketsAsync(CancellationToken cancellationToken = default)
+    {
+        await EnsureBucketIsReadyAsync(_options.AudioBucketName, cancellationToken);
+        await EnsureBucketIsReadyAsync(_options.ImageBucketName, cancellationToken);
     }
 
     public string GetImageRootPath()
@@ -289,81 +292,50 @@ public class MinioFileStorage : IFileStorage
         await _minioClient.GetObjectAsync(args);
     }
 
-    private async Task InitializeAudioBucket()
+    private async Task EnsureBucketIsReadyAsync(string bucketName, CancellationToken ct)
     {
         bool found = await _minioClient.BucketExistsAsync(
-            new BucketExistsArgs().WithBucket(_options.AudioBucketName));
-        if (!found)
-        {
-            await _minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(_options.AudioBucketName));
+            new BucketExistsArgs().WithBucket(bucketName), ct);
 
-            string policyJson = $$"""
-                {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Principal": {"AWS": ["*"]},
-                            "Action": ["s3:GetBucketLocation"],
-                            "Resource": ["arn:aws:s3:::{{_options.AudioBucketName}}"]
-                        },
-                        {
-                            "Effect": "Allow",
-                            "Principal": {"AWS": ["*"]},
-                            "Action": ["s3:ListBucket"],
-                            "Resource": ["arn:aws:s3:::{{_options.AudioBucketName}}"]
-                        },
-                        {
-                            "Effect": "Allow",
-                            "Principal": {"AWS": ["*"]},
-                            "Action": ["s3:GetObject"],
-                            "Resource": ["arn:aws:s3:::{{_options.AudioBucketName}}/*"]
-                        }
-                    ]
-                }
-                """;
-            await _minioClient.SetPolicyAsync(new SetPolicyArgs()
-                .WithBucket(_options.AudioBucketName)
-                .WithPolicy(policyJson));
+        if (found)
+        {
+            return;
+        }
+
+        try
+        {
+            await _minioClient.MakeBucketAsync(
+                new MakeBucketArgs().WithBucket(bucketName), ct);
+
+            string policyJson = GetPublicReadPolicy(bucketName);
+            await _minioClient.SetPolicyAsync(
+                new SetPolicyArgs().WithBucket(bucketName).WithPolicy(policyJson), ct);
+        }
+        catch (Exception ex) when (ex.Message.Contains("already owned by you"))
+        {
+            // Swallow this specific error: another thread/instance created it
+            // between our "found" check and our "MakeBucket" call.
         }
     }
 
-    private async Task InitializeImagesBucket()
+    private static string GetPublicReadPolicy(string bucketName) => $$"""
     {
-        bool found = await _minioClient.BucketExistsAsync(
-            new BucketExistsArgs().WithBucket(_options.ImageBucketName));
-        if (!found)
-        {
-            await _minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(_options.ImageBucketName));
-
-            string policyJson = $$"""
-                {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Principal": {"AWS": ["*"]},
-                            "Action": ["s3:GetBucketLocation"],
-                            "Resource": ["arn:aws:s3:::{{_options.ImageBucketName}}"]
-                        },
-                        {
-                            "Effect": "Allow",
-                            "Principal": {"AWS": ["*"]},
-                            "Action": ["s3:ListBucket"],
-                            "Resource": ["arn:aws:s3:::{{_options.ImageBucketName}}"]
-                        },
-                        {
-                            "Effect": "Allow",
-                            "Principal": {"AWS": ["*"]},
-                            "Action": ["s3:GetObject"],
-                            "Resource": ["arn:aws:s3:::{{_options.ImageBucketName}}/*"]
-                        }
-                    ]
-                }
-                """;
-            await _minioClient.SetPolicyAsync(new SetPolicyArgs()
-                .WithBucket(_options.ImageBucketName)
-                .WithPolicy(policyJson));
-        }
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": {"AWS": ["*"]},
+                "Action": [
+                    "s3:GetBucketLocation",
+                    "s3:ListBucket",
+                    "s3:GetObject"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::{{bucketName}}",
+                    "arn:aws:s3:::{{bucketName}}/*"
+                ]
+            }
+        ]
     }
+    """;
 }

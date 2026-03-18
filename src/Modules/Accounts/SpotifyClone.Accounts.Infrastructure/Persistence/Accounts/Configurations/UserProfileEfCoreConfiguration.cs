@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
 using SpotifyClone.Accounts.Domain.Aggregates.Users.Rules;
-using SpotifyClone.Accounts.Domain.Aggregates.Users.ValueObjects;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Configurations.Converters;
 
 namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Configurations;
@@ -25,9 +24,9 @@ internal sealed class UserProfileEfCoreConfiguration : IEntityTypeConfiguration<
             .HasMaxLength(DisplayNameRules.MaxLength)
             .IsRequired();
 
-        builder.Property(x => x.BirthDate)
-            .HasColumnName("birth_date")
-            .IsRequired();
+        builder.Property(x => x.BirthDateUtc)
+            .HasColumnName("birth_date_utc")
+            .IsRequired(false);
 
         builder.Property(x => x.Gender)
             .HasColumnName("gender")

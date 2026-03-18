@@ -69,4 +69,9 @@ internal sealed class PlaylistEfCoreRepository(PlaylistsAppDbContext context)
         Playlist playlist,
         CancellationToken cancellationToken = default)
         => _playlists.Remove(playlist);
+
+    public async Task DeleteAllAsync(
+        IEnumerable<Playlist> playlists,
+        CancellationToken cancellationToken = default)
+        => _playlists.RemoveRange(playlists);
 }

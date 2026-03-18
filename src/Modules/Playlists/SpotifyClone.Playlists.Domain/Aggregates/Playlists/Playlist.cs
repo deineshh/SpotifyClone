@@ -95,6 +95,11 @@ public sealed class Playlist : AggregateRoot<PlaylistId, Guid>
 
     public void AddCollaborator(UserId collaboratorId)
     {
+        if (OwnerId == collaboratorId)
+        {
+            return;
+        }
+
         if (Type != PlaylistType.UserCreated)
         {
             throw new PlaylistIsNotUserGeneratedDomainException(
@@ -142,7 +147,7 @@ public sealed class Playlist : AggregateRoot<PlaylistId, Guid>
             ? _tracks.Max(t => t.Position) + PositionStep
             : PositionStep;
 
-        var track = new PlaylistTrack(trackId, addedBy, nextPosition);
+        var track = new PlaylistTrack(Id, trackId, addedBy, nextPosition);
 
         if (_tracks.Any(t => t.Id == track.Id) || !_tracks.Add(track))
         {

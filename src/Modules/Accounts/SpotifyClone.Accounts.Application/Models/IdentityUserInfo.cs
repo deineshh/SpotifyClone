@@ -3,7 +3,9 @@
 namespace SpotifyClone.Accounts.Application.Models;
 
 public sealed record IdentityUserInfo(
-    UserId UserId,
-    string Email,
+    UserId Id,
+    string? Email,
+    string? PhoneNumber,
     bool EmailConfirmed,
+    bool PhoneNumberConfirmed,
     bool RequiresTwoFactor);

@@ -4,9 +4,9 @@ namespace SpotifyClone.Accounts.Application.Errors;
 
 public static class AuthErrors
 {
-    public static readonly Error InvalidEmail = new(
-        "Auth.InvalidEmail",
-        "The provided email is invalid.");
+    public static readonly Error InvalidIdentifier = new(
+        "Auth.InvalidIdentifier",
+        "The provided email or username is invalid.");
 
     public static readonly Error InvalidPassword = new(
         "Auth.InvalidPassword",
@@ -24,6 +24,10 @@ public static class AuthErrors
         "Auth.RegistrationFailed",
         "Registration of the specified user failed.");
 
+    public static readonly Error NotLoggedIn = new(
+        "Auth.NotLoggedIn",
+        "User is not authenticated.");
+
     public static readonly Error EmailAlreadyConfirmed = new(
         "Auth.EmailAlreadyConfirmed",
         "Email is already confirmed.");
@@ -39,6 +43,10 @@ public static class AuthErrors
     public static readonly Error InvalidPhoneNumberConfirmationToken = Identity(
         "InvalidPhoneNumberConfirmationToken",
         "Phone number confirmation token is invalid.");
+
+    public static readonly Error InvalidPasswordResetToken = Identity(
+        "InvalidPasswordResetToken",
+        "Password reset token is invalid.");
 
     public static Error Identity(string codeTitle, string description) => new(
         $"Identity.{codeTitle}",

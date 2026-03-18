@@ -20,4 +20,9 @@ internal sealed class UserProfileEfCoreRepository(
         UserProfile user,
         CancellationToken cancellationToken = default)
         => await _users.AddAsync(user, cancellationToken);
+
+    public async Task DeleteAsync(
+        UserProfile userProfile,
+        CancellationToken cancellationToken = default)
+        => _users.Remove(userProfile);
 }

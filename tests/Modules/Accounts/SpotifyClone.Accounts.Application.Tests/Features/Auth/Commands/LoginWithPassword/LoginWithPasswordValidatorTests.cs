@@ -1,5 +1,5 @@
 ﻿using FluentValidation.TestHelper;
-using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithPassword;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.Password;
 
 namespace SpotifyClone.Accounts.Application.Tests.Features.Auth.Commands.LoginWithPassword;
 
@@ -9,11 +9,11 @@ public sealed class LoginWithPasswordValidatorTests
     public void Validate_Should_NotHaveAnyValidationErrors_When_DataIsValid()
     {
         // Arrange
-        var validator = new LoginWithPasswordCommandValidator();
+        var validator = new LoginUserWithPasswordCommandValidator();
 
         // Act
-        TestValidationResult<LoginWithPasswordCommand> result = validator.TestValidate(
-            new LoginWithPasswordCommand("example@gmail.com", "StrongPass123"));
+        TestValidationResult<LoginUserWithPasswordCommand> result = validator.TestValidate(
+            new LoginUserWithPasswordCommand("example@gmail.com", "StrongPass123"));
 
         // Assert
         result.ShouldNotHaveAnyValidationErrors();
@@ -22,17 +22,17 @@ public sealed class LoginWithPasswordValidatorTests
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void Email_Should_NotBeNullOrEmpty(string? invalidEmail)
+    public void Identifier_Should_NotBeNullOrEmpty(string? invalidIdentifier)
     {
         // Arrange
-        var validator = new LoginWithPasswordCommandValidator();
+        var validator = new LoginUserWithPasswordCommandValidator();
 
         // Act
-        TestValidationResult<LoginWithPasswordCommand> result = validator.TestValidate(
-            new LoginWithPasswordCommand(invalidEmail!, "StrongPass123!"));
+        TestValidationResult<LoginUserWithPasswordCommand> result = validator.TestValidate(
+            new LoginUserWithPasswordCommand(invalidIdentifier!, "StrongPass123!"));
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Email);
+        result.ShouldHaveValidationErrorFor(x => x.Identifier);
     }
 
     [Theory]
@@ -41,11 +41,11 @@ public sealed class LoginWithPasswordValidatorTests
     public void Password_Should_NotBeNullOrEmpty(string? invalidPassword)
     {
         // Arrange
-        var validator = new LoginWithPasswordCommandValidator();
+        var validator = new LoginUserWithPasswordCommandValidator();
 
         // Act
-        TestValidationResult<LoginWithPasswordCommand> result = validator.TestValidate(
-            new LoginWithPasswordCommand("example@gmail.com", invalidPassword!));
+        TestValidationResult<LoginUserWithPasswordCommand> result = validator.TestValidate(
+            new LoginUserWithPasswordCommand("example@gmail.com", invalidPassword!));
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Password);

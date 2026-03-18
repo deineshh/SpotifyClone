@@ -61,6 +61,11 @@ builder.Services
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!)),
 
         ClockSkew = TimeSpan.Zero
+    })
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
     });
 
 builder.Services.AddAuthorization(options
@@ -82,8 +87,15 @@ builder.Services.AddRateLimiter(options =>
 
     options.AddFixedWindowLimiter("send-limits", opt =>
     {
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.PermitLimit = 1;
+        opt.Window = TimeSpan.FromHours(1);
+        opt.PermitLimit = 3;
+        opt.QueueLimit = 0;
+    });
+
+    options.AddFixedWindowLimiter("login-limits", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(15);
+        opt.PermitLimit = 5;
         opt.QueueLimit = 0;
     });
 

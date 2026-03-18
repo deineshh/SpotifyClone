@@ -13,13 +13,48 @@ internal sealed class IdentityAccountVerificationService(
     IIdentityService identity,
     IEmailSender emailSender,
     ISmsSender smsSender,
-    IOptions<ApplicationSettings> appSettings) : IAccountVerificationService
+    IOptions<ApplicationSettings> appSettings)
+    : IAccountVerificationService
 {
     private readonly ILogger<IdentityAccountVerificationService> _logger = logger;
     private readonly IIdentityService _identity = identity;
     private readonly IEmailSender _emailSender = emailSender;
     private readonly ISmsSender _smsSender = smsSender;
     private readonly ApplicationSettings _appSettings = appSettings.Value;
+
+    public async Task<Result> SendEmailChangedEmailAsync(
+        string oldEmail,
+        string newEmail,
+        string displayName,
+        CancellationToken cancellationToken = default)
+    {
+        var emailMessage = new EmailMessage(
+            [oldEmail],
+            $"Вашу електронну адресу {_appSettings.DomainName} змінено",
+            PlainTextBody: $"Привіт, {displayName},\n\n" +
+            $"Електронну адресу вашого облікового запису Spotify нещодавно було змінено.\n\n" +
+            $"Ознайомтеся з деталями цих оновлень облікового запису нижче:\n\n" +
+            $"Стара електронна адреса:\n{oldEmail}\n\n" +
+            $"Нова електронна адреса:\n{newEmail}\n\n" +
+            $"Якщо ви внесли цю зміну, подальші дії не потрібні.\n\n" +
+            $"Ви не вносили цю зміну? Негайно скасуйте ці зміни у вашому обліковому записі {_appSettings.DomainName}." +
+            $"\n\nБудь ласка, не пересилайте цей лист.\n\n" +
+            $"Забезпечення вашої безпеки,\n{_appSettings.DomainName} Security");
+
+        _logger.LogInformation("Sending email changed email...");
+
+        Result result = await _emailSender.SendAsync(emailMessage, cancellationToken: cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Sending email changed email failed.");
+        }
+        else
+        {
+            _logger.LogInformation("Sending email changed email succeeded.");
+        }
+
+        return result;
+    }
 
     public async Task<Result> SendVerificationEmailAsync(
         string email,
@@ -30,12 +65,11 @@ internal sealed class IdentityAccountVerificationService(
         var emailMessage = new EmailMessage(
             [email],
             $"{_appSettings.DomainName} - Підтвердження пошти",
-            GetHtmlBody(token));
+            GetRegistrationHtml(token));
 
         _logger.LogInformation("Sending verification email...");
 
         Result result = await _emailSender.SendAsync(emailMessage, cancellationToken: cancellationToken);
-
         if (result.IsFailure)
         {
             _logger.LogError("Sending verification email failed.");
@@ -57,7 +91,7 @@ internal sealed class IdentityAccountVerificationService(
 
         if (result.IsFailure)
         {
-            _logger.LogError("Confirming email failed.");
+            _logger.LogError("Confirming email failed, {Error}", result.Errors.Select(e => e.ToString()));
         }
         else
         {
@@ -67,25 +101,25 @@ internal sealed class IdentityAccountVerificationService(
         return result;
     }
 
-    public async Task<Result> SendVerificationSmsAsync(
+    public async Task<Result> SendOtpAsync(
         Guid userId,
-        string phoneNumber)
+        string phoneNumber,
+        CancellationToken cancellationToken = default)
     {
-        Result<string> codeResult = await _identity.GeneratePhoneNumberConfirmationTokenAsync(
-            userId,
-            phoneNumber);
-        if (codeResult.IsFailure)
+        Result<string> tokenResult = await _identity.GeneratePhoneNumberConfirmationTokenAsync(userId, phoneNumber);
+        if (tokenResult.IsFailure)
         {
-            return Result.Failure(codeResult.Errors);
+            return Result.Failure(tokenResult.Errors);
         }
 
-        string message = $"Твій {_appSettings.DomainName} код: {codeResult.Value}";
-        await _smsSender.SendAsync(phoneNumber, message);
+        _logger.LogInformation("Sending One-Time-Password SMS...");
 
+        string message = $"Твій {_appSettings.DomainName} код: {tokenResult.Value}";
+        await _smsSender.SendAsync(phoneNumber, message, cancellationToken);
         return Result.Success();
     }
     
-    public async Task<Result> VerifyPhoneNumberAsync(
+    public async Task<Result> VerifyOtpAsync(
         Guid userId,
         string phoneNumber,
         string token,
@@ -95,7 +129,7 @@ internal sealed class IdentityAccountVerificationService(
 
         if (result.IsFailure)
         {
-            _logger.LogError("Confirming phone number failed.");
+            _logger.LogError("Confirming phone number failed, {Error}", result.Errors.Select(e => e.ToString()));
         }
         else
         {
@@ -105,7 +139,65 @@ internal sealed class IdentityAccountVerificationService(
         return result;
     }
 
-    private static string GetHtmlBody(string token)
+    public async Task<Result<TimeSpan>> SendPasswordResetEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        Result<string> tokenResult = await _identity.GeneratePasswordResetTokenAsync(email, cancellationToken);
+        if (tokenResult.IsFailure)
+        {
+            return Result.Failure<TimeSpan>(tokenResult.Errors);
+        }
+
+        var message = new EmailMessage(
+            [email],
+            $"{_appSettings.DomainName} - обновлення паролю",
+            null,
+            $"Твій {_appSettings.DomainName} код для обновлення паролю: {tokenResult.Value}");
+        Result sendResult = await _emailSender.SendAsync(message, cancellationToken: cancellationToken);
+        if (sendResult.IsFailure)
+        {
+            _logger.LogError(
+                "Sending password reset email failed, {Error}",
+                sendResult.Errors.Select(e => e.ToString()));
+        }
+        else
+        {
+            _logger.LogInformation("Sending password reset email succeeeded.");
+        }
+
+        return TimeSpan.FromSeconds(180);
+    }
+
+    public async Task<Result> VerifyPasswordResetTokenAsync(
+        string email,
+        string token,
+        CancellationToken cancellationToken = default)
+    {
+        Result<bool> verificationResult = await _identity.VerifyPasswordResetTokenAsync(
+            email, token, cancellationToken);
+        if (verificationResult.IsFailure)
+        {
+            return verificationResult;
+        }
+
+        if (!verificationResult.Value)
+        {
+            return Result.Failure(AuthErrors.InvalidPasswordResetToken);
+        }
+
+        return verificationResult;
+    }
+
+    public async Task<Result> ConfirmPasswordResetAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken cancellationToken = default)
+        => await _identity.ConfirmPasswordResetTokenAsync(
+            email, token, newPassword, cancellationToken);
+
+    private static string GetRegistrationHtml(string token)
         => $$"""
     <!DOCTYPE html>
     <html>

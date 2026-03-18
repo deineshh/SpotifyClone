@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -7,14 +8,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SpotifyClone.Accounts.Application;
 using SpotifyClone.Accounts.Application.Abstractions;
+using SpotifyClone.Accounts.Application.Abstractions.Data;
 using SpotifyClone.Accounts.Application.Abstractions.Repositories;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Behaviors;
 using SpotifyClone.Accounts.Application.Errors;
 using SpotifyClone.Accounts.Application.Features.Auth.Commands.RegisterUser;
+using SpotifyClone.Accounts.Application.Jobs;
 using SpotifyClone.Accounts.Domain.Aggregates.Users;
-using SpotifyClone.Accounts.Infrastructure.Auth.Jwt;
-using SpotifyClone.Accounts.Infrastructure.Auth.Sms;
 using SpotifyClone.Accounts.Infrastructure.Persistence;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Repositories;
@@ -24,6 +25,10 @@ using SpotifyClone.Accounts.Infrastructure.Persistence.Auth.Repositories;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Database;
 using SpotifyClone.Accounts.Infrastructure.Persistence.Identity.Services;
+using SpotifyClone.Accounts.Infrastructure.Persistence.Queries;
+using SpotifyClone.Accounts.Infrastructure.Services;
+using SpotifyClone.Accounts.Infrastructure.Services.Jwt;
+using SpotifyClone.Accounts.Infrastructure.Services.Sms;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions;
 using SpotifyClone.Shared.BuildingBlocks.Application.Abstractions.Mappers;
 using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
@@ -53,12 +58,21 @@ public static class AccountsModule
 
         services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
         {
-            options.User.RequireUniqueEmail = true;
             options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultPhoneProvider;
+            options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultPhoneProvider;
         })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<IdentityAppDbContext>()
             .AddDefaultTokenProviders();
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+            options.InstanceName = "SpotifyClone_";
+        });
+
+        services.Configure<DataProtectionTokenProviderOptions>(options =>
+            options.TokenLifespan = TimeSpan.FromMinutes(15));
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
@@ -67,7 +81,9 @@ public static class AccountsModule
         services.AddScoped<IUserProfileRepository, UserProfileEfCoreRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenEfCoreRepository>();
         services.AddScoped<IOutboxRepository, OutboxEfCoreRepository>();
+        services.AddScoped<IUserReadService, UserEfCoreReadService>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IOtpCacheService, OtpCacheService>();
         services.AddScoped<IDomainExceptionMapper, AccountsDomainExceptionMapper>();
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AccountsTransactionalPipelineBehavior<,>));
@@ -75,6 +91,8 @@ public static class AccountsModule
         services.AddTransient<ITokenService, JwtTokenService>();
         services.AddTransient<IAccountVerificationService, IdentityAccountVerificationService>();
         services.AddTransient<ISmsSender, LoggerSmsSender>();
+
+        services.AddTransient<ProcessOutboxMessagesJob>();
 
         return services;
     }
@@ -127,5 +145,13 @@ public static class AccountsModule
                 Gender: "male",
                 Role: UserRoles.Creator));
         }
+
+        IRecurringJobManager recurringJobManager =
+            app.ApplicationServices.GetRequiredService<IRecurringJobManager>();
+        recurringJobManager.AddOrUpdate<ProcessOutboxMessagesJob>(
+            "accounts-outbox-processor",
+            job => job.ProcessAsync(),
+            "*/5 * * * * *" // Every 5 seconds (Cron expression)
+        );
     }
 }

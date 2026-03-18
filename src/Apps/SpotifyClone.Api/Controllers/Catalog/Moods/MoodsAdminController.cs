@@ -18,6 +18,7 @@ namespace SpotifyClone.Api.Controllers.Catalog.Moods;
 [Tags("Catalog Module")]
 [Route("api/v1/admin/moods")]
 [Authorize(Roles = UserRoles.Admin)]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
 public sealed class MoodsAdminController(IMediator mediator)
     : ApiController(mediator)
 {

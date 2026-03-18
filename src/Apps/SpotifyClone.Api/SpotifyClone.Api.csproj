@@ -11,6 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Hangfire.Redis.StackExchange" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
@@ -35,7 +36,6 @@
     <ProjectReference Include="..\..\Shared\BuildingBlocks\SpotifyClone.Shared.BuildingBlocks.Infrastructure\SpotifyClone.Shared.BuildingBlocks.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Contracts\v1\Accounts\Profile\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 </Project>

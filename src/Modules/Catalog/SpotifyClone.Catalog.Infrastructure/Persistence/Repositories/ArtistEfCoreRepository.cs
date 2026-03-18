@@ -3,6 +3,7 @@ using SpotifyClone.Catalog.Domain.Aggregates.Artists;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.Enums;
 using SpotifyClone.Catalog.Domain.Aggregates.Artists.ValueObjects;
 using SpotifyClone.Catalog.Infrastructure.Persistence.Database;
+using SpotifyClone.Shared.Kernel.IDs;
 
 namespace SpotifyClone.Catalog.Infrastructure.Persistence.Repositories;
 
@@ -23,11 +24,18 @@ internal sealed class ArtistEfCoreRepository(CatalogAppDbContext context)
             a => a.Id == id && a.Status != ArtistStatus.Banned,
             cancellationToken);
 
-    public async Task<IEnumerable<Artist>> GetByIdsAsync(
+    public async Task<IEnumerable<Artist>> GetAllByIdsAsync(
         IEnumerable<ArtistId> ids,
         CancellationToken cancellationToken = default)
         => await _artists
             .Where(a => ids.Contains(a.Id) && a.Status != ArtistStatus.Banned)
+            .ToListAsync(cancellationToken);
+
+    public async Task<IEnumerable<Artist>> GetAllByOwnerAsync(
+        UserId ownerId,
+        CancellationToken cancellationToken = default)
+        => await _artists
+            .Where(a => a.OwnerId == ownerId && a.Status != ArtistStatus.Banned)
             .ToListAsync(cancellationToken);
 
     public async Task<Artist?> GetBannedByIdAsync(

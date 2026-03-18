@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyClone.Playlists.Domain.Aggregates.Playlists;
+using SpotifyClone.Playlists.Domain.Aggregates.Playlists.Entities;
 using SpotifyClone.Playlists.Infrastructure.Persistence.Entities;
 using SpotifyClone.Shared.BuildingBlocks.Infrastructure.Persistence.Database;
 
@@ -9,6 +10,7 @@ public sealed class PlaylistsAppDbContext(DbContextOptions<PlaylistsAppDbContext
     : ApplicationDbContext<PlaylistsAppDbContext>("playlists", options)
 {
     public DbSet<Playlist> Playlists => Set<Playlist>();
+    public DbSet<PlaylistTrack> PlaylistTracks => Set<PlaylistTrack>();
     public DbSet<TrackReference> TrackReferences => Set<TrackReference>();
     public DbSet<UserReference> UserReferences => Set<UserReference>();
 

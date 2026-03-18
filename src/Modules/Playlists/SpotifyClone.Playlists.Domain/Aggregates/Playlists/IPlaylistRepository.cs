@@ -32,4 +32,8 @@ public interface IPlaylistRepository
     Task DeleteAsync(
         Playlist playlist,
         CancellationToken cancellationToken = default);
+
+    Task DeleteAllAsync(
+        IEnumerable<Playlist> playlists,
+        CancellationToken cancellationToken = default);
 }

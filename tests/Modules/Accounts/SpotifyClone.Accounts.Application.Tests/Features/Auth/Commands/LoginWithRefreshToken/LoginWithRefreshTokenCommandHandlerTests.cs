@@ -5,7 +5,8 @@ using SpotifyClone.Accounts.Application.Abstractions;
 using SpotifyClone.Accounts.Application.Abstractions.Repositories;
 using SpotifyClone.Accounts.Application.Abstractions.Services;
 using SpotifyClone.Accounts.Application.Errors;
-using SpotifyClone.Accounts.Application.Features.Auth.Commands.LoginWithRefreshToken;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Login;
+using SpotifyClone.Accounts.Application.Features.Auth.Commands.Login.RefreshToken;
 using SpotifyClone.Accounts.Application.Models;
 using SpotifyClone.Shared.BuildingBlocks.Application.Errors;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
@@ -21,14 +22,14 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
     private readonly Mock<ITokenHasher> _tokenHasher = new();
     private readonly Mock<IIdentityService> _identity = new();
 
-    private readonly LoginWithRefreshTokenCommandHandler _handler;
+    private readonly LoginUserWithRefreshTokenCommandHandler _handler;
 
     public LoginWithRefreshTokenCommandHandlerTests()
     {
         _unit.SetupGet(x => x.RefreshTokens)
              .Returns(_refreshTokens.Object);
 
-        _handler = new LoginWithRefreshTokenCommandHandler(
+        _handler = new LoginUserWithRefreshTokenCommandHandler(
             _unit.Object,
             _tokenService.Object,
             _tokenHasher.Object,
@@ -38,7 +39,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
     [Fact]
     public async Task Handle_Should_ReturnFailure_When_RefreshTokenLookupFails()
     {
-        var command = new LoginWithRefreshTokenCommand("raw-token");
+        var command = new LoginUserWithRefreshTokenCommand("raw-token");
         string hash = "hash";
 
         _tokenHasher.Setup(x => x.Hash("raw-token"))
@@ -50,7 +51,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .Setup(x => x.GetByTokenHashAsync(hash, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure<RefreshTokenEnvelope>(error));
 
-        Result<LoginWithRefreshTokenCommandResult> result =
+        Result<LoginUserCommandResult> result =
             await _handler.Handle(command, CancellationToken.None);
 
         result.IsFailure.Should().BeTrue();
@@ -60,7 +61,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
     [Fact]
     public async Task Handle_Should_ReturnFailure_When_IdentityLookupFails()
     {
-        var command = new LoginWithRefreshTokenCommand("raw-token");
+        var command = new LoginUserWithRefreshTokenCommand("raw-token");
         string hash = "hash";
         var userId = UserId.New();
 
@@ -80,10 +81,10 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
         Error error = IdentityUserErrors.NotFound;
 
         _identity
-            .Setup(x => x.GetUserInfoAsync(userId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.FindByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure<IdentityUserInfo>(error));
 
-        Result<LoginWithRefreshTokenCommandResult> result =
+        Result<LoginUserCommandResult> result =
             await _handler.Handle(command, CancellationToken.None);
 
         result.IsFailure.Should().BeTrue();
@@ -93,7 +94,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
     [Fact]
     public async Task Handle_Should_ReturnFailure_When_RevokeFails()
     {
-        var command = new LoginWithRefreshTokenCommand("raw-token");
+        var command = new LoginUserWithRefreshTokenCommand("raw-token");
         string hash = "old-hash";
         string newHash = "new-hash";
         var userId = UserId.New();
@@ -101,8 +102,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
         var storedToken =
             new RefreshTokenEnvelope(userId, "ignored", DateTimeOffset.UtcNow.AddDays(10), true);
 
-        var identity =
-            new IdentityUserInfo(userId, "test@test.com", true, false);
+        var identity = new IdentityUserInfo(userId, "test@test.com", null, true, false, false);
 
         _tokenHasher
             .Setup(x => x.Hash(It.IsAny<string>()))
@@ -113,7 +113,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .ReturnsAsync(Result.Success(storedToken));
 
         _identity
-            .Setup(x => x.GetUserInfoAsync(userId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.FindByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(identity));
 
         _identity
@@ -140,7 +140,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .Setup(x => x.RevokeAsync(hash, newHash, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure(error));
 
-        Result<LoginWithRefreshTokenCommandResult> result =
+        Result<LoginUserCommandResult> result =
             await _handler.Handle(command, CancellationToken.None);
 
         result.IsFailure.Should().BeTrue();
@@ -150,7 +150,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
     [Fact]
     public async Task Handle_Should_ReturnNewTokens_When_RefreshTokenIsValid()
     {
-        var command = new LoginWithRefreshTokenCommand("raw-token");
+        var command = new LoginUserWithRefreshTokenCommand("raw-token");
 
         string oldHash = "old-hash";
         string newHash = "new-hash";
@@ -158,7 +158,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
 
         var storedToken = new RefreshTokenEnvelope(userId, "ignored", DateTimeOffset.UtcNow.AddDays(10), true);
 
-        var identity = new IdentityUserInfo(userId, "test@test.com", true, false);
+        var identity = new IdentityUserInfo(userId, "test@test.com", null, true, false, false);
 
         var accessToken = new AccessToken("access-token", DateTimeOffset.UtcNow.AddMinutes(5));
         var newRefreshToken = new RefreshTokenEnvelope(
@@ -175,7 +175,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .ReturnsAsync(Result.Success(storedToken));
 
         _identity
-            .Setup(x => x.GetUserInfoAsync(userId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.FindByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success(identity));
 
         _identity
@@ -198,7 +198,7 @@ public sealed class LoginWithRefreshTokenCommandHandlerTests
             .Setup(x => x.StoreAsync(userId, newHash, newRefreshToken.ExpiresAt, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
 
-        Result<LoginWithRefreshTokenCommandResult> result =
+        Result<LoginUserCommandResult> result =
             await _handler.Handle(command, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();

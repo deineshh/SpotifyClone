@@ -4,7 +4,7 @@ public sealed record RegisterUserResponse(
     Guid UserId,
     string Email,
     string DisplayName,
-    DateTimeOffset BirthDate,
+    DateTimeOffset? BirthDateUtc,
     string Gender,
     string AccessToken,
     DateTimeOffset ExpiresAt);

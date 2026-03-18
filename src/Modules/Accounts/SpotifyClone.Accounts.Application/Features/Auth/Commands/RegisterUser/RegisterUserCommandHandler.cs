@@ -30,20 +30,7 @@ internal sealed class RegisterUserCommandHandler(
             return Result.Failure<RegisterUserCommandResult>(createUserResult.Errors);
         }
 
-        bool userExists = await _identity.UserExistsAsync(createUserResult.Value, cancellationToken);
-        if (!userExists)
-        {
-            return Result.Failure<RegisterUserCommandResult>(AuthErrors.RegistrationFailed);
-        }
-
         var userId = UserId.From(createUserResult.Value);
-
-        Result<string> emailVerificationTokenResult
-            = await _identity.GenerateEmailConfirmationTokenAsync(userId.Value);
-        if (emailVerificationTokenResult.IsFailure)
-        {
-            return Result.Failure<RegisterUserCommandResult>(emailVerificationTokenResult.Errors);
-        }
 
         Result<UserProfile> createUserProfileResult = await CreateUserProfileAsync(
             request, userId, cancellationToken);
@@ -61,6 +48,13 @@ internal sealed class RegisterUserCommandHandler(
 
         UserProfile userProfile = createUserProfileResult.Value;
 
+        Result<string> emailVerificationTokenResult
+            = await _identity.GenerateEmailConfirmationTokenAsync(userId.Value);
+        if (emailVerificationTokenResult.IsFailure)
+        {
+            return Result.Failure<RegisterUserCommandResult>(emailVerificationTokenResult.Errors);
+        }
+
         userProfile.ProcessRegistration(request.Email, emailVerificationTokenResult.Value);
 
         await _unit.UserProfiles.AddAsync(userProfile, cancellationToken);
@@ -69,7 +63,7 @@ internal sealed class RegisterUserCommandHandler(
             userProfile.Id.Value,
             request.Email,
             userProfile.DisplayName,
-            userProfile.BirthDate,
+            userProfile.BirthDateUtc,
             userProfile.Gender.Value,
             request.Role);
     }
@@ -85,7 +79,7 @@ internal sealed class RegisterUserCommandHandler(
         }
 
         Result<Guid> createUserResult = await _identity.CreateUserAsync(
-            request.Email, request.Password, UserRoles.CalculateBy(request.Role));
+            request.Email, request.Password, null, false, UserRoles.CalculateBy(request.Role));
 
         return createUserResult;
     }

@@ -30,11 +30,11 @@ internal sealed class DeleteAlbumCommandHandler(
             return Result.Failure<DeleteAlbumCommandResult>(AlbumErrors.NotFound);
         }
 
-        IEnumerable<Artist> artists = await _unit.Artists.GetByIdsAsync(
+        IEnumerable<Artist> artists = await _unit.Artists.GetAllByIdsAsync(
             album.MainArtists,
             cancellationToken);
 
-        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId.Value != _currentUser.Id)) &&
+        if ((!_currentUser.IsAuthenticated || artists.Any(a => a.OwnerId?.Value != _currentUser.Id)) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<DeleteAlbumCommandResult>(AlbumErrors.NotOwned);

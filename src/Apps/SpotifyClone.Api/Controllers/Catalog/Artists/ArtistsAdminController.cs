@@ -14,6 +14,7 @@ namespace SpotifyClone.Api.Controllers.Catalog.Artists;
 [Tags("Catalog Module")]
 [Route("api/v1/admin/artists")]
 [Authorize(Roles = UserRoles.Admin)]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
 public sealed class ArtistsAdminController(IMediator mediator)
     : ApiController(mediator)
 {

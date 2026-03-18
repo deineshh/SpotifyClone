@@ -20,7 +20,13 @@ public static class UserProfileErrors
         "UserProfile.InvalidGender",
         "The provided gender is invalid.");
 
-    public static readonly Error AlreadyExists = new(
-        "UserProfile.AlreadyExists",
-        "The specified user profile is already exists.");
+    public static readonly Error NotOwned = new(
+        "UserProfile.NotOwned",
+        "User profile is not owned by the current user.");
+
+    public static readonly Error AlreadyExists = CommonErrors.AlreadyExists(
+        "UserProfile", "User profile");
+
+    public static readonly Error NotFound = CommonErrors.NotFound(
+        "UserProfile", "User profile");
 }

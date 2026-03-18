@@ -16,7 +16,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
     public string Name { get; private set; } = null!;
     public string? Bio { get; private set; }
-    public UserId OwnerId { get; private set; } = null!;
+    public UserId? OwnerId { get; private set; }
     public ArtistStatus Status { get; private set; } = null!;
     public ArtistAvatarImage? Avatar { get; private set; }
     public ArtistBannerImage? Banner { get; private set; }
@@ -38,7 +38,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
 
         ThrowIfBanned("Cannot link a new avatar image to a banned artist.");
 
-        UnlinkAvatarIfExists();
+        UnlinkAvatar();
 
         Avatar = avatar;
         RaiseDomainEvent(new ArtistLinkedToAvatarImageDomainEvent(Avatar.ImageId));
@@ -51,13 +51,13 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         ThrowIfBanned("Cannot link a new banner image to a banned artist.");
         ThrowIfNotVerified("Cannot link a new banner image to a non-verified artist.");
 
-        UnlinkBannerIfExists();
+        UnlinkBanner();
 
         Banner = banner;
         RaiseDomainEvent(new ArtistLinkedToBannerImageDomainEvent(Banner.ImageId));
     }
 
-    public void UnlinkAvatarIfExists()
+    public void UnlinkAvatar()
     {
         if (Avatar is null)
         {
@@ -68,7 +68,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         Avatar = null;
     }
 
-    public void UnlinkBannerIfExists()
+    public void UnlinkBanner()
     {
         if (Banner is null)
         {
@@ -78,6 +78,9 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         RaiseDomainEvent(new ArtistUnlinkedFromBannerImageDomainEvent(Banner.ImageId));
         Banner = null;
     }
+
+    public void UnlinkOwner()
+        => OwnerId = null;
 
     public void Verify()
     {
@@ -211,7 +214,7 @@ public sealed class Artist : AggregateRoot<ArtistId, Guid>
         ArtistId id,
         string name,
         string? bio,
-        UserId ownerId,
+        UserId? ownerId,
         ArtistStatus status,
         ArtistAvatarImage? avatar,
         ArtistBannerImage? banner,

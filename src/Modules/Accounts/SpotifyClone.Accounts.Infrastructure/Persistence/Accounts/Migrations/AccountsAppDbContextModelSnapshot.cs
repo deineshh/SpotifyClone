@@ -18,7 +18,7 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("accounts")
-                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -29,9 +29,9 @@ namespace SpotifyClone.Accounts.Infrastructure.Persistence.Accounts.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTimeOffset>("BirthDate")
+                    b.Property<DateTimeOffset?>("BirthDateUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("birth_date");
+                        .HasColumnName("birth_date_utc");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()

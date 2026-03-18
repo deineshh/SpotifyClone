@@ -29,13 +29,13 @@ internal sealed class UnlinkBannerFromArtistCommandHandler(
             return Result.Failure<UnlinkBannerFromArtistCommandResult>(ArtistErrors.NotFound);
         }
 
-        if ((!_currentUser.IsAuthenticated || _currentUser.Id != artist.OwnerId.Value) &&
+        if ((!_currentUser.IsAuthenticated || _currentUser.Id != artist.OwnerId?.Value) &&
             !_currentUser.IsInRole(UserRoles.Admin))
         {
             return Result.Failure<UnlinkBannerFromArtistCommandResult>(ArtistErrors.NotOwned);
         }
 
-        artist.UnlinkBannerIfExists();
+        artist.UnlinkBanner();
 
         return new UnlinkBannerFromArtistCommandResult();
     }
