@@ -28,7 +28,6 @@ using SpotifyClone.Api.Mappers;
 using SpotifyClone.Shared.BuildingBlocks.Application.Auth;
 using SpotifyClone.Shared.BuildingBlocks.Application.Configuration;
 using SpotifyClone.Shared.BuildingBlocks.Application.Results;
-using Twilio.Http;
 
 namespace SpotifyClone.Api.Controllers.Accounts;
 
@@ -46,9 +45,16 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     };
 
     [HttpPost("register")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Register User")]
+    [EndpointDescription("Registers a new User, " +
+                         "also sends an email to the specified address with the email verification code.")]
+    [ProducesResponseType(typeof(RegisterUserResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [AllowAnonymous]
+    [EnableRateLimiting("login-limits")]
     public async Task<ActionResult<RegisterUserResponse>> RegisterUser(
         RegisterUserRequest request,
         CancellationToken cancellationToken = default)
@@ -101,20 +107,27 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
 
         Response.Cookies.Append("refreshToken", loginResultData.RefreshToken, _cookieOptions);
 
-        return Ok(new RegisterUserResponse(
-            registrationResultData.UserId,
-            registrationResultData.Email,
-            registrationResultData.DisplayName,
-            registrationResultData.BirthDateUtc,
-            registrationResultData.Gender,
-            loginResultData.AccessToken,
-            loginResultData.ExpiresAt));
+        return Created(
+            new Uri($"api/v1/users/users/{registrationResultData.UserId}"),
+            new RegisterUserResponse(
+                registrationResultData.UserId,
+                registrationResultData.Email,
+                registrationResultData.DisplayName,
+                registrationResultData.BirthDateUtc,
+                registrationResultData.Gender,
+                loginResultData.AccessToken,
+                loginResultData.ExpiresAt));
     }
 
     [HttpPost("login")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Login User with Password")]
+    [EndpointDescription("Logins the user with a password.")]
+    [ProducesResponseType(typeof(LoginUserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [AllowAnonymous]
+    [EnableRateLimiting("login-limits")]
     public async Task<ActionResult<LoginUserResponse>> Login(
         LoginUserWithPasswordRequest request,
         CancellationToken cancellationToken = default)
@@ -140,17 +153,21 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     }
 
     [HttpPost("refresh")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [Authorize(Roles = UserRoles.Listener)]
+    [EndpointSummary("Login User with Refresh token")]
+    [EndpointDescription("Logins the user with a refresh token.")]
+    [ProducesResponseType(typeof(LoginUserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [AllowAnonymous]
+    [EnableRateLimiting("login-limits")]
     public async Task<ActionResult<LoginUserResponse>> Refresh(
         CancellationToken cancellationToken = default)
     {
         string? refreshToken = Request.Cookies["refreshToken"];
         if (string.IsNullOrEmpty(refreshToken))
         {
-            return Unauthorized("Refresh token not found.");
+            return Unauthorized(new { Message = "Refresh token not found." });
         }
 
         Result<LoginUserCommandResult> result = await Mediator.Send(
@@ -176,9 +193,13 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     }
 
     [HttpPost("logout")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [EndpointSummary("Logout User")]
+    [EndpointDescription("Logouts the current user.")]
+    [ProducesResponseType(typeof(LoginUserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [Authorize(Roles = UserRoles.Listener)]
     public async Task<IActionResult> Logout(
         CancellationToken cancellationToken = default)
@@ -199,6 +220,12 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     }
 
     [HttpPost("email/verify")]
+    [EndpointSummary("Verify Email")]
+    [EndpointDescription("Verifies a User's email code.")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [EnableRateLimiting("verification-limits")]
     [AllowAnonymous]
     public async Task<ActionResult> VerifyEmail(
@@ -225,11 +252,12 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     [HttpPost("password-reset/request")]
     [EndpointSummary("Request User password reset")]
     [EndpointDescription("Sends an Email to the specified address with the generated password reset code.")]
-    [ProducesResponseType(StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(RequestUserPasswordResetResponse), StatusCodes.Status202Accepted)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [EnableRateLimiting("send-limits")]
+    [AllowAnonymous]
     public async Task<ActionResult> RequestPasswordReset(
         RequestUserPasswordResetRequest request,
         CancellationToken cancellationToken = default)
@@ -313,6 +341,8 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
     }
 
     [HttpGet("login-google")]
+    [AllowAnonymous]
+    [EnableRateLimiting("login-limits")]
     public IActionResult LoginGoogle(SignInManager<ApplicationUser> signInManager)
     {
         const string Google = "Google";
@@ -345,10 +375,18 @@ public sealed class AuthController(IMediator mediator, IHostEnvironment hostEnvi
 
         Response.Cookies.Append("refreshToken", result.Value.RefreshToken, _cookieOptions);
 
-        string successUrl = $"{appSettings.Value.FrontendUrl}" +
-            $"/auth-success?accessToken={result.Value.AccessToken}&expiresAt={result.Value.ExpiresAt}";
+        var tempTokenOptions = new CookieOptions
+        {
+            HttpOnly = false,
+            Secure = !hostEnvironment.IsDevelopment(),
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTime.UtcNow.AddMinutes(2)
+        };
 
-        return Redirect(successUrl);
+        Response.Cookies.Append("tempAccessToken", result.Value.AccessToken, tempTokenOptions);
+        Response.Cookies.Append("tempExpiresAt", result.Value.ExpiresAt.ToString(), tempTokenOptions);
+
+        return Redirect($"{appSettings.Value.FrontendUrl}/auth-success");
     }
 
     [HttpPost("login-otp/request")]

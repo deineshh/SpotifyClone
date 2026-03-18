@@ -92,6 +92,13 @@ builder.Services.AddRateLimiter(options =>
         opt.QueueLimit = 0;
     });
 
+    options.AddFixedWindowLimiter("login-limits", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(15);
+        opt.PermitLimit = 5;
+        opt.QueueLimit = 0;
+    });
+
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
